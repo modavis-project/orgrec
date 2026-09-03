@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orgrec.modavis.org/schemas/grandorgue-import-manifest.schema.json",
+  "title": "OrgRec GrandOrgue import manifest v1",
+  "description": "Frozen evidence produced when OrgRec converts one selected GrandOrgue ODF and its self-contained source tree into an editable project and VAO.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "importedAt",
+    "sourceDirectoryName",
+    "sourceDirectoryPathAtImport",
+    "sourceMutationPolicy",
+    "inspection"
+  ],
+  "properties": {
+    "contract": {
+      "const": "orgrec.grandorgue-import-manifest/v1"
+    },
+    "importedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sourceDirectoryName": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "sourceDirectoryPathAtImport": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "sourceMutationPolicy": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "inspection": {
+      "$ref": "#/$defs/inspection"
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "division": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section", "name", "isPedal", "firstMIDINote", "keyCount", "stopCount"],
+      "properties": {
+        "section": { "$ref": "#/$defs/nonEmptyString" },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "isPedal": { "type": "boolean" },
+        "firstMIDINote": { "type": "integer", "minimum": 0, "maximum": 127 },
+        "keyCount": { "type": "integer", "minimum": 1, "maximum": 128 },
+        "stopCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "stop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "division",
+        "sectionNames",
+        "firstMIDINote",
+        "lastMIDINote",
+        "pipeCount"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "division": { "$ref": "#/$defs/nonEmptyString" },
+        "footHeight": { "$ref": "#/$defs/nonEmptyString" },
+        "sectionNames": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "firstMIDINote": { "type": "integer", "minimum": 0, "maximum": 127 },
+        "lastMIDINote": { "type": "integer", "minimum": 0, "maximum": 127 },
+        "pipeCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section", "name", "type"],
+      "properties": {
+        "section": { "$ref": "#/$defs/nonEmptyString" },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "type": { "type": "string", "enum": ["stop", "coupler", "tremulant"] },
+        "division": { "$ref": "#/$defs/nonEmptyString" },
+        "destinationDivision": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "stopID",
+        "stopName",
+        "division",
+        "odfSection",
+        "odfPipeKey",
+        "odfValue",
+        "midiNote"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "stopID": { "$ref": "#/$defs/nonEmptyString" },
+        "stopName": { "$ref": "#/$defs/nonEmptyString" },
+        "division": { "$ref": "#/$defs/nonEmptyString" },
+        "footHeight": { "$ref": "#/$defs/nonEmptyString" },
+        "odfSection": { "$ref": "#/$defs/nonEmptyString" },
+        "odfPipeKey": { "$ref": "#/$defs/nonEmptyString" },
+        "odfValue": { "$ref": "#/$defs/nonEmptyString" },
+        "midiNote": { "type": "integer", "minimum": 0, "maximum": 127 },
+        "sourceRelativePath": { "$ref": "#/$defs/relativePath" },
+        "referenceTarget": { "$ref": "#/$defs/nonEmptyString" },
+        "sampleRate": { "type": "number", "exclusiveMinimum": 0 },
+        "channelCount": { "type": "integer", "minimum": 1 },
+        "frameCount": { "type": "integer", "minimum": 0 },
+        "fileSize": { "type": "integer", "minimum": 0 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "payloadFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relativePath", "fileSize"],
+      "properties": {
+        "relativePath": { "$ref": "#/$defs/relativePath" },
+        "fileSize": { "type": "integer", "minimum": 0 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "inspection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "sourceDirectory",
+        "odfRelativePath",
+        "odfEncoding",
+        "odfSHA256",
+        "organName",
+        "venueName",
+        "location",
+        "divisions",
+        "stops",
+        "samples",
+        "payloadFiles",
+        "controls",
+        "couplerCount",
+        "tremulantCount",
+        "warnings"
+      ],
+      "properties": {
+        "contract": { "const": "orgrec.grandorgue-inspection/v1" },
+        "sourceDirectory": { "$ref": "#/$defs/nonEmptyString" },
+        "odfRelativePath": { "$ref": "#/$defs/relativePath" },
+        "odfEncoding": { "$ref": "#/$defs/nonEmptyString" },
+        "odfSHA256": { "$ref": "#/$defs/sha256" },
+        "organName": { "$ref": "#/$defs/nonEmptyString" },
+        "venueName": { "type": "string" },
+        "location": { "type": "string" },
+        "builder": { "$ref": "#/$defs/nonEmptyString" },
+        "buildDateLabel": { "$ref": "#/$defs/nonEmptyString" },
+        "recordingDetails": { "$ref": "#/$defs/nonEmptyString" },
+        "sourcePageURL": { "type": "string", "format": "uri" },
+        "licenseURL": { "type": "string", "format": "uri" },
+        "licenseLabel": { "$ref": "#/$defs/nonEmptyString" },
+        "rightsHolder": { "$ref": "#/$defs/nonEmptyString" },
+        "divisions": { "type": "array", "items": { "$ref": "#/$defs/division" } },
+        "stops": { "type": "array", "items": { "$ref": "#/$defs/stop" } },
+        "samples": { "type": "array", "items": { "$ref": "#/$defs/sample" } },
+        "payloadFiles": { "type": "array", "items": { "$ref": "#/$defs/payloadFile" } },
+        "controls": { "type": "array", "items": { "$ref": "#/$defs/control" } },
+        "couplerCount": { "type": "integer", "minimum": 0 },
+        "tremulantCount": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "formatVersion": "0.3.3",
+  "releaseLine": "0.3",
+  "status": "implemented-editor-draft",
+  "implementationReady": true,
+  "publicationReady": false,
+  "repositoryRequired": false,
+  "zenodoRequired": false,
+  "zenodoAdapterStatus": "optional-sandbox-verified",
+  "publicationTopology": {
+    "default": "single-record",
+    "optionalAlternative": "record-family",
+    "exactVersionRelationsRequired": true,
+    "zenodoMetadataProjection": "implemented",
+    "zenodoRequired": false
+  },
+  "sandboxEvidence": {
+    "recordId": "590947",
+    "versionDOI": "10.5072/zenodo.590947",
+    "conceptDOI": "10.5072/zenodo.590944",
+    "firstFailedRecordId": "590945",
+    "firstFailedVersionDOI": "10.5072/zenodo.590945",
+    "failure": "Draft API advertised a 10.5281 DOI but Sandbox publication assigned 10.5072; bytes were not replaced and a corrected new version was published.",
+    "anonymousResolution": "passed",
+    "sha256Verification": "passed",
+    "historicalFormatVersion": "0.3.0",
+    "mutatedFor033": false
+  },
+  "visualAcousticScene": {
+    "dataset": "AcousticRooms",
+    "upstreamCommit": "3c87318a0188e1b441fc75846d54b487ca215fbb",
+    "subset": "Bathrooms/Bathrooms_idx_0/S000_R0011",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "workspace": "Fixtures/VAO03/valid/acousticrooms-scene",
+    "carrier": "dist/acousticrooms-bathrooms-idx-0-0.3.3.vao",
+    "carrierByteSize": 1754708,
+    "carrierSHA256": "fab2ea3af77b4a52f634188bc63c47ba026d722d98246e7d226c90c8e4149a0e",
+    "verifiedPayloadBytes": 1722650,
+    "offlinePreservationClosure": true
+  },
+  "complexInstrument": {
+    "case": "MIMUL Kinoorgel",
+    "fixture": "Fixtures/VAO03/descriptors/kinoorgel-interaction.example.json",
+    "carrierIndependent": true,
+    "interactionRegistries": 10,
+    "captureRegistries": 4,
+    "capabilities": [
+      "stateful-interaction",
+      "conditional-routing",
+      "composite-actuation",
+      "timed-process",
+      "actuator-transfer",
+      "capture-event-alignment"
+    ]
+  },
+  "editorDraftBundle": {
+    "path": "dist/vao-specification-0.3.3-rc.zip",
+    "byteSize": 636010,
+    "sha256": "d22b58f928f43ff43abbd1cb5b168f83bc2be3243c6816c3d08e83b6edc7c173",
+    "deterministicRebuild": "passed"
+  },
+  "localConformance": {
+    "pythonCases": 72,
+    "pythonFailures": 0,
+    "swiftVAO03Cases": 25,
+    "swiftVAO03Failures": 0,
+    "swiftTotalCases": 102,
+    "swiftTotalFailures": 0
+  },
+  "publicationBlockers": [
+    "governance approval and named reviewers",
+    "public W3ID control",
+    "media-type registration plan",
+    "released checksum-pinned MODAVIS dependencies",
+    "approved source/standard license",
+    "independent interoperability and security review"
+  ]
+}

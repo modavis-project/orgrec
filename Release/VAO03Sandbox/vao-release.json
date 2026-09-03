@@ -1,0 +1,29 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/release.json",
+  "type": "VAORelease",
+  "formatVersion": "0.3.0",
+  "vaoId": "https://example.org/vao/fixture/zenodo-sandbox",
+  "releaseId": "urn:uuid:03000000-0000-4000-8000-000000000102",
+  "revision": 2,
+  "contentVersion": "1.0.1-sandbox",
+  "manifest": {
+    "fileIdentifier": "vao-manifest.json",
+    "byteSize": 7648,
+    "sha256": "34d46192d7a69a424c37ff9b52fa6e806ac1d96e20c44c1f5d4a4b2f0a60f3d7"
+  },
+  "repositoryRecord": {
+    "repositoryType": "https://w3id.org/modavis/vao/repository/zenodo",
+    "instance": "https://sandbox.zenodo.org",
+    "versionPersistentIdentifier": "https://doi.org/10.5072/zenodo.590947",
+    "conceptPersistentIdentifier": "https://doi.org/10.5072/zenodo.590944",
+    "recordIdentifier": "590947"
+  },
+  "carriers": [
+    {
+      "fileIdentifier": "vao-zenodo-sandbox.vao",
+      "byteSize": 8803,
+      "sha256": "8080a3e4090985cbc0e39b5c3ad1685b6d871857529bb900faebc7ba5a60ed92"
+    }
+  ],
+  "packManifests": []
+}

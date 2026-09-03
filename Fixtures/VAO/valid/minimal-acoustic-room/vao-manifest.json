@@ -1,0 +1,380 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.2/schema/manifest.json",
+  "@context": [
+    "https://w3id.org/modavis/vao/0.2/context.jsonld"
+  ],
+  "type": "VirtualAcousticObject",
+  "formatVersion": "0.2.2",
+  "id": "https://example.org/vao/fixture/minimal-acoustic-room",
+  "revision": 1,
+  "createdAt": "2026-08-16T00:00:00Z",
+  "modifiedAt": "2026-08-16T00:00:00Z",
+  "title": {
+    "en": "Minimal measured acoustic room"
+  },
+  "description": {
+    "en": "VAO 0.2 conformance fixture joining a semantic room model, measured response, room metric, and tracked-listener render contract."
+  },
+  "conformsTo": [
+    "https://w3id.org/modavis/vao/profile/core/0.2",
+    "https://w3id.org/modavis/vao/profile/research/0.2",
+    "https://w3id.org/modavis/vao/profile/spatial/0.2",
+    "https://w3id.org/modavis/vao/profile/acoustics/0.2"
+  ],
+  "profiles": [
+    {
+      "id": "https://w3id.org/modavis/vao/profile/core/0.2",
+      "version": "0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/core-graph",
+        "https://w3id.org/modavis/vao/vocab/capability/fixity"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/research/0.2",
+      "version": "0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/paradata"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/spatial/0.2",
+      "version": "0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/spatial"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/acoustics/0.2",
+      "version": "0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/semantic-building-model",
+        "https://w3id.org/modavis/vao/vocab/capability/measured-impulse-response",
+        "https://w3id.org/modavis/vao/vocab/capability/room-acoustic-metrics",
+        "https://w3id.org/modavis/vao/vocab/capability/spatial-audio-scene",
+        "https://w3id.org/modavis/vao/vocab/capability/tracked-listener-convolution"
+      ]
+    }
+  ],
+  "modavisBinding": {
+    "ontologyIRI": "https://w3id.org/modavis/ontology",
+    "ontologyVersion": "0.2.0-dev",
+    "ontologyStatus": "development",
+    "mappingVersion": "vao-modavis-mapping/0.2.2",
+    "notes": "Fixture binding; not a claim that the MODAVIS development ontology is a published release."
+  },
+  "primaryEntityId": "urn:vao:fixture:acoustic-room:building",
+  "focusEntityIds": [
+    "urn:vao:fixture:acoustic-room:building",
+    "urn:vao:fixture:acoustic-room:space"
+  ],
+  "entities": [
+    {
+      "id": "urn:vao:fixture:acoustic-room:building",
+      "kind": "building",
+      "types": ["https://w3id.org/modavis/vao/ontology#Building"],
+      "labels": {"en": "Fixture building"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:space",
+      "kind": "space",
+      "types": ["https://w3id.org/modavis/vao/ontology#Space"],
+      "labels": {"en": "Measured room"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:boundary",
+      "kind": "boundary",
+      "types": ["https://w3id.org/modavis/vao/ontology#Boundary"],
+      "labels": {"en": "Room enclosure"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:source",
+      "kind": "acousticEmitter",
+      "types": ["https://w3id.org/modavis/vao/ontology#AcousticEmitter"],
+      "labels": {"en": "Calibrated source"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:receiver",
+      "kind": "acousticReceiver",
+      "types": ["https://w3id.org/modavis/vao/ontology#AcousticReceiver"],
+      "labels": {"en": "Tracked receiver"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:response",
+      "kind": "acousticResponse",
+      "types": ["https://w3id.org/modavis/vao/ontology#AcousticResponseSet"],
+      "labels": {"en": "Measured spatial room impulse response"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:scene",
+      "kind": "audioScene",
+      "types": ["https://w3id.org/modavis/vao/ontology#SpatialAudioScene"],
+      "labels": {"en": "Tracked room response scene"},
+      "properties": {}
+    }
+  ],
+  "relations": [
+    {
+      "id": "urn:vao:fixture:acoustic-room:relation:contains",
+      "subjectId": "urn:vao:fixture:acoustic-room:building",
+      "predicate": "http://purl.org/dc/terms/hasPart",
+      "objectId": "urn:vao:fixture:acoustic-room:space",
+      "status": "asserted"
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:relation:bounded",
+      "subjectId": "urn:vao:fixture:acoustic-room:space",
+      "predicate": "https://w3id.org/modavis/vao/ontology#boundedBy",
+      "objectId": "urn:vao:fixture:acoustic-room:boundary",
+      "status": "asserted"
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:relation:response",
+      "subjectId": "urn:vao:fixture:acoustic-room:space",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasAcousticResponse",
+      "objectId": "urn:vao:fixture:acoustic-room:response-set",
+      "status": "asserted",
+      "generatedByIds": ["urn:vao:fixture:acoustic-room:activity:measurement"]
+    }
+  ],
+  "assets": [
+    {
+      "id": "urn:vao:fixture:acoustic-room:asset:ifc",
+      "path": "payload/models/room.ifc",
+      "mediaType": "application/x-step",
+      "byteSize": 125,
+      "sha256": "26a1eb03cd40d2220e43e47593fa474cabba2c71da4235fab45960b7fbbaa0ec",
+      "roles": ["https://w3id.org/modavis/vao/vocab/asset-role/spatial-model"],
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "aboutEntityIds": ["urn:vao:fixture:acoustic-room:building", "urn:vao:fixture:acoustic-room:space"],
+      "originalFilename": "room.ifc",
+      "createdAt": "2026-08-16T00:00:00Z",
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:asset:sofa",
+      "path": "payload/acoustics/room.sofa",
+      "mediaType": "application/x-sofa",
+      "byteSize": 153,
+      "sha256": "55841620742519de4719582a46900b2dcf2d3367a2d4f5ccb27caddd14d084c7",
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/impulse-response",
+        "https://w3id.org/modavis/vao/vocab/asset-role/spatial-listening-audio"
+      ],
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/measured",
+      "aboutEntityIds": ["urn:vao:fixture:acoustic-room:response", "urn:vao:fixture:acoustic-room:space"],
+      "originalFilename": "room.sofa",
+      "createdAt": "2026-08-16T00:00:00Z",
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:asset:protocol",
+      "path": "payload/evidence/measurement-protocol.txt",
+      "mediaType": "text/plain",
+      "byteSize": 156,
+      "sha256": "f27efaa5b71f4bbedb241f24ce84794dff8f9a6c1edb382a957260362b298cda",
+      "roles": ["https://w3id.org/modavis/vao/vocab/asset-role/source-evidence"],
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "aboutEntityIds": ["urn:vao:fixture:acoustic-room:space"],
+      "originalFilename": "measurement-protocol.txt",
+      "createdAt": "2026-08-16T00:00:00Z",
+      "encoding": "UTF-8",
+      "properties": {}
+    }
+  ],
+  "paradata": [
+    {
+      "id": "urn:vao:fixture:acoustic-room:activity:measurement",
+      "activityType": "https://w3id.org/modavis/vao/vocab/activity/ImpulseResponseMeasurement",
+      "startedAt": "2026-08-16T00:00:00Z",
+      "endedAt": "2026-08-16T00:05:00Z",
+      "software": {"name": "VAO fixture generator", "version": "0.2.2"},
+      "method": {
+        "methodType": "measurement",
+        "representationStatus": "measured",
+        "standard": "https://www.iso.org/standard/40979.html",
+        "standardEdition": "ISO 3382-1:2009",
+        "protocolAssetId": "urn:vao:fixture:acoustic-room:asset:protocol",
+        "qualityFlags": []
+      },
+      "inputIds": ["urn:vao:fixture:acoustic-room:asset:protocol"],
+      "outputIds": ["urn:vao:fixture:acoustic-room:response-set", "urn:vao:fixture:acoustic-room:asset:sofa"],
+      "parameters": {"sampleRateHz": 48000, "excitation": "exponential-sine-sweep"}
+    },
+    {
+      "id": "urn:vao:fixture:acoustic-room:activity:metrics",
+      "activityType": "https://w3id.org/modavis/vao/vocab/activity/RoomMetricCalculation",
+      "startedAt": "2026-08-16T00:06:00Z",
+      "software": {"name": "VAO fixture generator", "version": "0.2.2"},
+      "method": {
+        "methodType": "metric-calculation",
+        "representationStatus": "measured",
+        "standard": "https://www.iso.org/standard/40979.html",
+        "standardEdition": "ISO 3382-1:2009",
+        "qualityFlags": []
+      },
+      "inputIds": ["urn:vao:fixture:acoustic-room:response-set"],
+      "outputIds": ["urn:vao:fixture:acoustic-room:metric-set"],
+      "parameters": {"decayRangeDB": 30}
+    }
+  ],
+  "analyses": [],
+  "acoustics": {
+    "coordinateFrames": [
+      {
+        "id": "urn:vao:fixture:acoustic-room:frame",
+        "dimension": 3,
+        "coordinateType": "cartesian",
+        "unit": "http://qudt.org/vocab/unit/M",
+        "handedness": "right",
+        "upAxis": "+Z",
+        "forwardAxis": "+Y",
+        "notes": "Authoritative IFC local placement frame."
+      }
+    ],
+    "poses": [
+      {
+        "id": "urn:vao:fixture:acoustic-room:pose:source",
+        "subjectId": "urn:vao:fixture:acoustic-room:source",
+        "frameId": "urn:vao:fixture:acoustic-room:frame",
+        "position": [1.0, 1.0, 1.5],
+        "orientationXYZW": [0.0, 0.0, 0.0, 1.0],
+        "interpolation": "none"
+      },
+      {
+        "id": "urn:vao:fixture:acoustic-room:pose:receiver",
+        "subjectId": "urn:vao:fixture:acoustic-room:receiver",
+        "frameId": "urn:vao:fixture:acoustic-room:frame",
+        "position": [3.0, 2.0, 1.6],
+        "orientationXYZW": [0.0, 0.0, 0.0, 1.0],
+        "interpolation": "none"
+      }
+    ],
+    "geometryBindings": [
+      {
+        "id": "urn:vao:fixture:acoustic-room:geometry:space",
+        "subjectId": "urn:vao:fixture:acoustic-room:space",
+        "assetId": "urn:vao:fixture:acoustic-room:asset:ifc",
+        "role": "authoritative-semantic",
+        "selector": {"selectorType": "ifc-global-id", "value": "0VAO2FixtureRoom00001"},
+        "frameId": "urn:vao:fixture:acoustic-room:frame"
+      }
+    ],
+    "materialModels": [],
+    "responseSets": [
+      {
+        "id": "urn:vao:fixture:acoustic-room:response-set",
+        "responseEntityId": "urn:vao:fixture:acoustic-room:response",
+        "responseKind": "srir",
+        "assetId": "urn:vao:fixture:acoustic-room:asset:sofa",
+        "encoding": "AES69-SOFA",
+        "convention": "SingleRoomSRIR",
+        "representationStatus": "measured",
+        "measurements": [
+          {
+            "index": 0,
+            "sourceId": "urn:vao:fixture:acoustic-room:source",
+            "receiverId": "urn:vao:fixture:acoustic-room:receiver",
+            "sourcePoseId": "urn:vao:fixture:acoustic-room:pose:source",
+            "receiverPoseId": "urn:vao:fixture:acoustic-room:pose:receiver",
+            "spaceId": "urn:vao:fixture:acoustic-room:space",
+            "channelIndices": [0]
+          }
+        ],
+        "sampleRateHz": 48000,
+        "timeZeroPolicy": "direct-arrival",
+        "normalization": "physical-pressure",
+        "channelTopology": "https://www.sofaconventions.org/mediawiki/index.php/SingleRoomSRIR",
+        "generatedById": "urn:vao:fixture:acoustic-room:activity:measurement",
+        "qualityFlags": []
+      }
+    ],
+    "metricSets": [
+      {
+        "id": "urn:vao:fixture:acoustic-room:metric-set",
+        "standard": "https://www.iso.org/standard/40979.html",
+        "standardEdition": "ISO 3382-1:2009",
+        "method": "T30 from integrated energy decay curve",
+        "subjectIds": ["urn:vao:fixture:acoustic-room:space"],
+        "inputIds": ["urn:vao:fixture:acoustic-room:response-set"],
+        "bandAxis": {"scale": "octave", "centerFrequenciesHz": [500], "weighting": "none"},
+        "metrics": [
+          {
+            "property": "https://w3id.org/modavis/vao/vocab/acoustic-metric/T30",
+            "values": [1.2],
+            "unit": "http://qudt.org/vocab/unit/SEC",
+            "uncertainties": [0.05],
+            "status": "observed",
+            "sourceId": "urn:vao:fixture:acoustic-room:source",
+            "receiverId": "urn:vao:fixture:acoustic-room:receiver"
+          }
+        ],
+        "generatedById": "urn:vao:fixture:acoustic-room:activity:metrics",
+        "qualityFlags": []
+      }
+    ],
+    "audioScenes": [
+      {
+        "id": "urn:vao:fixture:acoustic-room:audio-scene",
+        "sceneEntityId": "urn:vao:fixture:acoustic-room:scene",
+        "representationType": "hybrid",
+        "standard": "https://aes.org/standards/AES69/",
+        "coordinateFrameId": "urn:vao:fixture:acoustic-room:frame",
+        "mediaAssetIds": ["urn:vao:fixture:acoustic-room:asset:sofa"],
+        "bindings": [
+          {
+            "id": "urn:vao:fixture:acoustic-room:audio-binding",
+            "entityId": "urn:vao:fixture:acoustic-room:source",
+            "mediaAssetId": "urn:vao:fixture:acoustic-room:asset:sofa",
+            "bindingType": "response",
+            "poseId": "urn:vao:fixture:acoustic-room:pose:source"
+          }
+        ]
+      }
+    ],
+    "renderConfigurations": [
+      {
+        "id": "urn:vao:fixture:acoustic-room:renderer",
+        "sceneId": "urn:vao:fixture:acoustic-room:audio-scene",
+        "strategy": "tracked-convolution",
+        "coordinateFrameId": "urn:vao:fixture:acoustic-room:frame",
+        "inputIds": ["urn:vao:fixture:acoustic-room:response-set"],
+        "listener": {
+          "mode": "tracked-6dof",
+          "receiverId": "urn:vao:fixture:acoustic-room:receiver",
+          "coordinateFrameId": "urn:vao:fixture:acoustic-room:frame",
+          "poseId": "urn:vao:fixture:acoustic-room:pose:receiver"
+        },
+        "features": [
+          {"feature": "early-reflections", "mode": "response-field", "inputIds": ["urn:vao:fixture:acoustic-room:response-set"]},
+          {"feature": "late-reverberation", "mode": "response-field", "inputIds": ["urn:vao:fixture:acoustic-room:response-set"]}
+        ],
+        "validDomainId": "urn:vao:fixture:acoustic-room:space",
+        "outsideDomainPolicy": "fallback",
+        "fallbackIds": ["urn:vao:fixture:acoustic-room:response-set"],
+        "transitionSeconds": 0.05,
+        "latencyBudgetMilliseconds": 20
+      }
+    ]
+  },
+  "rights": [
+    {
+      "appliesToIds": ["https://example.org/vao/fixture/minimal-acoustic-room"],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "statement": {"en": "Synthetic conformance fixture dedicated to the public domain."},
+      "accessCondition": "Open"
+    }
+  ],
+  "integrity": {
+    "algorithm": "sha256",
+    "assetCount": 3,
+    "totalPayloadBytes": 434
+  },
+  "extensions": {}
+}

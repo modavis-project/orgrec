@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orgrec.modavis.org/schemas/legacy-audio-import-manifest.schema.json",
+  "title": "OrgRec legacy audio import manifest",
+  "type": "object",
+  "required": [
+    "contract",
+    "importedAt",
+    "sourceDirectoryName",
+    "sourceDirectoryPathAtImport",
+    "sourceMutationPolicy",
+    "profile",
+    "files",
+    "ignoredEntries",
+    "warnings"
+  ],
+  "properties": {
+    "contract": { "const": "orgrec.legacy-audio-import-manifest/v1" },
+    "importedAt": { "type": "string", "format": "date-time" },
+    "sourceDirectoryName": { "type": "string", "minLength": 1 },
+    "sourceDirectoryPathAtImport": { "type": "string", "minLength": 1 },
+    "sourceMutationPolicy": { "type": "string", "minLength": 1 },
+    "profile": { "$ref": "#/$defs/profile" },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/file" }
+    },
+    "ignoredEntries": { "type": "array", "items": { "type": "string" } },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "required": [
+        "profileContract",
+        "sourceNamespace",
+        "sourceRecordIdentifier",
+        "organName",
+        "venueName",
+        "divisionName",
+        "filenamePattern",
+        "referencePitchHz",
+        "referencePitchIsAssumed",
+        "temperament",
+        "stopMappings",
+        "sourceURLs",
+        "modelingNotes"
+      ],
+      "properties": {
+        "profileContract": { "enum": ["orgrec.legacy-audio-profile/v1", "orgrec.audio-dataset-profile/v1"] },
+        "sourceNamespace": { "type": "string", "minLength": 1 },
+        "sourceRecordKey": { "type": ["string", "null"] },
+        "sourceRecordIdentifier": { "type": "string", "minLength": 1 },
+        "organName": { "type": "string", "minLength": 1 },
+        "venueName": { "type": "string" },
+        "divisionName": { "type": "string", "minLength": 1 },
+        "filenamePattern": { "type": "string", "minLength": 1 },
+        "filenameConvention": {
+          "type": ["string", "null"],
+          "enum": ["stopThenMIDI", "recordStopMIDI", "midiThenStop", "stopThenNoteName", null]
+        },
+        "midiNoteOffset": { "type": ["integer", "null"], "minimum": -127, "maximum": 127 },
+        "referencePitchHz": { "type": "number", "exclusiveMinimum": 0 },
+        "referencePitchIsAssumed": { "type": "boolean" },
+        "temperament": { "type": "string" },
+        "stopMappings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["code", "label", "soundingSemitoneOffset", "interpretationNote"],
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1 },
+              "footHeight": { "type": ["string", "null"] },
+              "soundingSemitoneOffset": { "type": "integer" },
+              "interpretationNote": { "type": "string" }
+            }
+          }
+        },
+        "sourceURLs": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "rightsStatement": { "type": ["string", "null"] },
+        "builder": { "type": ["string", "null"] },
+        "modelingNotes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "filename",
+        "sourceRecordIdentifier",
+        "stopCode",
+        "midiNote",
+        "sampleRate",
+        "channelCount",
+        "frameCount",
+        "durationSeconds",
+        "fileSize",
+        "formatDescription",
+        "sha256"
+      ],
+      "properties": {
+        "filename": { "type": "string", "pattern": "^[^/]+\\.(?:[Ww][Aa][Vv][Ee]?|[Aa][Ii][Ff][Ff]?|[Cc][Aa][Ff]|[Ff][Ll][Aa][Cc])$" },
+        "sourceRecordIdentifier": { "type": "string", "minLength": 1 },
+        "stopCode": { "type": "string", "minLength": 1 },
+        "midiNote": { "type": "integer", "minimum": 0, "maximum": 127 },
+        "sourcePitchToken": { "type": ["string", "null"] },
+        "variant": { "type": ["string", "null"] },
+        "sampleRate": { "type": "number", "exclusiveMinimum": 0 },
+        "channelCount": { "type": "integer", "minimum": 1 },
+        "frameCount": { "type": "integer", "minimum": 1 },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "fileSize": { "type": "integer", "minimum": 1 },
+        "formatDescription": { "type": "string", "minLength": 1 },
+        "containerDescription": { "type": ["string", "null"] },
+        "encodingDescription": { "type": ["string", "null"] },
+        "bitDepth": { "type": ["integer", "null"], "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    }
+  }
+}

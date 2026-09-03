@@ -1,0 +1,130 @@
+{
+  "contractVersion": "orgrec-vpo-source-routes/1",
+  "reviewedAt": "2026-08-31",
+  "scope": "Direct publisher or project-catalog routes for the ten VPO entities that contributed ranks to the comparative stop-timbre analysis.",
+  "routes": {
+    "VPO-083": {
+      "sourcePageURL": "https://www.jeuxdorgues.com/jeux-d-orgues-2-stiehr-mockers/",
+      "downloads": [
+        {
+          "url": "https://www.jeuxdorgues.com/files/jeuxdorgues2_grandorgue.rar",
+          "filename": "jeuxdorgues2_grandorgue.rar",
+          "expectedBytes": 177917826,
+          "expectedBytesBasis": "historical-acquisition-record",
+          "archiveFormat": "rar"
+        }
+      ]
+    },
+    "VPO-085": {
+      "sourcePageURL": "https://familjenpalo.se/vpo/download/",
+      "downloads": [
+        {
+          "url": "https://familjenpalo.se/sites/default/files/sampleset/packages/BureaChoir20160108.orgue",
+          "filename": "BureaChoir20160108.orgue",
+          "expectedBytes": 643276926,
+          "expectedBytesBasis": "historical-acquisition-record",
+          "archiveFormat": "zip"
+        }
+      ]
+    },
+    "VPO-086": {
+      "sourcePageURL": "https://familjenpalo.se/vpo/download/",
+      "downloads": [
+        {
+          "url": "https://familjenpalo.se/sites/default/files/sampleset/packages/BureaChurch.orgue",
+          "filename": "BureaChurch.orgue",
+          "expectedBytes": 818040215,
+          "expectedBytesBasis": "historical-acquisition-record",
+          "archiveFormat": "zip"
+        }
+      ]
+    },
+    "VPO-087": {
+      "sourcePageURL": "https://familjenpalo.se/vpo/burea-funeral-chapel/",
+      "downloads": [
+        {
+          "url": "https://familjenpalo.se/sites/default/files/sampleset/Burea_Funeral_Chapel.rar",
+          "filename": "Burea_Funeral_Chapel.rar",
+          "expectedBytes": 92238154,
+          "expectedBytesBasis": "retained-local-archive",
+          "expectedSHA256": "9ee7258dcdee164d59cefe8da482fd142ed3188ce5b9ab72cee213bb0926dbae",
+          "archiveFormat": "rar"
+        }
+      ]
+    },
+    "VPO-088": {
+      "sourcePageURL": "https://familjenpalo.se/vpo/download/",
+      "downloads": [
+        {
+          "url": "https://familjenpalo.se/sites/default/files/sampleset/packages/BygdsiljumChurch.orgue",
+          "filename": "BygdsiljumChurch.orgue",
+          "expectedBytes": 1671622867,
+          "expectedBytesBasis": "historical-acquisition-record",
+          "archiveFormat": "zip"
+        }
+      ]
+    },
+    "VPO-089": {
+      "sourcePageURL": "https://familjenpalo.se/vpo/jukkasjarvi-church-organ-sample-set/",
+      "downloads": [
+        {
+          "url": "https://familjenpalo.se/sites/default/files/sampleset/packages/JukkasjarviChurchAB20241202.orgue",
+          "filename": "JukkasjarviChurchAB20241202.orgue",
+          "expectedBytes": 2139330980,
+          "expectedBytesBasis": "historical-acquisition-record",
+          "archiveFormat": "zip"
+        }
+      ],
+      "note": "The AB 2024-12-02 edition is the edition used by the frozen corpus; do not substitute the newer NC edition."
+    },
+    "VPO-090": {
+      "sourcePageURL": "https://familjenpalo.se/vpo/kalvtrask/",
+      "downloads": [
+        {
+          "url": "https://familjenpalo.se/sites/default/files/sampleset/Kalvtrask_Church.rar",
+          "filename": "Kalvtrask_Church.rar",
+          "expectedBytes": 1207368325,
+          "expectedBytesBasis": "current-server-2026-08-31; historical archive-length record not retained",
+          "archiveFormat": "rar"
+        }
+      ]
+    },
+    "VPO-091": {
+      "sourcePageURL": "https://familjenpalo.se/vpo/about-my-samplesets/norrfjarden-church/",
+      "downloads": [
+        {
+          "url": "https://familjenpalo.se/sites/default/files/sampleset/packages/NorrfjardenChurch.orgue",
+          "filename": "NorrfjardenChurch.orgue",
+          "expectedBytes": 2045915742,
+          "expectedBytesBasis": "historical-acquisition-record",
+          "archiveFormat": "zip"
+        }
+      ]
+    },
+    "VPO-092": {
+      "sourcePageURL": "https://familjenpalo.se/vpo/pitea-mhs/",
+      "downloads": [
+        {
+          "url": "https://familjenpalo.se/sites/default/files/sampleset/packages/PiteaMHS20250727.orgue",
+          "filename": "PiteaMHS20250727.orgue",
+          "expectedBytes": 1047973302,
+          "expectedBytesBasis": "historical-acquisition-record",
+          "archiveFormat": "zip"
+        }
+      ]
+    },
+    "VPO-187": {
+      "sourcePageURL": "https://github.com/GrandOrgue/grandorgue/wiki/Sample-Sets",
+      "downloads": [
+        {
+          "url": "https://drive.usercontent.google.com/download?id=1abXMuqOdikWrvYmVdqYmWXIJIvUMJX2K&export=download&confirm=t",
+          "filename": "Veendam_Grand_Orgue.7z",
+          "expectedBytes": 559949706,
+          "expectedBytesBasis": "historical-acquisition-record",
+          "archiveFormat": "7z"
+        }
+      ],
+      "note": "The GrandOrgue project catalog identifies this Google Drive object as the Kaat en Tijhuis set."
+    }
+  }
+}

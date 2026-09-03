@@ -1,0 +1,27 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/zenodo-metadata.json",
+  "type": "VAOZenodoMetadata",
+  "formatVersion": "0.3.3",
+  "releaseId": "urn:uuid:03100000-0000-4000-8000-000000000101",
+  "publicationRecordId": "urn:uuid:03100000-0000-4000-8000-000000000110",
+  "recordRole": "family-root",
+  "metadata": {
+    "upload_type": "dataset",
+    "title": "Example instrument — Virtual Acoustic Object root",
+    "description": "The citable root of a VAO record family. It contains the exact manifest and bootstrap carrier and links to version-pinned model and audio records.",
+    "creators": [{ "name": "Example, Ada", "affiliation": "Example Institute" }],
+    "contributors": [{ "name": "Curator, Chris", "type": "DataCurator" }],
+    "publication_date": "2026-08-24",
+    "version": "1.0.0",
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "keywords": ["Virtual Acoustic Object", "VAO 0.3", "record family", "digital heritage"],
+    "related_identifiers": [
+      { "identifier": "https://doi.org/10.5281/zenodo.2234570", "relation": "hasPart", "resource_type": "dataset" },
+      { "identifier": "https://doi.org/10.5281/zenodo.3234570", "relation": "requires", "resource_type": "dataset" },
+      { "identifier": "https://doi.org/10.1234/example.source.2", "relation": "isDerivedFrom", "resource_type": "dataset" }
+    ],
+    "language": "eng",
+    "notes": "Cite this root DOI for the VAO as a whole; dependency resolution uses the exact member version DOIs."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.5.0/schema/carrier.json",
+  "carrierMode": "bootstrap",
+  "completeGroupIds": [
+    "urn:uuid:03000000-0000-4000-8000-000000000030"
+  ],
+  "embeddedRealizations": [
+    {
+      "path": "payload/evidence/source.txt",
+      "realizationId": "urn:uuid:03000000-0000-4000-8000-000000000021"
+    }
+  ],
+  "formatVersion": "0.5.0",
+  "id": "urn:uuid:03000000-0000-4000-8000-000000000040",
+  "manifestByteSize": 11893,
+  "manifestSHA256": "9261db2780dc4cb7530c0283d3c0c3a2b94f82b77432611313c6737a256197da",
+  "releaseId": "urn:uuid:03000000-0000-4000-8000-000000000001",
+  "type": "VAOCarrier"
+}

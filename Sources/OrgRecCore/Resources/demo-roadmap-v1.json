@@ -1,0 +1,10 @@
+{
+  "schema": "orgrec-demo-roadmap/1.0",
+  "release_binding": {
+    "requested_release": "1.1",
+    "terminal_state": "release_1_1_enrichment_not_justified",
+    "source_database_release": "1.0",
+    "protected_fingerprint": "70a3ff6dd2f629e6da9fb713acfe9e9358cd7db85612a9789931ded5663031c7"
+  },
+  "notice": "Demonstration data only. Navigator-provided snapshots replace this fixture."
+}

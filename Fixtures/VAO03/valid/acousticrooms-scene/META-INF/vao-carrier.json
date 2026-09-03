@@ -1,0 +1,46 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/carrier.json",
+  "type": "VAOCarrier",
+  "formatVersion": "0.3.3",
+  "releaseId": "urn:vao:fixture:acousticrooms:bathrooms-idx-0:release:1",
+  "manifestSHA256": "15b9401c19c8d973085f2248a2a5cef4e1a5b82460cf6c23fd2b18f4e79422ab",
+  "manifestByteSize": 28804,
+  "carrierMode": "preservation-closure",
+  "embeddedRealizations": [
+    {
+      "realizationId": "urn:vao:fixture:acousticrooms:realization:rir:wav",
+      "path": "payload/acoustics/S000_R0011_hybrid_IR.wav"
+    },
+    {
+      "realizationId": "urn:vao:fixture:acousticrooms:realization:license",
+      "path": "payload/evidence/ACOUSTICROOMS_LICENSE.txt"
+    },
+    {
+      "realizationId": "urn:vao:fixture:acousticrooms:realization:readme",
+      "path": "payload/evidence/ACOUSTICROOMS_README.md"
+    },
+    {
+      "realizationId": "urn:vao:fixture:acousticrooms:realization:pair-metadata",
+      "path": "payload/evidence/S000_R0011.json"
+    },
+    {
+      "realizationId": "urn:vao:fixture:acousticrooms:realization:fixture-provenance",
+      "path": "payload/evidence/fixture-provenance.json"
+    },
+    {
+      "realizationId": "urn:vao:fixture:acousticrooms:realization:simulation-config",
+      "path": "payload/evidence/simulation.json"
+    },
+    {
+      "realizationId": "urn:vao:fixture:acousticrooms:realization:geometry:glb",
+      "path": "payload/geometry/Bathrooms_idx_0.glb"
+    },
+    {
+      "realizationId": "urn:vao:fixture:acousticrooms:realization:geometry:obj",
+      "path": "payload/geometry/Bathrooms_idx_0.obj"
+    }
+  ],
+  "completeGroupIds": [
+    "urn:vao:fixture:acousticrooms:group:complete-scene"
+  ]
+}

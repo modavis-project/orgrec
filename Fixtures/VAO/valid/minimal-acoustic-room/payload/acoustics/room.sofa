@@ -1,0 +1,2 @@
+VAO 0.2 conformance placeholder for an AES69 SOFA SingleRoomSRIR payload.
+This compact fixture validates package semantics, not the external HDF5 codec.

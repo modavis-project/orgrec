@@ -1,0 +1,801 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/manifest.json",
+  "@context": [
+    "https://w3id.org/modavis/vao/0.3/context.jsonld"
+  ],
+  "type": "VirtualAcousticObject",
+  "formatVersion": "0.3.3",
+  "id": "urn:vao:fixture:acousticrooms:bathrooms-idx-0",
+  "release": {
+    "id": "urn:vao:fixture:acousticrooms:bathrooms-idx-0:release:1",
+    "revision": 1,
+    "contentVersion": "acousticrooms-fixture-1"
+  },
+  "createdAt": "2026-08-24T17:35:00Z",
+  "modifiedAt": "2026-08-24T17:35:00Z",
+  "title": {
+    "en": "AcousticRooms Bathrooms_idx_0 visual-acoustic scene"
+  },
+  "description": {
+    "en": "CC BY 4.0 test subset joining an original room mesh, a Blender-derived GLB, one hybrid simulated room impulse response, and exact source/receiver positions from AcousticRooms."
+  },
+  "conformsTo": [
+    "https://w3id.org/modavis/vao/profile/core/0.3",
+    "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3",
+    "https://w3id.org/modavis/vao/profile/spatial/0.3",
+    "https://w3id.org/modavis/vao/profile/acoustics/0.3"
+  ],
+  "profiles": [
+    {
+      "id": "https://w3id.org/modavis/vao/profile/core/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/core-graph",
+        "https://w3id.org/modavis/vao/vocab/capability/fixity"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/immutable-release",
+        "https://w3id.org/modavis/vao/vocab/capability/carrier-mapping"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/spatial/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/spatial"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/acoustics/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/simulated-impulse-response",
+        "https://w3id.org/modavis/vao/vocab/capability/position-registered-acoustic-scene",
+        "https://w3id.org/modavis/vao/vocab/capability/visual-acoustic-scene",
+        "https://w3id.org/modavis/vao/vocab/capability/spatial-audio-scene"
+      ]
+    }
+  ],
+  "materializableProfiles": [],
+  "modavisBinding": {
+    "ontologyIRI": "https://w3id.org/modavis/ontology",
+    "ontologyVersion": "0.2.0-dev",
+    "ontologyStatus": "development",
+    "mappingVersion": "0.3.3",
+    "notes": "Fixture binding; not a claim that the MODAVIS development ontology is a published release."
+  },
+  "primaryEntityId": "urn:vao:fixture:acousticrooms:space",
+  "focusEntityIds": [
+    "urn:vao:fixture:acousticrooms:space",
+    "urn:vao:fixture:acousticrooms:source:0",
+    "urn:vao:fixture:acousticrooms:receiver:11"
+  ],
+  "entities": [
+    {
+      "id": "urn:vao:fixture:acousticrooms:space",
+      "kind": "space",
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Space"
+      ],
+      "labels": {
+        "en": "AcousticRooms Bathrooms_idx_0"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/vocab/sourceDataset": "https://github.com/facebookresearch/AcousticRooms/tree/3c87318a0188e1b441fc75846d54b487ca215fbb"
+      }
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:source:0",
+      "kind": "acousticEmitter",
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#AcousticEmitter"
+      ],
+      "labels": {
+        "en": "AcousticRooms Source_0"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/vocab/sourceIdentifier": "417ba642-8ad8-47b5-916e-163f6680645a",
+        "https://w3id.org/modavis/vao/vocab/directivity": "omnidirectional"
+      }
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:receiver:11",
+      "kind": "acousticReceiver",
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#AcousticReceiver"
+      ],
+      "labels": {
+        "en": "AcousticRooms rec_11"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/vocab/sourceIdentifier": "58b07d52-3e5d-445e-9b76-07ea6882c899",
+        "https://w3id.org/modavis/vao/vocab/directivity": "omnidirectional"
+      }
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:response",
+      "kind": "acousticResponse",
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#AcousticResponseSet"
+      ],
+      "labels": {
+        "en": "Hybrid simulated S000_R0011 room impulse response"
+      },
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:scene",
+      "kind": "audioScene",
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#SpatialAudioScene"
+      ],
+      "labels": {
+        "en": "Fixed-pair visual-acoustic scene"
+      },
+      "properties": {}
+    }
+  ],
+  "relations": [
+    {
+      "id": "urn:vao:fixture:acousticrooms:relation:source-in-space",
+      "subjectId": "urn:vao:fixture:acousticrooms:source:0",
+      "predicate": "https://w3id.org/modavis/vao/ontology#locatedIn",
+      "objectId": "urn:vao:fixture:acousticrooms:space",
+      "status": "asserted",
+      "evidenceIds": [
+        "urn:vao:fixture:acousticrooms:asset:pair-metadata"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:relation:receiver-in-space",
+      "subjectId": "urn:vao:fixture:acousticrooms:receiver:11",
+      "predicate": "https://w3id.org/modavis/vao/ontology#locatedIn",
+      "objectId": "urn:vao:fixture:acousticrooms:space",
+      "status": "asserted",
+      "evidenceIds": [
+        "urn:vao:fixture:acousticrooms:asset:pair-metadata"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:relation:response",
+      "subjectId": "urn:vao:fixture:acousticrooms:space",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasAcousticResponse",
+      "objectId": "urn:vao:fixture:acousticrooms:response-set",
+      "status": "asserted",
+      "generatedByIds": [
+        "urn:vao:fixture:acousticrooms:activity:simulation"
+      ]
+    }
+  ],
+  "paradata": [
+    {
+      "id": "urn:vao:fixture:acousticrooms:activity:simulation",
+      "activityType": "https://w3id.org/modavis/vao/vocab/activity/RoomImpulseResponseSimulation",
+      "software": {
+        "name": "Treble",
+        "version": "not stated by source dataset"
+      },
+      "method": {
+        "methodType": "simulation",
+        "representationStatus": "hybrid"
+      },
+      "inputIds": [
+        "urn:vao:fixture:acousticrooms:asset:room-geometry",
+        "urn:vao:fixture:acousticrooms:asset:simulation-config"
+      ],
+      "outputIds": [
+        "urn:vao:fixture:acousticrooms:response-set",
+        "urn:vao:fixture:acousticrooms:asset:rir"
+      ],
+      "parameters": {
+        "crossoverFrequencyHz": 710,
+        "simulationType": "Hybrid",
+        "impulseLengthSeconds": 0.5380072922824315
+      }
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:activity:gltf-conversion",
+      "activityType": "https://w3id.org/modavis/vao/vocab/activity/GeometryConversion",
+      "startedAt": "2026-08-24T17:32:00Z",
+      "software": {
+        "name": "Blender",
+        "version": "5.1.1"
+      },
+      "method": {
+        "methodType": "encoding",
+        "representationStatus": "converted"
+      },
+      "inputIds": [
+        "urn:vao:fixture:acousticrooms:realization:geometry:obj"
+      ],
+      "outputIds": [
+        "urn:vao:fixture:acousticrooms:realization:geometry:glb"
+      ],
+      "parameters": {
+        "exportFormat": "glTF 2.0 GLB",
+        "sourceUpAxis": "+Z",
+        "outputUpAxis": "+Y"
+      }
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:activity:fixture-assembly",
+      "activityType": "https://w3id.org/modavis/vao/vocab/activity/FixtureAssembly",
+      "startedAt": "2026-08-24T17:35:00Z",
+      "software": {
+        "name": "VAO reference implementation",
+        "version": "0.3.3"
+      },
+      "method": {
+        "methodType": "manual-authoring",
+        "representationStatus": "authored"
+      },
+      "inputIds": [
+        "https://github.com/facebookresearch/AcousticRooms/tree/3c87318a0188e1b441fc75846d54b487ca215fbb"
+      ],
+      "outputIds": [
+        "urn:vao:fixture:acousticrooms:realization:fixture-provenance"
+      ],
+      "parameters": {
+        "selection": "Bathrooms_idx_0/S000_R0011"
+      }
+    }
+  ],
+  "analyses": [],
+  "acoustics": {
+    "coordinateFrames": [
+      {
+        "id": "urn:vao:fixture:acousticrooms:frame:dataset",
+        "dimension": 3,
+        "coordinateType": "cartesian",
+        "unit": "http://qudt.org/vocab/unit/M",
+        "handedness": "right",
+        "upAxis": "+Z",
+        "forwardAxis": "not-applicable",
+        "notes": "Source OBJ, simulation configuration, and pair metadata coordinates."
+      },
+      {
+        "id": "urn:vao:fixture:acousticrooms:frame:gltf",
+        "dimension": 3,
+        "coordinateType": "cartesian",
+        "unit": "http://qudt.org/vocab/unit/M",
+        "handedness": "right",
+        "upAxis": "+Y",
+        "forwardAxis": "not-applicable",
+        "parentFrameId": "urn:vao:fixture:acousticrooms:frame:dataset",
+        "transformToParent": [
+          1, 0, 0, 0,
+          0, 0, -1, 0,
+          0, 1, 0, 0,
+          0, 0, 0, 1
+        ],
+        "generatedById": "urn:vao:fixture:acousticrooms:activity:gltf-conversion",
+        "notes": "glTF +Y-up frame; matrix maps GLB coordinates into the dataset +Z-up frame."
+      }
+    ],
+    "poses": [
+      {
+        "id": "urn:vao:fixture:acousticrooms:pose:source:0",
+        "subjectId": "urn:vao:fixture:acousticrooms:source:0",
+        "frameId": "urn:vao:fixture:acousticrooms:frame:dataset",
+        "position": [2.3496, 0.7269, 1.353],
+        "interpolation": "none"
+      },
+      {
+        "id": "urn:vao:fixture:acousticrooms:pose:receiver:11",
+        "subjectId": "urn:vao:fixture:acousticrooms:receiver:11",
+        "frameId": "urn:vao:fixture:acousticrooms:frame:dataset",
+        "position": [2.8176, 0.9871, 1.4665],
+        "interpolation": "none"
+      }
+    ],
+    "geometryBindings": [
+      {
+        "id": "urn:vao:fixture:acousticrooms:geometry-binding:simulation",
+        "subjectId": "urn:vao:fixture:acousticrooms:space",
+        "logicalAssetId": "urn:vao:fixture:acousticrooms:asset:room-geometry",
+        "role": "acoustic-simulation"
+      },
+      {
+        "id": "urn:vao:fixture:acousticrooms:geometry-binding:visual",
+        "subjectId": "urn:vao:fixture:acousticrooms:space",
+        "logicalAssetId": "urn:vao:fixture:acousticrooms:asset:room-geometry",
+        "role": "runtime-visual",
+        "generatedById": "urn:vao:fixture:acousticrooms:activity:gltf-conversion"
+      }
+    ],
+    "materialModels": [],
+    "measurements": [
+      {
+        "id": "urn:vao:fixture:acousticrooms:measurement:S000-R0011",
+        "sourceId": "urn:vao:fixture:acousticrooms:source:0",
+        "receiverId": "urn:vao:fixture:acousticrooms:receiver:11",
+        "sourcePoseId": "urn:vao:fixture:acousticrooms:pose:source:0",
+        "receiverPoseId": "urn:vao:fixture:acousticrooms:pose:receiver:11",
+        "spaceId": "urn:vao:fixture:acousticrooms:space"
+      }
+    ],
+    "responseSets": [
+      {
+        "id": "urn:vao:fixture:acousticrooms:response-set",
+        "responseEntityId": "urn:vao:fixture:acousticrooms:response",
+        "responseKind": "rir",
+        "logicalAssetId": "urn:vao:fixture:acousticrooms:asset:rir",
+        "representationStatus": "hybrid",
+        "measurementIds": [
+          "urn:vao:fixture:acousticrooms:measurement:S000-R0011"
+        ],
+        "generatedById": "urn:vao:fixture:acousticrooms:activity:simulation",
+        "qualityFlags": [
+          "source dataset states that distributed RIRs are normalized; the exact normalization convention is not stated"
+        ]
+      }
+    ],
+    "metricSets": [],
+    "audioScenes": [
+      {
+        "id": "urn:vao:fixture:acousticrooms:audio-scene",
+        "sceneEntityId": "urn:vao:fixture:acousticrooms:scene",
+        "representationType": "hybrid",
+        "coordinateFrameId": "urn:vao:fixture:acousticrooms:frame:dataset",
+        "mediaAssetIds": [
+          "urn:vao:fixture:acousticrooms:asset:rir"
+        ],
+        "metadataAssetId": "urn:vao:fixture:acousticrooms:asset:pair-metadata",
+        "bindings": [
+          {
+            "id": "urn:vao:fixture:acousticrooms:audio-binding:source",
+            "entityId": "urn:vao:fixture:acousticrooms:source:0",
+            "mediaAssetId": "urn:vao:fixture:acousticrooms:asset:rir",
+            "bindingType": "response",
+            "channelIndices": [0],
+            "poseId": "urn:vao:fixture:acousticrooms:pose:source:0"
+          }
+        ],
+        "generatedById": "urn:vao:fixture:acousticrooms:activity:fixture-assembly"
+      }
+    ],
+    "renderConfigurations": [
+      {
+        "id": "urn:vao:fixture:acousticrooms:renderer:fixed-convolution",
+        "sceneId": "urn:vao:fixture:acousticrooms:audio-scene",
+        "strategy": "static-playback",
+        "coordinateFrameId": "urn:vao:fixture:acousticrooms:frame:dataset",
+        "inputIds": [
+          "urn:vao:fixture:acousticrooms:response-set"
+        ],
+        "listener": {
+          "mode": "fixed",
+          "receiverId": "urn:vao:fixture:acousticrooms:receiver:11",
+          "coordinateFrameId": "urn:vao:fixture:acousticrooms:frame:dataset",
+          "poseId": "urn:vao:fixture:acousticrooms:pose:receiver:11"
+        },
+        "features": [
+          {
+            "feature": "early-reflections",
+            "mode": "response-field",
+            "inputIds": [
+              "urn:vao:fixture:acousticrooms:response-set"
+            ]
+          },
+          {
+            "feature": "late-reverberation",
+            "mode": "response-field",
+            "inputIds": [
+              "urn:vao:fixture:acousticrooms:response-set"
+            ]
+          }
+        ],
+        "validDomainId": "urn:vao:fixture:acousticrooms:space",
+        "outsideDomainPolicy": "reject",
+        "fallbackIds": []
+      }
+    ]
+  },
+  "logicalAssets": [
+    {
+      "id": "urn:vao:fixture:acousticrooms:asset:room-geometry",
+      "type": "LogicalAsset",
+      "labels": {
+        "en": "Bathrooms_idx_0 room geometry"
+      },
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/spatial-model",
+        "https://w3id.org/modavis/vao/vocab/asset-role/three-dimensional-model"
+      ],
+      "aboutEntityIds": [
+        "urn:vao:fixture:acousticrooms:space"
+      ],
+      "realizationIds": [
+        "urn:vao:fixture:acousticrooms:realization:geometry:obj",
+        "urn:vao:fixture:acousticrooms:realization:geometry:glb"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:asset:rir",
+      "type": "LogicalAsset",
+      "labels": {
+        "en": "S000_R0011 hybrid room impulse response"
+      },
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/impulse-response",
+        "https://w3id.org/modavis/vao/vocab/asset-role/spatial-listening-audio"
+      ],
+      "aboutEntityIds": [
+        "urn:vao:fixture:acousticrooms:response",
+        "urn:vao:fixture:acousticrooms:space"
+      ],
+      "realizationIds": [
+        "urn:vao:fixture:acousticrooms:realization:rir:wav"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:asset:pair-metadata",
+      "type": "LogicalAsset",
+      "labels": {
+        "en": "Exact source/receiver pair metadata"
+      },
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/acoustic-scene-metadata",
+        "https://w3id.org/modavis/vao/vocab/asset-role/source-evidence"
+      ],
+      "aboutEntityIds": [
+        "urn:vao:fixture:acousticrooms:source:0",
+        "urn:vao:fixture:acousticrooms:receiver:11"
+      ],
+      "realizationIds": [
+        "urn:vao:fixture:acousticrooms:realization:pair-metadata"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:asset:simulation-config",
+      "type": "LogicalAsset",
+      "labels": {
+        "en": "AcousticRooms simulation configuration"
+      },
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/acoustic-scene-metadata",
+        "https://w3id.org/modavis/vao/vocab/asset-role/source-evidence"
+      ],
+      "aboutEntityIds": [
+        "urn:vao:fixture:acousticrooms:space"
+      ],
+      "realizationIds": [
+        "urn:vao:fixture:acousticrooms:realization:simulation-config"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:asset:license",
+      "type": "LogicalAsset",
+      "labels": {
+        "en": "AcousticRooms CC BY 4.0 license"
+      },
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/source-evidence"
+      ],
+      "aboutEntityIds": [
+        "urn:vao:fixture:acousticrooms:space"
+      ],
+      "realizationIds": [
+        "urn:vao:fixture:acousticrooms:realization:license"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:asset:readme",
+      "type": "LogicalAsset",
+      "labels": {
+        "en": "AcousticRooms source README"
+      },
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/source-evidence"
+      ],
+      "aboutEntityIds": [
+        "urn:vao:fixture:acousticrooms:space"
+      ],
+      "realizationIds": [
+        "urn:vao:fixture:acousticrooms:realization:readme"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:asset:fixture-provenance",
+      "type": "LogicalAsset",
+      "labels": {
+        "en": "Fixture selection and conversion provenance"
+      },
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/paradata-record"
+      ],
+      "aboutEntityIds": [
+        "urn:vao:fixture:acousticrooms:space"
+      ],
+      "realizationIds": [
+        "urn:vao:fixture:acousticrooms:realization:fixture-provenance"
+      ]
+    }
+  ],
+  "realizations": [
+    {
+      "id": "urn:vao:fixture:acousticrooms:realization:geometry:obj",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:acousticrooms:asset:room-geometry",
+      "variantSetId": "room-geometry",
+      "qualityTier": "preservation",
+      "mediaType": "model/obj",
+      "byteSize": 1112265,
+      "sha256": "b86f60267314fe314d0ebacd716c1770dd029a8c5ad851a56b1162ac4975b6ff",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": [
+        "urn:vao:fixture:acousticrooms:rights:cc-by-4.0"
+      ],
+      "provenanceIds": [
+        "urn:vao:fixture:acousticrooms:activity:fixture-assembly"
+      ],
+      "technicalMetadata": {
+        "kind": "geometry",
+        "coordinateFrameId": "urn:vao:fixture:acousticrooms:frame:dataset",
+        "coordinateUnit": "http://qudt.org/vocab/unit/M",
+        "handedness": "right",
+        "upAxis": "Z",
+        "lod": 0,
+        "triangleCount": 43520,
+        "vertexCount": 10882,
+        "purposeLimitations": [
+          "No textures are included in the source dataset OBJ",
+          "Acoustic surface-material bindings are not exposed for this selected public subset"
+        ]
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:realization:geometry:glb",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:acousticrooms:asset:room-geometry",
+      "variantSetId": "room-geometry",
+      "qualityTier": "production-spatial",
+      "mediaType": "model/gltf-binary",
+      "byteSize": 549736,
+      "sha256": "03e1bb41f2db881da22212184baa765a71ae9e3248ef610237f67322b039798a",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/converted",
+      "rightsIds": [
+        "urn:vao:fixture:acousticrooms:rights:cc-by-4.0"
+      ],
+      "provenanceIds": [
+        "urn:vao:fixture:acousticrooms:activity:gltf-conversion"
+      ],
+      "technicalMetadata": {
+        "kind": "geometry",
+        "coordinateFrameId": "urn:vao:fixture:acousticrooms:frame:gltf",
+        "coordinateUnit": "http://qudt.org/vocab/unit/M",
+        "handedness": "right",
+        "upAxis": "Y",
+        "lod": 0,
+        "triangleCount": 21760,
+        "vertexCount": 17429,
+        "purposeLimitations": [
+          "Visualization derivative; the source OBJ remains the preservation realization"
+        ]
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:realization:rir:wav",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:acousticrooms:asset:rir",
+      "variantSetId": "S000-R0011-rir",
+      "qualityTier": "production-spatial",
+      "mediaType": "audio/wav",
+      "byteSize": 23772,
+      "sha256": "acfa34ce1f465e78337da0ac7032b92e2913dfa4203c077acd1e5cbe6dd446b6",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/hybrid",
+      "rightsIds": [
+        "urn:vao:fixture:acousticrooms:rights:cc-by-4.0"
+      ],
+      "provenanceIds": [
+        "urn:vao:fixture:acousticrooms:activity:simulation",
+        "urn:vao:fixture:acousticrooms:activity:fixture-assembly"
+      ],
+      "technicalMetadata": {
+        "kind": "audio",
+        "sampleRate": 22050,
+        "sampleFormat": "signed integer PCM",
+        "bitDepth": 16,
+        "channelCount": 1,
+        "channelLabels": [
+          "monaural RIR"
+        ],
+        "audioContainer": "WAVE",
+        "impulseResponse": {
+          "responseSetId": "urn:vao:fixture:acousticrooms:response-set",
+          "encoding": "WAV",
+          "sampleCount": 11864,
+          "timeZeroPolicy": "unspecified",
+          "normalization": "unspecified",
+          "measurementMappings": [
+            {
+              "measurementId": "urn:vao:fixture:acousticrooms:measurement:S000-R0011",
+              "channelIndices": [0]
+            }
+          ]
+        }
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:realization:pair-metadata",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:acousticrooms:asset:pair-metadata",
+      "variantSetId": "pair-metadata",
+      "qualityTier": "bootstrap",
+      "mediaType": "application/json",
+      "byteSize": 211,
+      "sha256": "66b0fcd2990cb9bd2719e01f8f2a3d00aaeb6a0dc01cf5c2d977515468582b36",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": [
+        "urn:vao:fixture:acousticrooms:rights:cc-by-4.0"
+      ],
+      "provenanceIds": [
+        "urn:vao:fixture:acousticrooms:activity:fixture-assembly"
+      ],
+      "technicalMetadata": {
+        "kind": "data"
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:realization:simulation-config",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:acousticrooms:asset:simulation-config",
+      "variantSetId": "simulation-config",
+      "qualityTier": "preservation",
+      "mediaType": "application/json",
+      "byteSize": 12099,
+      "sha256": "d691f91969ed3a640733929eadbc9292a0dfd20639ec00be518911e1f6add3f3",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": [
+        "urn:vao:fixture:acousticrooms:rights:cc-by-4.0"
+      ],
+      "provenanceIds": [
+        "urn:vao:fixture:acousticrooms:activity:fixture-assembly"
+      ],
+      "technicalMetadata": {
+        "kind": "data"
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:realization:license",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:acousticrooms:asset:license",
+      "variantSetId": "license",
+      "qualityTier": "preservation",
+      "mediaType": "text/plain",
+      "byteSize": 18103,
+      "sha256": "77bb3ec108e522894a2333e6ef0f20007bed136285166b46b852010ee78ec31f",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": [
+        "urn:vao:fixture:acousticrooms:rights:cc-by-4.0"
+      ],
+      "provenanceIds": [
+        "urn:vao:fixture:acousticrooms:activity:fixture-assembly"
+      ],
+      "technicalMetadata": {
+        "kind": "document"
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:realization:readme",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:acousticrooms:asset:readme",
+      "variantSetId": "readme",
+      "qualityTier": "preservation",
+      "mediaType": "text/markdown",
+      "byteSize": 4585,
+      "sha256": "986dd099f8276e53a5dc63d86aac03f97a57387dac8a29edab79251eaea0ec79",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": [
+        "urn:vao:fixture:acousticrooms:rights:cc-by-4.0"
+      ],
+      "provenanceIds": [
+        "urn:vao:fixture:acousticrooms:activity:fixture-assembly"
+      ],
+      "technicalMetadata": {
+        "kind": "document"
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:acousticrooms:realization:fixture-provenance",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:acousticrooms:asset:fixture-provenance",
+      "variantSetId": "fixture-provenance",
+      "qualityTier": "preservation",
+      "mediaType": "application/json",
+      "byteSize": 1879,
+      "sha256": "eb1ee01d91c1f44e125cf70090d845a4d09a3f2335784abc1031748936162114",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": [
+        "urn:vao:fixture:acousticrooms:rights:cc-by-4.0"
+      ],
+      "provenanceIds": [
+        "urn:vao:fixture:acousticrooms:activity:fixture-assembly"
+      ],
+      "technicalMetadata": {
+        "kind": "data"
+      },
+      "distributionIds": []
+    }
+  ],
+  "distributions": [],
+  "repositoryBindings": [],
+  "assetGroups": [
+    {
+      "id": "urn:vao:fixture:acousticrooms:group:complete-scene",
+      "type": "AssetGroup",
+      "labels": {
+        "en": "Complete embedded visual-acoustic fixture"
+      },
+      "selectionSetId": "visual-acoustic-fixture",
+      "qualityTier": "bootstrap",
+      "availability": "offline-required",
+      "selectionPolicy": "independent",
+      "realizationIds": [
+        "urn:vao:fixture:acousticrooms:realization:geometry:obj",
+        "urn:vao:fixture:acousticrooms:realization:geometry:glb",
+        "urn:vao:fixture:acousticrooms:realization:rir:wav",
+        "urn:vao:fixture:acousticrooms:realization:pair-metadata",
+        "urn:vao:fixture:acousticrooms:realization:simulation-config",
+        "urn:vao:fixture:acousticrooms:realization:license",
+        "urn:vao:fixture:acousticrooms:realization:readme",
+        "urn:vao:fixture:acousticrooms:realization:fixture-provenance"
+      ],
+      "dependsOnGroupIds": [],
+      "totalByteSize": 1722650,
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/visual-acoustic-scene"
+      ],
+      "materializesProfileIds": [],
+      "cachePolicy": {
+        "evictable": false,
+        "priority": 100
+      }
+    }
+  ],
+  "rights": [
+    {
+      "id": "urn:vao:fixture:acousticrooms:rights:cc-by-4.0",
+      "appliesToIds": [
+        "urn:vao:fixture:acousticrooms:bathrooms-idx-0",
+        "urn:vao:fixture:acousticrooms:asset:room-geometry",
+        "urn:vao:fixture:acousticrooms:asset:rir",
+        "urn:vao:fixture:acousticrooms:asset:pair-metadata",
+        "urn:vao:fixture:acousticrooms:asset:simulation-config",
+        "urn:vao:fixture:acousticrooms:asset:license",
+        "urn:vao:fixture:acousticrooms:asset:readme",
+        "urn:vao:fixture:acousticrooms:asset:fixture-provenance",
+        "urn:vao:fixture:acousticrooms:realization:geometry:obj",
+        "urn:vao:fixture:acousticrooms:realization:geometry:glb",
+        "urn:vao:fixture:acousticrooms:realization:rir:wav",
+        "urn:vao:fixture:acousticrooms:realization:pair-metadata",
+        "urn:vao:fixture:acousticrooms:realization:simulation-config",
+        "urn:vao:fixture:acousticrooms:realization:license",
+        "urn:vao:fixture:acousticrooms:realization:readme",
+        "urn:vao:fixture:acousticrooms:realization:fixture-provenance"
+      ],
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "statement": {
+        "en": "AcousticRooms and this attributed test subset are licensed CC BY 4.0. The GLB is a format-conversion derivative of the selected source OBJ."
+      },
+      "access": "open",
+      "attribution": "AcousticRooms by Xiulong Liu, Anurag Kumar, Paul Calamia, Sebastià V. Amengual Garí, Calvin Murdock, Ishwarya Ananthabhotla, Philip Robinson, Eli Shlizerman, Vamsi Krishna Ithapu, and Ruohan Gao; Liu et al., Hearing Anywhere in Any Environment, CVPR 2025."
+    }
+  ],
+  "integrity": {
+    "algorithm": "sha256",
+    "manifestDigestLocation": "external-release-and-carrier-descriptors",
+    "carrierDescriptor": "META-INF/vao-carrier.json"
+  }
+}

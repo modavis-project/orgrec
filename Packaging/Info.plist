@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleDisplayName</key>
+    <string>OrgRec</string>
+    <key>CFBundleExecutable</key>
+    <string>OrgRec</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.modavis.OrgRec</string>
+    <key>CFBundleIconFile</key>
+    <string>OrgRec</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>OrgRec</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.3.0</string>
+    <key>CFBundleVersion</key>
+    <string>8</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.music</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2026 OrgRec contributors.</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>OrgRec records pipe-organ tones and room responses for research documentation.</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>Virtual Acoustic Object</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>org.modavis.virtual-acoustic-object</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>OrgRec Project</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>org.modavis.orgrec.project</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>MODAVIS Instrumental Audio Dataset</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>org.modavis.instrumental-audio-dataset</string>
+            </array>
+        </dict>
+    </array>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array><string>public.zip-archive</string><string>public.data</string></array>
+            <key>UTTypeDescription</key>
+            <string>Virtual Acoustic Object</string>
+            <key>UTTypeIdentifier</key>
+            <string>org.modavis.virtual-acoustic-object</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array><string>vao</string></array>
+                <key>public.mime-type</key>
+                <string>application/vnd.modavis.vao+zip</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array><string>com.apple.package</string></array>
+            <key>UTTypeDescription</key>
+            <string>OrgRec Project Package</string>
+            <key>UTTypeIdentifier</key>
+            <string>org.modavis.orgrec.project</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array><string>orgrec</string></array>
+            </dict>
+        </dict>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array><string>com.apple.package</string></array>
+            <key>UTTypeDescription</key>
+            <string>MODAVIS Instrumental Audio Dataset Package</string>
+            <key>UTTypeIdentifier</key>
+            <string>org.modavis.instrumental-audio-dataset</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array><string>orgrec-capture</string><string>iad</string></array>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>

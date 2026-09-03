@@ -1,0 +1,37 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/materialization-receipt.json",
+  "type": "VAOMaterializationReceipt",
+  "formatVersion": "0.3.3",
+  "releaseId": "urn:uuid:03000000-0000-4000-8000-000000000102",
+  "manifestSHA256": "34d46192d7a69a424c37ff9b52fa6e806ac1d96e20c44c1f5d4a4b2f0a60f3d7",
+  "instanceId": "urn:uuid:03000000-0000-4000-8000-000000000299",
+  "createdAt": "2026-08-24T00:00:00Z",
+  "selectedGroupIds": [
+    "urn:uuid:03000000-0000-4000-8000-000000000130",
+    "urn:uuid:03000000-0000-4000-8000-000000000131"
+  ],
+  "acquisitions": [
+    {
+      "realizationId": "urn:uuid:03000000-0000-4000-8000-000000000123",
+      "distributionId": "urn:uuid:03000000-0000-4000-8000-000000000150",
+      "byteSize": 80,
+      "sha256": "487de76ad66794ffcda3774e07018d421ca73ba10ba1c86295787b732a6456bc",
+      "status": "verified",
+      "verifiedAt": "2026-08-24T00:00:00Z"
+    }
+  ],
+  "profileStates": [
+    {
+      "profileId": "https://w3id.org/modavis/vao/profile/core/0.3",
+      "state": "embedded-valid"
+    },
+    {
+      "profileId": "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3",
+      "state": "materialized-valid"
+    },
+    {
+      "profileId": "https://w3id.org/modavis/vao/profile/repository/zenodo/0.3",
+      "state": "materialized-valid"
+    }
+  ]
+}

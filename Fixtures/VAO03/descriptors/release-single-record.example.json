@@ -1,0 +1,55 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/release.json",
+  "type": "VAORelease",
+  "formatVersion": "0.3.3",
+  "vaoId": "https://example.org/vao/ideal-monolithic",
+  "releaseId": "urn:uuid:03100000-0000-4000-8000-000000000001",
+  "revision": 1,
+  "contentVersion": "1.0.0",
+  "publication": {
+    "topology": "single-record",
+    "rootRecord": {
+      "id": "urn:uuid:03100000-0000-4000-8000-000000000010",
+      "repositoryType": "https://w3id.org/modavis/vao/repository/zenodo",
+      "instance": "https://zenodo.org",
+      "versionPersistentIdentifier": "https://doi.org/10.5281/zenodo.1234567",
+      "conceptPersistentIdentifier": "https://doi.org/10.5281/zenodo.1234566",
+      "recordIdentifier": "1234567",
+      "files": [
+        {
+          "fileIdentifier": "vao-manifest.json",
+          "role": "manifest",
+          "byteSize": 12000,
+          "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        {
+          "fileIdentifier": "instrument.vao",
+          "role": "carrier",
+          "byteSize": 250000,
+          "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        {
+          "fileIdentifier": "instrument-model.glb",
+          "role": "realization",
+          "byteSize": 850000000,
+          "sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+          "realizationIds": ["urn:uuid:03100000-0000-4000-8000-000000000021"]
+        },
+        {
+          "fileIdentifier": "instrument-audio.zip",
+          "role": "pack",
+          "byteSize": 4200000000,
+          "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+          "realizationIds": ["urn:uuid:03100000-0000-4000-8000-000000000022"]
+        },
+        {
+          "fileIdentifier": "zenodo-metadata.json",
+          "role": "metadata",
+          "byteSize": 3000,
+          "sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+        }
+      ]
+    },
+    "familyMembers": []
+  }
+}

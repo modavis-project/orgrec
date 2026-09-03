@@ -1,0 +1,158 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/manifest.json",
+  "@context": [
+    "https://w3id.org/modavis/vao/0.3/context.jsonld"
+  ],
+  "type": "VirtualAcousticObject",
+  "formatVersion": "0.3.3",
+  "id": "https://example.org/vao/fixture/embedded-private",
+  "release": {
+    "id": "urn:uuid:03000000-0000-4000-8000-000000000001",
+    "revision": 1,
+    "contentVersion": "1.0.0"
+  },
+  "createdAt": "2026-08-24T00:00:00Z",
+  "modifiedAt": "2026-08-24T00:00:00Z",
+  "title": {
+    "en": "VAO 0.3 embedded private-sharing fixture"
+  },
+  "description": {
+    "en": "A fully embedded carrier with no repository, DOI, network, or Zenodo dependency."
+  },
+  "conformsTo": [
+    "https://w3id.org/modavis/vao/profile/core/0.3",
+    "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3"
+  ],
+  "profiles": [
+    {
+      "id": "https://w3id.org/modavis/vao/profile/core/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/core-graph",
+        "https://w3id.org/modavis/vao/vocab/capability/fixity"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/immutable-release",
+        "https://w3id.org/modavis/vao/vocab/capability/carrier-mapping"
+      ]
+    }
+  ],
+  "materializableProfiles": [],
+  "modavisBinding": {
+    "ontologyIRI": "https://w3id.org/modavis/ontology/",
+    "ontologyVersion": "development",
+    "ontologyStatus": "development",
+    "mappingVersion": "0.3.3",
+    "notes": "Fixture binding; publication requires checksum-pinned released dependencies."
+  },
+  "primaryEntityId": "urn:uuid:03000000-0000-4000-8000-000000000010",
+  "focusEntityIds": [
+    "urn:uuid:03000000-0000-4000-8000-000000000010"
+  ],
+  "entities": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000010",
+      "kind": "instrument",
+      "types": [
+        "https://w3id.org/modavis/ontology/instrument#MusicalInstrument"
+      ],
+      "labels": {
+        "en": "Example instrument"
+      },
+      "properties": {}
+    }
+  ],
+  "relations": [],
+  "paradata": [],
+  "analyses": [],
+  "logicalAssets": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000020",
+      "type": "LogicalAsset",
+      "labels": {
+        "en": "Source evidence note"
+      },
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/source-evidence"
+      ],
+      "aboutEntityIds": [
+        "urn:uuid:03000000-0000-4000-8000-000000000010"
+      ],
+      "realizationIds": [
+        "urn:uuid:03000000-0000-4000-8000-000000000021"
+      ],
+      "properties": {}
+    }
+  ],
+  "realizations": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000021",
+      "type": "Realization",
+      "assetId": "urn:uuid:03000000-0000-4000-8000-000000000020",
+      "variantSetId": "source-evidence-note",
+      "qualityTier": "bootstrap",
+      "mediaType": "text/plain",
+      "byteSize": 69,
+      "sha256": "167b48baa46a4d2c665c7ee655e255e817e32f2fee84275bd7067971b1593f17",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": [
+        "urn:uuid:03000000-0000-4000-8000-000000000040"
+      ],
+      "provenanceIds": [],
+      "technicalMetadata": {
+        "kind": "document"
+      },
+      "distributionIds": []
+    }
+  ],
+  "distributions": [],
+  "repositoryBindings": [],
+  "assetGroups": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000030",
+      "type": "AssetGroup",
+      "labels": {
+        "en": "Embedded bootstrap"
+      },
+      "selectionSetId": "bootstrap",
+      "qualityTier": "bootstrap",
+      "availability": "offline-required",
+      "selectionPolicy": "independent",
+      "realizationIds": [
+        "urn:uuid:03000000-0000-4000-8000-000000000021"
+      ],
+      "dependsOnGroupIds": [],
+      "totalByteSize": 69,
+      "requiredCapabilities": [],
+      "materializesProfileIds": [],
+      "cachePolicy": {
+        "evictable": false,
+        "priority": 100
+      }
+    }
+  ],
+  "rights": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000040",
+      "appliesToIds": [
+        "https://example.org/vao/fixture/embedded-private",
+        "urn:uuid:03000000-0000-4000-8000-000000000020",
+        "urn:uuid:03000000-0000-4000-8000-000000000021"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "statement": {
+        "en": "CC0 test fixture."
+      },
+      "access": "open"
+    }
+  ],
+  "integrity": {
+    "algorithm": "sha256",
+    "manifestDigestLocation": "external-release-and-carrier-descriptors",
+    "carrierDescriptor": "META-INF/vao-carrier.json"
+  }
+}

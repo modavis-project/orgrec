@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use VAO, cite the versioned standard and its responsible editor."
+title: "Virtual Acoustic Object (VAO) Standard"
+type: software
+version: "0.5.0"
+date-released: 2026-08-31
+doi: 10.5281/zenodo.22214248
+authors:
+  - family-names: Ukolov
+    given-names: Dominik
+    orcid: "https://orcid.org/0000-0002-7904-3892"
+    affiliation: "Digital Humanities (Image/Object), Friedrich Schiller University Jena; Research Group DIGITAL ORGANOLOGY, Leipzig University"
+repository-code: "https://github.com/modavis-project/vao-standard"
+url: "https://w3id.org/modavis/vao/0.5.0/"
+license: CC-BY-4.0
+keywords:
+  - virtual acoustic object
+  - musical instrument
+  - digital preservation
+  - multimodal research data
+  - acoustics
+  - provenance
+abstract: >-
+  VAO is a preservation-oriented exchange standard for semantic, scientific,
+  multimodal, physical, playable, rights, and exact-byte descriptions of
+  musical instruments and other acoustic objects.

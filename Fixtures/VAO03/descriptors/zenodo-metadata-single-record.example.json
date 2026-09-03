@@ -1,0 +1,37 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/zenodo-metadata.json",
+  "type": "VAOZenodoMetadata",
+  "formatVersion": "0.3.3",
+  "releaseId": "urn:uuid:03100000-0000-4000-8000-000000000001",
+  "publicationRecordId": "urn:uuid:03100000-0000-4000-8000-000000000010",
+  "recordRole": "monolithic-root",
+  "metadata": {
+    "upload_type": "dataset",
+    "title": "Example instrument — Virtual Acoustic Object",
+    "description": "A complete VAO release with its bootstrap carrier, exact 3D model, audio pack, manifest, metadata projection, checksums, and documentation in one modular record.",
+    "creators": [
+      { "name": "Example, Ada", "affiliation": "Example Institute" }
+    ],
+    "contributors": [
+      { "name": "Curator, Chris", "affiliation": "Example Collection", "type": "DataCurator" }
+    ],
+    "publication_date": "2026-08-24",
+    "version": "1.0.0",
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "keywords": ["Virtual Acoustic Object", "VAO 0.3", "3D model", "spatial audio", "digital heritage"],
+    "related_identifiers": [
+      { "identifier": "https://doi.org/10.1234/example.source.1", "relation": "isDerivedFrom", "resource_type": "dataset" }
+    ],
+    "references": ["Example source catalogue entry and capture protocol."],
+    "subjects": [
+      { "term": "musical instruments", "identifier": "http://id.loc.gov/authorities/subjects/sh85089027", "scheme": "url" }
+    ],
+    "dates": [
+      { "start": "2026-08-01", "end": "2026-08-15", "type": "Collected", "description": "Capture campaign" }
+    ],
+    "language": "eng",
+    "notes": "Zenodo is an optional publication adapter; the VAO carrier remains usable without network access.",
+    "method": "Geometry, photographs, and audio were captured under a documented measurement protocol."
+  }
+}

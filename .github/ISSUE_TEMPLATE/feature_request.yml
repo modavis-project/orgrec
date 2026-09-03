@@ -1,0 +1,40 @@
+name: Feature proposal
+description: Propose a focused OrgRec workflow or interoperability improvement.
+title: "[Proposal] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Research or field-work need
+      description: Describe the problem and who encounters it.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: data
+    attributes:
+      label: Does this affect stored or exchanged data?
+      options:
+        - "No"
+        - "Yes — OrgRec project"
+        - "Yes — VAO"
+        - "Yes — POD or another dataset"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Standards, methods, or examples
+      description: Link public sources; do not upload restricted data.
+  - type: textarea
+    id: risks
+    attributes:
+      label: Compatibility, privacy, rights, or safety concerns

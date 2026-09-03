@@ -1,0 +1,115 @@
+@prefix vao: <https://w3id.org/modavis/vao/ontology#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://w3id.org/modavis/vao/0.3/vocabulary> a owl:Ontology ;
+  dcterms:title "Virtual Acoustic Object 0.3 delivery, playable-media, and acoustic-scene vocabulary"@en ;
+  owl:versionInfo "0.3.3" .
+
+vao:LogicalAsset a owl:Class ; rdfs:label "logical asset"@en .
+vao:Realization a owl:Class ; rdfs:label "byte realization"@en .
+vao:Distribution a owl:Class ; rdfs:label "distribution"@en .
+vao:RepositoryBinding a owl:Class ; rdfs:label "repository binding"@en .
+vao:AssetGroup a owl:Class ; rdfs:label "asset group"@en .
+vao:VAOCarrier a owl:Class ; rdfs:label "VAO carrier"@en .
+vao:VAORelease a owl:Class ; rdfs:label "VAO release descriptor"@en .
+vao:PublicationRecord a owl:Class ; rdfs:label "publication record"@en .
+vao:RecordFamilyMember a owl:Class ; rdfs:label "record family member"@en .
+vao:ZenodoMetadataProjection a owl:Class ; rdfs:label "Zenodo metadata projection"@en .
+vao:VAOPackManifest a owl:Class ; rdfs:label "VAO pack manifest"@en .
+vao:VAOMaterializationReceipt a owl:Class ; rdfs:label "VAO materialization receipt"@en .
+vao:CoordinateFrame a owl:Class ; rdfs:label "coordinate frame"@en .
+vao:Pose a owl:Class ; rdfs:label "pose"@en .
+vao:GeometryBinding a owl:Class ; rdfs:label "geometry binding"@en .
+vao:ResponseMeasurement a owl:Class ; rdfs:label "source-receiver response measurement"@en .
+vao:AcousticResponseSet a owl:Class ; rdfs:label "acoustic response set"@en .
+vao:AudioScene a owl:Class ; rdfs:label "audio scene"@en .
+vao:RenderConfiguration a owl:Class ; rdfs:label "render configuration"@en .
+vao:PlayableConfiguration a owl:Class ; rdfs:label "playable configuration"@en .
+vao:SignalRegion a owl:Class ; rdfs:label "signal region"@en .
+vao:LoopPointSet a owl:Class ; rdfs:label "loop-point set"@en .
+vao:TuningMap a owl:Class ; rdfs:label "tuning map"@en .
+vao:PerspectiveGroup a owl:Class ; rdfs:label "sample perspective group"@en .
+vao:SampleVariant a owl:Class ; rdfs:label "sample variant"@en .
+vao:SampleMapping a owl:Class ; rdfs:label "sample mapping"@en .
+vao:InteractionModel a owl:Class ; rdfs:label "complex-instrument interaction model"@en .
+vao:InteractionControl a owl:Class ; rdfs:label "persistent interaction control"@en .
+vao:InteractionEventType a owl:Class ; rdfs:label "interaction event type"@en .
+vao:ProtocolBinding a owl:Class ; rdfs:label "control protocol binding"@en .
+vao:StateVariable a owl:Class ; rdfs:label "interaction state variable"@en .
+vao:InteractionTransition a owl:Class ; rdfs:label "guarded interaction transition"@en .
+vao:RoutingRule a owl:Class ; rdfs:label "conditional event routing rule"@en .
+vao:ProcessModel a owl:Class ; rdfs:label "bounded interaction process model"@en .
+vao:TimingConstraint a owl:Class ; rdfs:label "measured timing constraint"@en .
+vao:TransferFunction a owl:Class ; rdfs:label "actuator transfer function"@en .
+vao:RenderBinding a owl:Class ; rdfs:label "interaction render binding"@en .
+vao:CaptureDocumentation a owl:Class ; rdfs:label "capture and derivative documentation"@en .
+vao:CaptureState a owl:Class ; rdfs:label "instrument capture state"@en .
+vao:EventAlignment a owl:Class ; rdfs:label "event-to-audio alignment"@en .
+vao:TakeSet a owl:Class ; rdfs:label "documented take set"@en .
+vao:DerivationMap a owl:Class ; rdfs:label "realization derivation map"@en .
+
+vao:hasRealization a owl:ObjectProperty ; rdfs:domain vao:LogicalAsset ; rdfs:range vao:Realization .
+vao:realizesAsset a owl:ObjectProperty ; rdfs:domain vao:Realization ; rdfs:range vao:LogicalAsset .
+vao:hasDistribution a owl:ObjectProperty ; rdfs:domain vao:Realization ; rdfs:range vao:Distribution .
+vao:repositoryBinding a owl:ObjectProperty ; rdfs:domain vao:Distribution ; rdfs:range vao:RepositoryBinding .
+vao:dependsOnGroup a owl:ObjectProperty ; rdfs:domain vao:AssetGroup ; rdfs:range vao:AssetGroup .
+vao:fallbackGroup a owl:ObjectProperty ; rdfs:domain vao:AssetGroup ; rdfs:range vao:AssetGroup .
+vao:publicationRoot a owl:ObjectProperty ; rdfs:domain vao:VAORelease ; rdfs:range vao:PublicationRecord .
+vao:familyMember a owl:ObjectProperty ; rdfs:domain vao:VAORelease ; rdfs:range vao:RecordFamilyMember .
+vao:publicationTopology a owl:DatatypeProperty ; rdfs:domain vao:VAORelease .
+vao:relationFromRoot a owl:DatatypeProperty ; rdfs:domain vao:RecordFamilyMember .
+vao:versionPersistentIdentifier a owl:DatatypeProperty ; rdfs:domain vao:PublicationRecord .
+vao:conceptPersistentIdentifier a owl:DatatypeProperty ; rdfs:domain vao:PublicationRecord .
+vao:logicalAsset a owl:ObjectProperty ; rdfs:range vao:LogicalAsset .
+vao:coordinateFrame a owl:ObjectProperty ; rdfs:range vao:CoordinateFrame .
+vao:parentFrame a owl:ObjectProperty ; rdfs:domain vao:CoordinateFrame ; rdfs:range vao:CoordinateFrame .
+vao:subject a owl:ObjectProperty .
+vao:source a owl:ObjectProperty .
+vao:receiver a owl:ObjectProperty .
+vao:sourcePose a owl:ObjectProperty ; rdfs:range vao:Pose .
+vao:receiverPose a owl:ObjectProperty ; rdfs:range vao:Pose .
+vao:measurement a owl:ObjectProperty ; rdfs:range vao:ResponseMeasurement .
+vao:responseSet a owl:ObjectProperty ; rdfs:range vao:AcousticResponseSet .
+vao:mediaAsset a owl:ObjectProperty ; rdfs:range vao:LogicalAsset .
+vao:scene a owl:ObjectProperty ; rdfs:range vao:AudioScene .
+vao:playable a owl:ObjectProperty ; rdfs:range vao:PlayableConfiguration .
+vao:realization a owl:ObjectProperty ; rdfs:range vao:Realization .
+vao:signalRegion a owl:ObjectProperty ; rdfs:range vao:SignalRegion .
+vao:loopPointSet a owl:ObjectProperty ; rdfs:range vao:LoopPointSet .
+vao:tuningMap a owl:ObjectProperty ; rdfs:range vao:TuningMap .
+vao:perspectiveGroup a owl:ObjectProperty ; rdfs:range vao:PerspectiveGroup .
+vao:sampleVariant a owl:ObjectProperty ; rdfs:range vao:SampleVariant .
+vao:interactionModel a owl:ObjectProperty ; rdfs:range vao:InteractionModel .
+vao:captureDocumentation a owl:ObjectProperty ; rdfs:range vao:CaptureDocumentation .
+vao:control a owl:ObjectProperty ; rdfs:range vao:InteractionControl .
+vao:eventType a owl:ObjectProperty ; rdfs:range vao:InteractionEventType .
+vao:stateVariable a owl:ObjectProperty ; rdfs:range vao:StateVariable .
+vao:processModel a owl:ObjectProperty ; rdfs:range vao:ProcessModel .
+vao:timingConstraint a owl:ObjectProperty ; rdfs:range vao:TimingConstraint .
+vao:sampleMapping a owl:ObjectProperty ; rdfs:range vao:SampleMapping .
+vao:captureState a owl:ObjectProperty ; rdfs:range vao:CaptureState .
+vao:audioRealization a owl:ObjectProperty ; rdfs:range vao:Realization .
+vao:eventLogRealization a owl:ObjectProperty ; rdfs:range vao:Realization .
+vao:startFrameInclusive a owl:DatatypeProperty ; rdfs:domain vao:SignalRegion .
+vao:endFrameExclusive a owl:DatatypeProperty ; rdfs:domain vao:SignalRegion .
+vao:frameCount a owl:DatatypeProperty ; rdfs:domain vao:Realization .
+
+<https://w3id.org/modavis/vao/vocab/capability/simulated-impulse-response> a vao:Capability ; rdfs:label "simulated impulse response"@en .
+<https://w3id.org/modavis/vao/vocab/capability/position-registered-acoustic-scene> a vao:Capability ; rdfs:label "position-registered acoustic scene"@en .
+<https://w3id.org/modavis/vao/vocab/capability/visual-acoustic-scene> a vao:Capability ; rdfs:label "visual-acoustic scene"@en .
+<https://w3id.org/modavis/vao/vocab/capability/interaction> a vao:Capability ; rdfs:label "protocol-independent interaction graph"@en .
+<https://w3id.org/modavis/vao/vocab/capability/playable-interaction> a vao:Capability ; rdfs:label "playable interaction graph"@en .
+<https://w3id.org/modavis/vao/vocab/capability/sampled-instrument-playback> a vao:Capability ; rdfs:label "protocol-neutral sampled-instrument playback"@en .
+<https://w3id.org/modavis/vao/vocab/capability/sample-looping> a vao:Capability ; rdfs:label "sample looping"@en .
+<https://w3id.org/modavis/vao/vocab/capability/tuning-map> a vao:Capability ; rdfs:label "tuning map"@en .
+<https://w3id.org/modavis/vao/vocab/capability/multi-perspective-sampling> a vao:Capability ; rdfs:label "multi-perspective sampling"@en .
+<https://w3id.org/modavis/vao/vocab/capability/recorded-release> a vao:Capability ; rdfs:label "recorded release"@en .
+<https://w3id.org/modavis/vao/vocab/capability/source-sampler-semantics> a vao:Capability ; rdfs:label "preserved source sampler semantics"@en .
+<https://w3id.org/modavis/vao/vocab/capability/stateful-interaction> a vao:Capability ; rdfs:label "typed persistent interaction state"@en .
+<https://w3id.org/modavis/vao/vocab/capability/conditional-routing> a vao:Capability ; rdfs:label "conditional key and event routing"@en .
+<https://w3id.org/modavis/vao/vocab/capability/composite-actuation> a vao:Capability ; rdfs:label "atomic compound actuation"@en .
+<https://w3id.org/modavis/vao/vocab/capability/timed-process> a vao:Capability ; rdfs:label "bounded process with measured timing"@en .
+<https://w3id.org/modavis/vao/vocab/capability/actuator-transfer> a vao:Capability ; rdfs:label "documented actuator transfer function"@en .
+<https://w3id.org/modavis/vao/vocab/capability/capture-event-alignment> a vao:Capability ; rdfs:label "capture event and audio alignment"@en .

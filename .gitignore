@@ -1,0 +1,41 @@
+.DS_Store
+.build/
+.swiftpm/
+.venv/
+__pycache__/
+*.py[cod]
+DerivedData/
+build/
+*.xcuserstate
+*.orgrec/
+OrgRec.app/
+dist/
+Packaging/OrgRec.iconset/
+tmp/
+
+# Generated research and preservation outputs are kept outside the public
+# software source set. Artifacts/README.md documents how local outputs are
+# handled; the directory contents remain local and reproducible.
+/Artifacts/*
+!/Artifacts/README.md
+# The full local-research corpus and pipe/rank export contain derived data from
+# sources whose redistribution rights were intentionally not presumed. Keep
+# them reproducible and available locally, but do not publish them by accident.
+Artifacts/ComparativeStopTimbre/retrieved-local-research-corpus.json
+Artifacts/ComparativeStopTimbre/Study/
+
+# Rights-restricted local interoperability fixture. Public conformance uses
+# compact synthetic or explicitly licensed fixtures instead.
+/Fixtures/VAO04/valid/cuntz-positiv-acoustic-test/
+
+# Locally trained model pending release with the separately published POD
+# subset and a complete model card/attribution record.
+/Sources/OrgRecCore/Resources/empirical-timbre-model-v1.json
+Kinoorgel-VAO/release/zenodo/record/*.vao
+Kinoorgel-VAO/tmp/
+
+# Independent, locally versioned dataset-publication projects. They are not
+# vendored dependencies of the OrgRec Swift package.
+/Cuntz-Positiv-VAO/
+/Kinoorgel-VAO/
+/Silbermann-Orgel-VAO/

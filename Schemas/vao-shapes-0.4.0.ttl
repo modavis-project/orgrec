@@ -1,0 +1,35 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix vao: <https://w3id.org/modavis/vao/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+vao:VAOShape a sh:NodeShape ;
+  sh:targetClass vao:VirtualAcousticObject ;
+  sh:closed true ;
+  sh:property [ sh:path vao:scientific ; sh:minCount 1 ; sh:maxCount 1 ] ;
+  sh:property [ sh:path vao:multimodal ; sh:minCount 1 ; sh:maxCount 1 ] ;
+  sh:property [ sh:path vao:physicalSystem ; sh:minCount 1 ; sh:maxCount 1 ] ;
+  sh:property [ sh:path vao:runtime ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+vao:ActivityShape a sh:NodeShape ;
+  sh:targetClass prov:Activity ;
+  sh:property [ sh:path prov:wasAssociatedWith ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path prov:used ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path prov:generated ; sh:nodeKind sh:IRI ] .
+
+vao:ObservationShape a sh:NodeShape ;
+  sh:targetClass sosa:Observation ;
+  sh:property [ sh:path sosa:observedProperty ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path sosa:hasFeatureOfInterest ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path sosa:hasResult ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+vao:SynchronizationMappingShape a sh:NodeShape ;
+  sh:targetClass vao:SynchronizationMapping ;
+  sh:property [ sh:path vao:sourceTimebase ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path vao:targetTimebase ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+vao:ConnectionShape a sh:NodeShape ;
+  sh:targetClass vao:Connection ;
+  sh:property [ sh:path vao:sourcePort ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path vao:targetPort ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .

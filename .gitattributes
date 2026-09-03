@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+*.aiff binary
+*.bin binary
+*.caf binary
+*.flac binary
+*.icns binary
+*.jpg binary
+*.mid binary
+*.midi binary
+*.mp3 binary
+*.png binary
+*.vao binary
+*.wav binary
+*.weights binary

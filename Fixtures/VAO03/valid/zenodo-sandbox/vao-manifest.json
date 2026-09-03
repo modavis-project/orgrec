@@ -1,0 +1,194 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/manifest.json",
+  "@context": ["https://w3id.org/modavis/vao/0.3/context.jsonld"],
+  "type": "VirtualAcousticObject",
+  "formatVersion": "0.3.3",
+  "id": "https://example.org/vao/fixture/zenodo-sandbox",
+  "release": {
+    "id": "urn:uuid:03000000-0000-4000-8000-000000000102",
+    "revision": 2,
+    "contentVersion": "1.0.1-sandbox",
+    "supersedesReleaseId": "urn:uuid:03000000-0000-4000-8000-000000000101"
+  },
+  "createdAt": "2026-08-24T00:00:00Z",
+  "modifiedAt": "2026-08-24T00:00:00Z",
+  "title": {"en": "VAO 0.3 optional Zenodo Sandbox fixture"},
+  "description": {"en": "A bootstrap carrier plus one optional exact remote realization in Zenodo Sandbox."},
+  "conformsTo": [
+    "https://w3id.org/modavis/vao/profile/core/0.3",
+    "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3",
+    "https://w3id.org/modavis/vao/profile/repository/zenodo/0.3"
+  ],
+  "profiles": [
+    {
+      "id": "https://w3id.org/modavis/vao/profile/core/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/core-graph",
+        "https://w3id.org/modavis/vao/vocab/capability/fixity"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/immutable-release",
+        "https://w3id.org/modavis/vao/vocab/capability/carrier-mapping"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/repository/zenodo/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/version-pinned-repository-resolution"
+      ]
+    }
+  ],
+  "materializableProfiles": [],
+  "modavisBinding": {
+    "ontologyIRI": "https://w3id.org/modavis/ontology/",
+    "ontologyVersion": "development",
+    "ontologyStatus": "development",
+    "mappingVersion": "0.3.3",
+    "notes": "Sandbox fixture binding; not a released MODAVIS dependency."
+  },
+  "primaryEntityId": "urn:uuid:03000000-0000-4000-8000-000000000110",
+  "focusEntityIds": ["urn:uuid:03000000-0000-4000-8000-000000000110"],
+  "entities": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000110",
+      "kind": "instrument",
+      "types": ["https://w3id.org/modavis/ontology/instrument#MusicalInstrument"],
+      "labels": {"en": "Example instrument"},
+      "properties": {}
+    }
+  ],
+  "relations": [],
+  "paradata": [],
+  "analyses": [],
+  "logicalAssets": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000120",
+      "type": "LogicalAsset",
+      "labels": {"en": "Embedded source evidence"},
+      "roles": ["https://w3id.org/modavis/vao/vocab/asset-role/source-evidence"],
+      "aboutEntityIds": ["urn:uuid:03000000-0000-4000-8000-000000000110"],
+      "realizationIds": ["urn:uuid:03000000-0000-4000-8000-000000000121"],
+      "properties": {}
+    },
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000122",
+      "type": "LogicalAsset",
+      "labels": {"en": "Optional repository-adapter evidence"},
+      "roles": ["https://w3id.org/modavis/vao/vocab/asset-role/test-evidence"],
+      "aboutEntityIds": ["urn:uuid:03000000-0000-4000-8000-000000000110"],
+      "realizationIds": ["urn:uuid:03000000-0000-4000-8000-000000000123"],
+      "properties": {}
+    }
+  ],
+  "realizations": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000121",
+      "type": "Realization",
+      "assetId": "urn:uuid:03000000-0000-4000-8000-000000000120",
+      "variantSetId": "embedded-source-evidence",
+      "qualityTier": "bootstrap",
+      "mediaType": "text/plain",
+      "byteSize": 69,
+      "sha256": "167b48baa46a4d2c665c7ee655e255e817e32f2fee84275bd7067971b1593f17",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": ["urn:uuid:03000000-0000-4000-8000-000000000140"],
+      "provenanceIds": [],
+      "technicalMetadata": {"kind": "document"},
+      "distributionIds": []
+    },
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000123",
+      "type": "Realization",
+      "assetId": "urn:uuid:03000000-0000-4000-8000-000000000122",
+      "variantSetId": "repository-adapter-evidence",
+      "qualityTier": "production",
+      "mediaType": "text/plain",
+      "byteSize": 80,
+      "sha256": "487de76ad66794ffcda3774e07018d421ca73ba10ba1c86295787b732a6456bc",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "rightsIds": ["urn:uuid:03000000-0000-4000-8000-000000000140"],
+      "provenanceIds": [],
+      "technicalMetadata": {"kind": "document"},
+      "distributionIds": ["urn:uuid:03000000-0000-4000-8000-000000000150"]
+    }
+  ],
+  "distributions": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000150",
+      "kind": "repository",
+      "repositoryBindingId": "urn:uuid:03000000-0000-4000-8000-000000000151",
+      "persistentIdentifier": "https://doi.org/10.5072/zenodo.590947",
+      "conceptIdentifier": "https://doi.org/10.5072/zenodo.590944",
+      "recordIdentifier": "590947",
+      "fileIdentifier": "remote-production.txt",
+      "access": "public"
+    }
+  ],
+  "repositoryBindings": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000151",
+      "repositoryType": "https://w3id.org/modavis/vao/repository/zenodo",
+      "instance": "https://sandbox.zenodo.org",
+      "apiProfile": "https://w3id.org/modavis/vao/repository/zenodo/records-api/1",
+      "resolutionPolicy": "version-pid-record-file"
+    }
+  ],
+  "assetGroups": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000130",
+      "type": "AssetGroup",
+      "labels": {"en": "Embedded bootstrap"},
+      "selectionSetId": "bootstrap",
+      "qualityTier": "bootstrap",
+      "availability": "offline-required",
+      "selectionPolicy": "independent",
+      "realizationIds": ["urn:uuid:03000000-0000-4000-8000-000000000121"],
+      "dependsOnGroupIds": [],
+      "totalByteSize": 69,
+      "requiredCapabilities": [],
+      "materializesProfileIds": [],
+      "cachePolicy": {"evictable": false, "priority": 100}
+    },
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000131",
+      "type": "AssetGroup",
+      "labels": {"en": "Optional Sandbox realization"},
+      "selectionSetId": "sandbox-adapter-trial",
+      "qualityTier": "production",
+      "availability": "remote-optional",
+      "selectionPolicy": "independent",
+      "realizationIds": ["urn:uuid:03000000-0000-4000-8000-000000000123"],
+      "dependsOnGroupIds": ["urn:uuid:03000000-0000-4000-8000-000000000130"],
+      "totalByteSize": 80,
+      "requiredCapabilities": ["https://w3id.org/modavis/vao/vocab/capability/version-pinned-repository-resolution"],
+      "materializesProfileIds": [],
+      "cachePolicy": {"evictable": true, "priority": 20}
+    }
+  ],
+  "rights": [
+    {
+      "id": "urn:uuid:03000000-0000-4000-8000-000000000140",
+      "appliesToIds": [
+        "https://example.org/vao/fixture/zenodo-sandbox",
+        "urn:uuid:03000000-0000-4000-8000-000000000120",
+        "urn:uuid:03000000-0000-4000-8000-000000000121",
+        "urn:uuid:03000000-0000-4000-8000-000000000122",
+        "urn:uuid:03000000-0000-4000-8000-000000000123"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "statement": {"en": "CC0 Sandbox conformance fixture."},
+      "access": "open"
+    }
+  ],
+  "integrity": {
+    "algorithm": "sha256",
+    "manifestDigestLocation": "external-release-and-carrier-descriptors",
+    "carrierDescriptor": "META-INF/vao-carrier.json"
+  }
+}

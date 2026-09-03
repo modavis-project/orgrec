@@ -1,0 +1,69 @@
+@prefix vao: <https://w3id.org/modavis/vao/ontology#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+
+<https://w3id.org/modavis/vao/0.4.0/vocabulary> a owl:Ontology ;
+  dcterms:title "Virtual Acoustic Object 0.4.0 multimodal scientific instrument vocabulary"@en ;
+  owl:versionInfo "0.4.0" .
+
+vao:VirtualAcousticObject a owl:Class .
+vao:LogicalAsset a owl:Class .
+vao:Realization a owl:Class .
+vao:ScientificRecordSet a owl:Class .
+vao:SoftwareEnvironment a owl:Class .
+vao:Analysis a owl:Class ; rdfs:subClassOf prov:Activity .
+vao:Calibration a owl:Class ; rdfs:subClassOf prov:Activity .
+vao:ScientificClaim a owl:Class .
+vao:Review a owl:Class ; rdfs:subClassOf prov:Activity .
+vao:Consent a owl:Class .
+vao:MultimodalTimeline a owl:Class .
+vao:Timebase a owl:Class .
+vao:Track a owl:Class .
+vao:SynchronizationMapping a owl:Class .
+vao:ClockSegment a owl:Class .
+vao:PhysicalSystem a owl:Class .
+vao:PhysicalComponent a owl:Class .
+vao:Port a owl:Class .
+vao:Connection a owl:Class .
+vao:RuntimeContract a owl:Class .
+vao:ExecutionSemantics a owl:Class .
+vao:RandomSource a owl:Class .
+vao:RendererDescriptor a owl:Class .
+vao:ConformanceTrace a owl:Class .
+vao:InteractionModel a owl:Class .
+vao:ProtocolBinding a owl:Class .
+vao:ProcessModel a owl:Class .
+vao:TransferFunction a owl:Class .
+
+vao:scientific a owl:ObjectProperty ; rdfs:domain vao:VirtualAcousticObject ; rdfs:range vao:ScientificRecordSet .
+vao:multimodal a owl:ObjectProperty ; rdfs:domain vao:VirtualAcousticObject ; rdfs:range vao:MultimodalTimeline .
+vao:physicalSystem a owl:ObjectProperty ; rdfs:domain vao:VirtualAcousticObject ; rdfs:range vao:PhysicalSystem .
+vao:runtime a owl:ObjectProperty ; rdfs:domain vao:VirtualAcousticObject ; rdfs:range vao:RuntimeContract .
+vao:logicalAsset a owl:ObjectProperty ; rdfs:range vao:LogicalAsset .
+vao:realization a owl:ObjectProperty ; rdfs:range vao:Realization .
+vao:timebase a owl:ObjectProperty ; rdfs:range vao:Timebase .
+vao:track a owl:ObjectProperty ; rdfs:range vao:Track .
+vao:synchronizationMapping a owl:ObjectProperty ; rdfs:range vao:SynchronizationMapping .
+vao:component a owl:ObjectProperty ; rdfs:range vao:PhysicalComponent .
+vao:port a owl:ObjectProperty ; rdfs:range vao:Port .
+vao:connection a owl:ObjectProperty ; rdfs:range vao:Connection .
+vao:executionSemantics a owl:ObjectProperty ; rdfs:range vao:ExecutionSemantics .
+vao:randomSource a owl:ObjectProperty ; rdfs:range vao:RandomSource .
+vao:renderer a owl:ObjectProperty ; rdfs:range vao:RendererDescriptor .
+vao:conformanceTrace a owl:ObjectProperty ; rdfs:range vao:ConformanceTrace .
+vao:sourceTimebase a owl:ObjectProperty ; rdfs:range vao:Timebase .
+vao:targetTimebase a owl:ObjectProperty ; rdfs:range vao:Timebase .
+vao:sourcePort a owl:ObjectProperty ; rdfs:range vao:Port .
+vao:targetPort a owl:ObjectProperty ; rdfs:range vao:Port .
+vao:jsonPointer a owl:DatatypeProperty ; rdfs:comment "Normative projection pointer used only for lossless JSON/RDF round trips."@en .
+
+<https://w3id.org/modavis/vao/vocab/capability/typed-scientific-provenance> a vao:Capability .
+<https://w3id.org/modavis/vao/vocab/capability/multimodal-synchronization> a vao:Capability .
+<https://w3id.org/modavis/vao/vocab/capability/physical-system-topology> a vao:Capability .
+<https://w3id.org/modavis/vao/vocab/capability/deterministic-render-trace> a vao:Capability .
+<https://w3id.org/modavis/vao/vocab/capability/midi-2-ump> a vao:Capability .
+<https://w3id.org/modavis/vao/vocab/capability/chunked-realization> a vao:Capability .
+<https://w3id.org/modavis/vao/vocab/capability/community-governed-rights> a vao:Capability .

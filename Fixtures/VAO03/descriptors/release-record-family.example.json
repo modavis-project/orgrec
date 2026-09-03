@@ -1,0 +1,111 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/release.json",
+  "type": "VAORelease",
+  "formatVersion": "0.3.3",
+  "vaoId": "https://example.org/vao/ideal-family",
+  "releaseId": "urn:uuid:03100000-0000-4000-8000-000000000101",
+  "revision": 1,
+  "contentVersion": "1.0.0",
+  "publication": {
+    "topology": "record-family",
+    "rootRecord": {
+      "id": "urn:uuid:03100000-0000-4000-8000-000000000110",
+      "repositoryType": "https://w3id.org/modavis/vao/repository/zenodo",
+      "instance": "https://zenodo.org",
+      "versionPersistentIdentifier": "https://doi.org/10.5281/zenodo.2234567",
+      "conceptPersistentIdentifier": "https://doi.org/10.5281/zenodo.2234566",
+      "recordIdentifier": "2234567",
+      "files": [
+        {
+          "fileIdentifier": "vao-manifest.json",
+          "role": "manifest",
+          "byteSize": 14000,
+          "sha256": "6111111111111111111111111111111111111111111111111111111111111111"
+        },
+        {
+          "fileIdentifier": "instrument-bootstrap.vao",
+          "role": "carrier",
+          "byteSize": 300000,
+          "sha256": "6222222222222222222222222222222222222222222222222222222222222222"
+        },
+        {
+          "fileIdentifier": "zenodo-metadata.json",
+          "role": "metadata",
+          "byteSize": 3500,
+          "sha256": "6333333333333333333333333333333333333333333333333333333333333333"
+        }
+      ]
+    },
+    "familyMembers": [
+      {
+        "recordRole": "asset-pack",
+        "membership": "exclusive",
+        "relationFromRoot": "hasPart",
+        "inverseRelationFromMember": "isPartOf",
+        "record": {
+          "id": "urn:uuid:03100000-0000-4000-8000-000000000120",
+          "repositoryType": "https://w3id.org/modavis/vao/repository/zenodo",
+          "instance": "https://zenodo.org",
+          "versionPersistentIdentifier": "https://doi.org/10.5281/zenodo.2234570",
+          "conceptPersistentIdentifier": "https://doi.org/10.5281/zenodo.2234569",
+          "recordIdentifier": "2234570",
+          "files": [
+            {
+              "fileIdentifier": "model-pack.zip",
+              "role": "pack",
+              "byteSize": 38000000000,
+              "sha256": "6444444444444444444444444444444444444444444444444444444444444444",
+              "realizationIds": ["urn:uuid:03100000-0000-4000-8000-000000000121"]
+            },
+            {
+              "fileIdentifier": "vao-pack-manifest.json",
+              "role": "pack-manifest",
+              "byteSize": 9000,
+              "sha256": "6555555555555555555555555555555555555555555555555555555555555555"
+            },
+            {
+              "fileIdentifier": "zenodo-metadata.json",
+              "role": "metadata",
+              "byteSize": 2500,
+              "sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+            }
+          ]
+        }
+      },
+      {
+        "recordRole": "asset-pack",
+        "membership": "shared",
+        "relationFromRoot": "requires",
+        "record": {
+          "id": "urn:uuid:03100000-0000-4000-8000-000000000130",
+          "repositoryType": "https://w3id.org/modavis/vao/repository/zenodo",
+          "instance": "https://zenodo.org",
+          "versionPersistentIdentifier": "https://doi.org/10.5281/zenodo.3234570",
+          "conceptPersistentIdentifier": "https://doi.org/10.5281/zenodo.3234569",
+          "recordIdentifier": "3234570",
+          "files": [
+            {
+              "fileIdentifier": "shared-spatial-audio.zip",
+              "role": "pack",
+              "byteSize": 24000000000,
+              "sha256": "6777777777777777777777777777777777777777777777777777777777777777",
+              "realizationIds": ["urn:uuid:03100000-0000-4000-8000-000000000131"]
+            },
+            {
+              "fileIdentifier": "vao-pack-manifest.json",
+              "role": "pack-manifest",
+              "byteSize": 11000,
+              "sha256": "6888888888888888888888888888888888888888888888888888888888888888"
+            },
+            {
+              "fileIdentifier": "zenodo-metadata.json",
+              "role": "metadata",
+              "byteSize": 2600,
+              "sha256": "6999999999999999999999999999999999999999999999999999999999999999"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

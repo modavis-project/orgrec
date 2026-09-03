@@ -1,0 +1,21 @@
+version = 1
+SPDX-PackageName = "OrgRec"
+SPDX-PackageDownloadLocation = "NOASSERTION"
+
+[[annotations]]
+path = ["Sources/**", "Tests/**", "Tools/**", "Scripts/**", "Research/**/*.py", "Research/**/requirements.txt", "Package.swift", "Packaging/**", ".github/**", ".gitattributes", ".gitignore", "requirements*.txt", "REUSE.toml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Dominik Ukolov and contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["Docs/**", "Schemas/**", "Fixtures/**", "Release/**", "Research/**/*.md", "Research/**/*.json", "*.md", "CITATION.cff", "Artifacts/README.md", "LICENSE", "NOTICE"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Dominik Ukolov and contributors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = ["Sources/OrgRecCore/Resources/crepe-tiny.mlmodelc/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2018 Jong Wook Kim; 2020 Max Morrison"
+SPDX-License-Identifier = "MIT"

@@ -1,0 +1,16 @@
+# Licensing
+
+OrgRec uses two licenses for material created in this repository:
+
+- `Apache-2.0` for Swift and Python source code, tests, automation, build files,
+  and application resources unless a narrower notice applies;
+- `CC-BY-4.0` for documentation, schemas, semantic artifacts, metadata, and
+  synthetic fixtures unless a narrower notice applies.
+
+The complete texts are in `LICENSES/Apache-2.0.txt` and
+`LICENSES/CC-BY-4.0.txt`. `REUSE.toml` is the authoritative path mapping.
+Third-party components and data retain their own terms and attribution as
+listed in `THIRD_PARTY_NOTICES.md`; the repository licenses do not grant rights
+in independently obtained recordings or datasets.
+
+Copyright 2026 Dominik Ukolov and contributors.

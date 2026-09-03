@@ -1,0 +1,50 @@
+name: Bug report
+description: Report reproducible OrgRec behavior that appears incorrect.
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Do not attach private recordings, unpublished datasets, personal data,
+        precise venue details, or security-sensitive files. Follow SECURITY.md
+        for vulnerabilities.
+  - type: input
+    id: version
+    attributes:
+      label: OrgRec version and build
+      placeholder: "0.3.0 (8)"
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: macOS and hardware
+      placeholder: "macOS version, Apple silicon or Intel, relevant audio interface"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use synthetic or redacted data where possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted diagnostics
+      description: Include relevant logs or integrity findings after removing sensitive data.

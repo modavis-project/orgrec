@@ -1,0 +1,1 @@
+Fixture protocol: exponential sine sweep, calibrated source and receiver, deconvolution, 48 kHz, direct-arrival time zero, physical-pressure normalization.

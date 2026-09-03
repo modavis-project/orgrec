@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "Cite the exact tagged OrgRec release used in your work."
+title: "OrgRec"
+type: software
+version: "0.3.0"
+doi: "10.5281/zenodo.22216026"
+date-released: 2026-09-01
+repository-code: "https://github.com/modavis-project/orgrec"
+url: "https://doi.org/10.5281/zenodo.22216026"
+authors:
+  - family-names: Ukolov
+    given-names: Dominik
+    orcid: "https://orcid.org/0000-0002-7904-3892"
+    affiliation: "Digital Humanities (Image/Object), Friedrich Schiller University Jena; Research Group DIGITAL ORGANOLOGY, Leipzig University"
+abstract: "A native macOS application for documented pipe-organ recording, review, analysis, and standards-based research-data exchange."
+license: Apache-2.0
+keywords:
+  - pipe organ
+  - field recording
+  - digital organology
+  - research software
+  - audio analysis
+  - virtual acoustic object

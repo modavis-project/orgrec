@@ -1,0 +1,97 @@
+{
+  "type": "VAOSpecificationBundle",
+  "formatVersion": "0.4.0",
+  "id": "https://w3id.org/modavis/vao/0.4.0/specification-bundle",
+  "artifacts": [
+    {
+      "path": "Schemas/vao-manifest-0.4.0.schema.json",
+      "byteSize": 140790,
+      "sha256": "0fcf0c153e81f0bf80ae9fe0c5b63e1fe63fb7d96b4f8f92fb4d74f6e75a8c25"
+    },
+    {
+      "path": "Schemas/vao-context-0.4.0.jsonld",
+      "byteSize": 5664,
+      "sha256": "89f00008fb85b2d88d3db9ff8ff3a23ffff7a2f484445d5a961786a5e5c02bf9"
+    },
+    {
+      "path": "Schemas/vao-vocabulary-0.4.0.ttl",
+      "byteSize": 3811,
+      "sha256": "a63270f4228538f0cfa9b7c19eb1f193f2967e44f9f23093161c175138c8d037"
+    },
+    {
+      "path": "Schemas/vao-shapes-0.4.0.ttl",
+      "byteSize": 1837,
+      "sha256": "d8bcd6b8d7d1bffacdccd6016cd99fe1c331ff9240c21a7b44fd935c9090157c"
+    },
+    {
+      "path": "Schemas/vao-carrier-0.4.0.schema.json",
+      "byteSize": 1734,
+      "sha256": "e231622bbe22ae935b599b524125e40826f6f6f8aef0211dd336876255929e62"
+    },
+    {
+      "path": "Schemas/vao-release-0.4.0.schema.json",
+      "byteSize": 7393,
+      "sha256": "534f9394dd381b530ae5a2d266b24f07328e1cac618edfc11ac5fb8630d95d7f"
+    },
+    {
+      "path": "Schemas/vao-pack-manifest-0.4.0.schema.json",
+      "byteSize": 1719,
+      "sha256": "e8798f46d8975c63d4f2f230488a6d3bc5d739d2930d237c2f8678890ff6e531"
+    },
+    {
+      "path": "Schemas/vao-materialization-receipt-0.4.0.schema.json",
+      "byteSize": 2878,
+      "sha256": "711e2ea5976fdb735b59a58b137a8947ddb38bc017248bafb6c321f7964aa2e6"
+    },
+    {
+      "path": "Schemas/vao-zenodo-metadata-0.4.0.schema.json",
+      "byteSize": 9553,
+      "sha256": "5404fdea3d95c7926bb5ba54a72acc9501e21610f531581f5a97fc56b9a4c8d3"
+    },
+    {
+      "path": "Docs/VAO_STANDARD_0.4.0.md",
+      "byteSize": 12629,
+      "sha256": "e73bcedc6f5e8a0286e1ef44b5df5e3910aed1e7610cb0ba96d5e3783246ba07"
+    },
+    {
+      "path": "Docs/VAO_CONFORMANCE_0.4.0.md",
+      "byteSize": 2523,
+      "sha256": "9be874b525f8d03fef80cb90d432f0fcad0a42d9967e2b09e877c186c414d0dc"
+    },
+    {
+      "path": "Docs/VAO_SCIENTIFIC_PROFILE_0.4.0.md",
+      "byteSize": 1004,
+      "sha256": "98cc1e5be10d00803143b9b83ebc277eda122e7e97f9e40c51788a52cbe05b9d"
+    },
+    {
+      "path": "Docs/VAO_MULTIMODAL_PROFILE_0.4.0.md",
+      "byteSize": 697,
+      "sha256": "8602d1bb2ab4699ce7c68eecbeedfc4bb1877b470bfb47c1393f36b8ed4bbe0a"
+    },
+    {
+      "path": "Docs/VAO_PHYSICAL_INSTRUMENT_PROFILE_0.4.0.md",
+      "byteSize": 647,
+      "sha256": "2551a8f4bec563e783ca11b4681ec90fcd33873cfad774fd3b28cc1262c8209d"
+    },
+    {
+      "path": "Docs/VAO_PLAYABLE_PROFILE_0.4.0.md",
+      "byteSize": 1107,
+      "sha256": "404be7e7802b826aaa11434a07ef399923ce81c4ca857de0eae41bf724433aa3"
+    },
+    {
+      "path": "Docs/VAO_ACOUSTIC_SCENES_0.4.0.md",
+      "byteSize": 812,
+      "sha256": "e89fb85943c4c76aa1963dab25ca5bea3b381ab61df4ea31ea2eab5c3e888261"
+    },
+    {
+      "path": "Docs/VAO_ZENODO_PROFILE_0.4.0.md",
+      "byteSize": 687,
+      "sha256": "fc152b29d44ee9fc0a20db70b0bcda35ce2510b1e735ba170cadbc0fcfbf6c0d"
+    },
+    {
+      "path": "Docs/VAO_INTEROPERABILITY_0.4.0.md",
+      "byteSize": 1167,
+      "sha256": "8ee2f395c0aabd376433c8a07db2d3d00c214e75108bf1a32af1cbf5fa0f8217"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modavis.org/schemas/orgrec-capture-package-2.0.json",
+  "title": "OrgRec Navigator Capture Package",
+  "type": "object",
+  "required": [
+    "schemaVersion", "generatedAt", "projectID", "projectTitle", "releaseBinding",
+    "modavisSnapshotSHA256", "coverage", "takes", "integrity",
+    "consistencyReportRelativePath", "consistencyScore", "iadManifestRelativePath", "iadManifestSHA256"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "orgrec-capture-package/2.0" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "projectID": { "$ref": "#/$defs/uuid" },
+    "projectTitle": { "type": "string", "minLength": 1 },
+    "releaseBinding": { "$ref": "#/$defs/releaseBinding" },
+    "modavisSnapshotSHA256": { "$ref": "#/$defs/sha256" },
+    "coverage": { "$ref": "#/$defs/coverage" },
+    "takes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/take" }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" },
+    "consistencyReportRelativePath": { "const": "consistency-report.json" },
+    "consistencyScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "iadManifestRelativePath": { "const": "iad-manifest.json" },
+    "iadManifestSHA256": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "format": "uuid" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "relativePath": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" },
+    "releaseBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requestedRelease", "releaseState", "canonicalSourceRelease", "protectedFingerprintSHA256", "navigatorContractVersion"],
+      "properties": {
+        "requestedRelease": { "type": "string", "minLength": 1 },
+        "releaseState": { "type": "string", "minLength": 1 },
+        "canonicalSourceRelease": { "type": "string", "minLength": 1 },
+        "protectedFingerprintSHA256": { "$ref": "#/$defs/sha256" },
+        "navigatorContractVersion": { "type": "string", "minLength": 1 }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted", "review", "missing", "exempt", "unresolved", "applicableRequired"],
+      "properties": {
+        "accepted": { "type": "integer", "minimum": 0 },
+        "review": { "type": "integer", "minimum": 0 },
+        "missing": { "type": "integer", "minimum": 0 },
+        "exempt": { "type": "integer", "minimum": 0 },
+        "unresolved": { "type": "integer", "minimum": 0 },
+        "applicableRequired": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "take": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["takeID", "roadmapItemID", "status", "audioRelativePath", "audioSHA256", "derivedRelativePaths", "recordedAt"],
+      "properties": {
+        "takeID": { "$ref": "#/$defs/uuid" },
+        "roadmapItemID": { "$ref": "#/$defs/uuid" },
+        "status": { "enum": ["recording", "recorded", "analyzing", "needsReview", "accepted", "rejected", "recovered", "failed"] },
+        "audioRelativePath": { "$ref": "#/$defs/relativePath" },
+        "audioSHA256": { "$ref": "#/$defs/sha256" },
+        "analysisRelativePath": { "anyOf": [{ "$ref": "#/$defs/relativePath" }, { "type": "null" }] },
+        "annotationRelativePath": { "anyOf": [{ "$ref": "#/$defs/relativePath" }, { "type": "null" }] },
+        "derivedRelativePaths": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/relativePath" } },
+        "recordedAt": { "type": "string", "format": "date-time" },
+        "durationSeconds": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/relativePath" },
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift:
+    name: Swift build and tests
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Toolchain
+        run: swift --version
+      - name: VAO 0.5.0 reference dependencies
+        run: python3 -m pip install -r requirements-vao05.txt
+      - name: Test
+        run: VAO05_REFERENCE_PYTHON=python3 swift test
+      - name: Release build
+        run: swift build -c release
+
+  vao-python:
+    name: VAO Python conformance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reference dependencies
+        run: python3 -m pip install -r requirements-vao05.txt -r requirements-release.txt
+      - name: VAO 0.2.2
+        run: python3 Tools/test_vao_conformance.py
+      - name: VAO 0.3.3
+        run: python3 Tools/test_vao03_conformance.py
+      - name: VAO 0.4.0
+        run: python3 Tools/test_vao04_conformance.py
+      - name: VAO 0.5.0
+        run: python3 Tools/test_vao05_conformance.py
+      - name: Reduced POD subset contract
+        run: python3 Tools/test_pod_subset_contract.py
+      - name: Public source boundary
+        run: python3 Tools/audit_public_release.py
+      - name: REUSE licensing
+        run: reuse lint

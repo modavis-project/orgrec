@@ -1,0 +1,641 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/manifest.json",
+  "@context": ["https://w3id.org/modavis/vao/0.3/context.jsonld"],
+  "type": "VirtualAcousticObject",
+  "formatVersion": "0.3.3",
+  "id": "urn:vao:fixture:kinoorgel",
+  "release": {
+    "id": "urn:vao:fixture:kinoorgel:release:1",
+    "revision": 1,
+    "contentVersion": "1.0.0"
+  },
+  "createdAt": "2026-08-25T00:00:00Z",
+  "modifiedAt": "2026-08-25T00:00:00Z",
+  "title": {"en": "Kinoorgel complex-interaction conformance fixture"},
+  "description": {"en": "A compact synthetic fixture for shared ranks, conditional couplers, bounded repetition, compound actuation, stepped expression, capture alignment, and derivative lineage."},
+  "conformsTo": [
+    "https://w3id.org/modavis/vao/profile/core/0.3",
+    "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3",
+    "https://w3id.org/modavis/vao/profile/playable/0.3"
+  ],
+  "profiles": [
+    {
+      "id": "https://w3id.org/modavis/vao/profile/core/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/core-graph",
+        "https://w3id.org/modavis/vao/vocab/capability/fixity"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/dynamic-delivery/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/immutable-release",
+        "https://w3id.org/modavis/vao/vocab/capability/carrier-mapping"
+      ]
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/playable/0.3",
+      "version": "0.3",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/interaction",
+        "https://w3id.org/modavis/vao/vocab/capability/sampled-instrument-playback",
+        "https://w3id.org/modavis/vao/vocab/capability/stateful-interaction",
+        "https://w3id.org/modavis/vao/vocab/capability/conditional-routing",
+        "https://w3id.org/modavis/vao/vocab/capability/composite-actuation",
+        "https://w3id.org/modavis/vao/vocab/capability/timed-process",
+        "https://w3id.org/modavis/vao/vocab/capability/actuator-transfer",
+        "https://w3id.org/modavis/vao/vocab/capability/capture-event-alignment"
+      ]
+    }
+  ],
+  "materializableProfiles": [],
+  "modavisBinding": {
+    "ontologyIRI": "https://w3id.org/modavis/ontology/",
+    "ontologyVersion": "development",
+    "ontologyStatus": "development",
+    "mappingVersion": "0.3.3"
+  },
+  "primaryEntityId": "urn:vao:fixture:kinoorgel:instrument",
+  "focusEntityIds": ["urn:vao:fixture:kinoorgel:instrument"],
+  "entities": [
+    {
+      "id": "urn:vao:fixture:kinoorgel:instrument",
+      "kind": "instrument",
+      "types": ["https://w3id.org/modavis/ontology/instrument#MusicalInstrument"],
+      "labels": {"en": "Synthetic cinema organ"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:kinoorgel:manual:great",
+      "kind": "component",
+      "types": ["https://w3id.org/modavis/vao/ontology#Division"],
+      "labels": {"en": "Great manual"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:kinoorgel:rank:tibia",
+      "kind": "component",
+      "types": ["https://w3id.org/modavis/vao/ontology#Rank"],
+      "labels": {"en": "Shared Tibia rank"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:kinoorgel:effect:cymbal",
+      "kind": "component",
+      "types": ["https://w3id.org/modavis/vao/ontology#Actuator"],
+      "labels": {"en": "Cymbal actuator"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:kinoorgel:effect:thunder",
+      "kind": "component",
+      "types": ["https://w3id.org/modavis/vao/ontology#CompoundEffect"],
+      "labels": {"en": "Thunder control"},
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:kinoorgel:interaction",
+      "kind": "interaction",
+      "types": ["https://w3id.org/modavis/vao/ontology#Interaction"],
+      "labels": {"en": "Operate cinema-organ controls"},
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#interactionType": "https://w3id.org/modavis/vao/vocab/interaction/stateful-control",
+        "https://w3id.org/modavis/vao/ontology#controlProtocol": "MIDI-1.0",
+        "https://w3id.org/modavis/vao/ontology#controlDomain": "keys, tabs, pistons and stepped expression",
+        "https://w3id.org/modavis/vao/ontology#timingPolicy": "event-triggered with measured mechanical constraints"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "id": "urn:vao:fixture:kinoorgel:relation:interaction",
+      "subjectId": "urn:vao:fixture:kinoorgel:interaction",
+      "predicate": "https://w3id.org/modavis/vao/ontology#activates",
+      "objectId": "urn:vao:fixture:kinoorgel:instrument",
+      "status": "asserted"
+    }
+  ],
+  "paradata": [],
+  "analyses": [],
+  "playable": {
+    "signalRegions": [],
+    "loopPointSets": [],
+    "tuningMaps": [],
+    "perspectiveGroups": [],
+    "sampleVariants": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:variant:tibia",
+        "realizationId": "urn:vao:fixture:kinoorgel:realization:tibia:44100",
+        "trigger": "note-on",
+        "signalRole": "attack-sustain",
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "sampleMappings": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:mapping:tibia",
+        "instrumentEntityId": "urn:vao:fixture:kinoorgel:instrument",
+        "rankEntityId": "urn:vao:fixture:kinoorgel:rank:tibia",
+        "keyRange": {"minimum": 36, "maximum": 96},
+        "velocitySensitivity": "none",
+        "controlKeyMeaning": "played-key",
+        "soundingKeyOffset": 0,
+        "sampleRootKey": 60,
+        "variantIds": ["urn:vao:fixture:kinoorgel:variant:tibia"],
+        "selectionPolicy": "single",
+        "noteOffPolicy": "stop",
+        "status": "asserted",
+        "source": "documented"
+      }
+    ]
+  },
+  "interactionModel": {
+    "controls": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:control:key",
+        "labels": {"en": "Manual key"},
+        "entityId": "urn:vao:fixture:kinoorgel:manual:great",
+        "controlBehavior": "gate",
+        "valueType": "integer",
+        "minimumValue": 36,
+        "maximumValue": 96,
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:control:tibia-stop",
+        "labels": {"en": "Tibia 8 foot stop tab"},
+        "controlBehavior": "toggle",
+        "valueType": "boolean",
+        "defaultValue": false,
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:control:shutter",
+        "labels": {"en": "Expression shutter"},
+        "controlBehavior": "stepped",
+        "valueType": "integer",
+        "minimumValue": 0,
+        "maximumValue": 17,
+        "stepCount": 18,
+        "defaultValue": 17,
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:control:telephone",
+        "labels": {"en": "Telephone effect tab"},
+        "controlBehavior": "gate",
+        "valueType": "boolean",
+        "defaultValue": false,
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:control:thunder",
+        "labels": {"en": "Thunder piston"},
+        "entityId": "urn:vao:fixture:kinoorgel:effect:thunder",
+        "controlBehavior": "momentary",
+        "valueType": "event",
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "eventTypes": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:event:note-on",
+        "labels": {"en": "Note on"},
+        "eventKind": "note-on",
+        "valueDomain": "midi-key",
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:event:control-on",
+        "labels": {"en": "Control activation"},
+        "eventKind": "control-on",
+        "valueDomain": "boolean",
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:event:telephone-pulse",
+        "labels": {"en": "Telephone repetition pulse"},
+        "eventKind": "trigger",
+        "valueDomain": "none",
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "protocolBindings": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:binding:key-c2",
+        "controlId": "urn:vao:fixture:kinoorgel:control:key",
+        "eventTypeId": "urn:vao:fixture:kinoorgel:event:note-on",
+        "protocol": "MIDI-1.0",
+        "direction": "input",
+        "messageType": "note",
+        "channel": 1,
+        "number": 36,
+        "channelNumberingBase": 1,
+        "dataNumberingBase": 0,
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:binding:tibia-stop",
+        "controlId": "urn:vao:fixture:kinoorgel:control:tibia-stop",
+        "eventTypeId": "urn:vao:fixture:kinoorgel:event:control-on",
+        "protocol": "MIDI-1.0",
+        "direction": "input",
+        "messageType": "program-change",
+        "channel": 1,
+        "number": 1,
+        "channelNumberingBase": 1,
+        "dataNumberingBase": 0,
+        "activationValue": 1,
+        "deactivationValue": 0,
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "stateVariables": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:state:tibia-enabled",
+        "labels": {"en": "Tibia stop enabled"},
+        "subjectEntityId": "urn:vao:fixture:kinoorgel:rank:tibia",
+        "valueType": "boolean",
+        "persistence": "latched",
+        "defaultValue": false,
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:state:shutter-stage",
+        "labels": {"en": "Shutter stage"},
+        "valueType": "integer",
+        "persistence": "latched",
+        "defaultValue": 17,
+        "minimumValue": 0,
+        "maximumValue": 17,
+        "stepCount": 18,
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "transitions": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:transition:tibia-toggle",
+        "eventTypeId": "urn:vao:fixture:kinoorgel:event:control-on",
+        "controlId": "urn:vao:fixture:kinoorgel:control:tibia-stop",
+        "actions": [
+          {"operation": "toggle-state", "targetId": "urn:vao:fixture:kinoorgel:state:tibia-enabled"}
+        ],
+        "atomic": true,
+        "conflictPolicy": "last-event-wins",
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:transition:thunder",
+        "eventTypeId": "urn:vao:fixture:kinoorgel:event:control-on",
+        "controlId": "urn:vao:fixture:kinoorgel:control:thunder",
+        "actions": [
+          {"operation": "start-process", "targetId": "urn:vao:fixture:kinoorgel:process:thunder"}
+        ],
+        "atomic": true,
+        "conflictPolicy": "reject",
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "routingRules": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:route:tibia-4",
+        "sourceControlId": "urn:vao:fixture:kinoorgel:control:key",
+        "sourceEntityId": "urn:vao:fixture:kinoorgel:manual:great",
+        "targetEntityId": "urn:vao:fixture:kinoorgel:rank:tibia",
+        "routingBehavior": "transposes",
+        "inputKeyMeaning": "played-key",
+        "outputKeyMeaning": "sounding-key",
+        "inputRange": {"minimum": 36, "maximum": 84},
+        "keyTransform": {"kind": "transpose", "semitoneOffset": 12},
+        "conditions": [
+          {"stateVariableId": "urn:vao:fixture:kinoorgel:state:tibia-enabled", "operator": "equals", "value": true}
+        ],
+        "footageLabel": "4 ft",
+        "harmonicRelation": 2,
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:route:thunder-cymbal",
+        "sourceEntityId": "urn:vao:fixture:kinoorgel:effect:thunder",
+        "targetEntityId": "urn:vao:fixture:kinoorgel:effect:cymbal",
+        "routingBehavior": "activates",
+        "inputKeyMeaning": "source-definition-key",
+        "outputKeyMeaning": "actuator-key",
+        "inputRange": {"minimum": 0, "maximum": 0},
+        "keyTransform": {"kind": "fixed", "fixedOutputKeys": [36]},
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:route:thunder-tibia",
+        "sourceEntityId": "urn:vao:fixture:kinoorgel:effect:thunder",
+        "targetEntityId": "urn:vao:fixture:kinoorgel:rank:tibia",
+        "routingBehavior": "activates",
+        "inputKeyMeaning": "source-definition-key",
+        "outputKeyMeaning": "sounding-key",
+        "inputRange": {"minimum": 0, "maximum": 0},
+        "keyTransform": {"kind": "fixed", "fixedOutputKeys": [36, 41]},
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "processModels": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:process:telephone",
+        "processKind": "repeating",
+        "ordering": "sequential",
+        "actions": [
+          {"operation": "emit-event", "targetId": "urn:vao:fixture:kinoorgel:event:telephone-pulse"}
+        ],
+        "timingConstraintIds": ["urn:vao:fixture:kinoorgel:timing:telephone-repeat"],
+        "terminationPolicy": "on-control-release",
+        "cancellationControlId": "urn:vao:fixture:kinoorgel:control:telephone",
+        "status": "asserted",
+        "source": "documented"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:process:thunder",
+        "processKind": "compound",
+        "ordering": "simultaneous",
+        "actions": [
+          {"operation": "route-event", "targetId": "urn:vao:fixture:kinoorgel:route:thunder-cymbal", "executionGroup": "thunder"},
+          {"operation": "route-event", "targetId": "urn:vao:fixture:kinoorgel:route:thunder-tibia", "executionGroup": "thunder"}
+        ],
+        "timingConstraintIds": ["urn:vao:fixture:kinoorgel:timing:thunder-latency"],
+        "terminationPolicy": "completed",
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "timingConstraints": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:timing:telephone-repeat",
+        "timingKind": "repeat-interval",
+        "unit": "milliseconds",
+        "minimum": 70,
+        "typical": 100,
+        "maximum": 155,
+        "appliesToIds": ["urn:vao:fixture:kinoorgel:process:telephone"],
+        "status": "asserted",
+        "source": "measured"
+      },
+      {
+        "id": "urn:vao:fixture:kinoorgel:timing:thunder-latency",
+        "timingKind": "latency",
+        "unit": "milliseconds",
+        "minimum": 174,
+        "appliesToIds": ["urn:vao:fixture:kinoorgel:process:thunder"],
+        "status": "asserted",
+        "source": "measured"
+      }
+    ],
+    "transferFunctions": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:transfer:shutter",
+        "inputKind": "expression-step",
+        "outputKind": "shutter-configuration",
+        "inputUnit": "stage",
+        "interpolation": "step",
+        "points": [
+          {"input": 0, "output": "closed"},
+          {"input": 8, "output": "half-open"},
+          {"input": 17, "output": "open"}
+        ],
+        "monotonic": true,
+        "appliesToIds": ["urn:vao:fixture:kinoorgel:control:shutter"],
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "renderBindings": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:render:tibia",
+        "eventTypeId": "urn:vao:fixture:kinoorgel:event:note-on",
+        "conditions": [
+          {"stateVariableId": "urn:vao:fixture:kinoorgel:state:tibia-enabled", "operator": "equals", "value": true}
+        ],
+        "sampleMappingIds": ["urn:vao:fixture:kinoorgel:mapping:tibia"],
+        "selectionPolicy": "state-dependent",
+        "status": "asserted",
+        "source": "documented"
+      }
+    ]
+  },
+  "captureDocumentation": {
+    "captureStates": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:capture-state:open-tibia",
+        "instrumentEntityId": "urn:vao:fixture:kinoorgel:instrument",
+        "labels": {"en": "Tibia enabled, shutter open"},
+        "stateAssignments": [
+          {"stateVariableId": "urn:vao:fixture:kinoorgel:state:tibia-enabled", "value": true},
+          {"stateVariableId": "urn:vao:fixture:kinoorgel:state:shutter-stage", "value": 17}
+        ],
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "eventAlignments": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:alignment:source-midi",
+        "audioRealizationId": "urn:vao:fixture:kinoorgel:realization:tibia:192000",
+        "eventLogRealizationId": "urn:vao:fixture:kinoorgel:realization:midi",
+        "clockBasis": "audio-frames",
+        "offset": 0,
+        "driftPPM": 0,
+        "eventMappings": [
+          {
+            "eventLocator": "track=reg11,event=1",
+            "eventTypeId": "urn:vao:fixture:kinoorgel:event:note-on",
+            "startFrame": 0,
+            "endFrameExclusive": 48000
+          }
+        ],
+        "status": "asserted",
+        "source": "documented"
+      }
+    ],
+    "takeSets": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:take-set:tibia",
+        "captureStateId": "urn:vao:fixture:kinoorgel:capture-state:open-tibia",
+        "realizationIds": ["urn:vao:fixture:kinoorgel:realization:tibia:192000"],
+        "setRole": "source-takes",
+        "selectionStatus": "accepted",
+        "status": "accepted",
+        "source": "documented"
+      }
+    ],
+    "derivationMaps": [
+      {
+        "id": "urn:vao:fixture:kinoorgel:derivation:tibia",
+        "sourceRealizationId": "urn:vao:fixture:kinoorgel:realization:tibia:192000",
+        "derivedRealizationId": "urn:vao:fixture:kinoorgel:realization:tibia:44100",
+        "sourceFrameRange": {"startFrameInclusive": 0, "endFrameExclusive": 96000},
+        "channelMap": [0, 1],
+        "operations": [
+          {"kind": "segment", "softwareName": "fixture generator", "softwareVersion": "1"},
+          {"kind": "resample", "softwareName": "fixture generator", "softwareVersion": "1", "parameters": {"targetSampleRate": 44100}},
+          {"kind": "dither", "softwareName": "fixture generator", "softwareVersion": "1"}
+        ],
+        "status": "asserted",
+        "source": "authored"
+      }
+    ]
+  },
+  "logicalAssets": [
+    {
+      "id": "urn:vao:fixture:kinoorgel:asset:tibia",
+      "type": "LogicalAsset",
+      "labels": {"en": "Tibia sample"},
+      "roles": ["https://w3id.org/modavis/vao/vocab/asset-role/instrument-sample"],
+      "aboutEntityIds": ["urn:vao:fixture:kinoorgel:rank:tibia"],
+      "realizationIds": [
+        "urn:vao:fixture:kinoorgel:realization:tibia:192000",
+        "urn:vao:fixture:kinoorgel:realization:tibia:44100"
+      ],
+      "properties": {}
+    },
+    {
+      "id": "urn:vao:fixture:kinoorgel:asset:midi",
+      "type": "LogicalAsset",
+      "labels": {"en": "Capture MIDI event log"},
+      "roles": ["https://w3id.org/modavis/vao/vocab/asset-role/capture-event-log"],
+      "aboutEntityIds": ["urn:vao:fixture:kinoorgel:instrument"],
+      "realizationIds": ["urn:vao:fixture:kinoorgel:realization:midi"],
+      "properties": {}
+    }
+  ],
+  "realizations": [
+    {
+      "id": "urn:vao:fixture:kinoorgel:realization:tibia:192000",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:kinoorgel:asset:tibia",
+      "variantSetId": "source-192000",
+      "qualityTier": "preservation",
+      "mediaType": "audio/wav",
+      "byteSize": 768000,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/captured",
+      "rightsIds": ["urn:vao:fixture:kinoorgel:rights"],
+      "provenanceIds": [],
+      "technicalMetadata": {
+        "kind": "audio",
+        "sampleRate": 192000,
+        "sampleFormat": "floating-point",
+        "bitDepth": 32,
+        "channelCount": 2,
+        "frameCount": 192000,
+        "audioContainer": "WAVE"
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:kinoorgel:realization:tibia:44100",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:kinoorgel:asset:tibia",
+      "variantSetId": "playback-44100",
+      "qualityTier": "production",
+      "mediaType": "audio/wav",
+      "byteSize": 176400,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000002",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/derived",
+      "rightsIds": ["urn:vao:fixture:kinoorgel:rights"],
+      "provenanceIds": [],
+      "technicalMetadata": {
+        "kind": "audio",
+        "sampleRate": 44100,
+        "sampleFormat": "signed-integer",
+        "bitDepth": 16,
+        "channelCount": 2,
+        "frameCount": 44100,
+        "audioContainer": "WAVE"
+      },
+      "distributionIds": []
+    },
+    {
+      "id": "urn:vao:fixture:kinoorgel:realization:midi",
+      "type": "Realization",
+      "assetId": "urn:vao:fixture:kinoorgel:asset:midi",
+      "variantSetId": "capture-events",
+      "qualityTier": "preservation",
+      "mediaType": "audio/midi",
+      "byteSize": 1024,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000003",
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/captured",
+      "rightsIds": ["urn:vao:fixture:kinoorgel:rights"],
+      "provenanceIds": [],
+      "technicalMetadata": {"kind": "data"},
+      "distributionIds": []
+    }
+  ],
+  "distributions": [],
+  "repositoryBindings": [],
+  "assetGroups": [
+    {
+      "id": "urn:vao:fixture:kinoorgel:group:bootstrap",
+      "type": "AssetGroup",
+      "labels": {"en": "Synthetic complex-instrument fixture"},
+      "selectionSetId": "bootstrap",
+      "qualityTier": "bootstrap",
+      "availability": "offline-required",
+      "selectionPolicy": "independent",
+      "realizationIds": [
+        "urn:vao:fixture:kinoorgel:realization:tibia:192000",
+        "urn:vao:fixture:kinoorgel:realization:tibia:44100",
+        "urn:vao:fixture:kinoorgel:realization:midi"
+      ],
+      "dependsOnGroupIds": [],
+      "totalByteSize": 945424,
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/stateful-interaction",
+        "https://w3id.org/modavis/vao/vocab/capability/conditional-routing",
+        "https://w3id.org/modavis/vao/vocab/capability/composite-actuation",
+        "https://w3id.org/modavis/vao/vocab/capability/timed-process",
+        "https://w3id.org/modavis/vao/vocab/capability/actuator-transfer",
+        "https://w3id.org/modavis/vao/vocab/capability/capture-event-alignment"
+      ],
+      "materializesProfileIds": [],
+      "cachePolicy": {"evictable": false, "priority": 100}
+    }
+  ],
+  "rights": [
+    {
+      "id": "urn:vao:fixture:kinoorgel:rights",
+      "appliesToIds": [
+        "urn:vao:fixture:kinoorgel",
+        "urn:vao:fixture:kinoorgel:asset:tibia",
+        "urn:vao:fixture:kinoorgel:asset:midi",
+        "urn:vao:fixture:kinoorgel:realization:tibia:192000",
+        "urn:vao:fixture:kinoorgel:realization:tibia:44100",
+        "urn:vao:fixture:kinoorgel:realization:midi"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "statement": {"en": "Synthetic CC0 conformance fixture; hashes and sizes are placeholders, not a distributed carrier."},
+      "access": "open"
+    }
+  ],
+  "integrity": {
+    "algorithm": "sha256",
+    "manifestDigestLocation": "external-release-and-carrier-descriptors",
+    "carrierDescriptor": "META-INF/vao-carrier.json"
+  }
+}

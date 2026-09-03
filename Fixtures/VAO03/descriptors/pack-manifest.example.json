@@ -1,0 +1,17 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/pack-manifest.json",
+  "type": "VAOPackManifest",
+  "formatVersion": "0.3.3",
+  "id": "urn:uuid:03000000-0000-4000-8000-000000000201",
+  "releaseId": "urn:uuid:03000000-0000-4000-8000-000000000102",
+  "members": [
+    {
+      "realizationId": "urn:uuid:03000000-0000-4000-8000-000000000123",
+      "path": "documents/remote-production.txt",
+      "mediaType": "text/plain",
+      "byteSize": 80,
+      "sha256": "487de76ad66794ffcda3774e07018d421ca73ba10ba1c86295787b732a6456bc"
+    }
+  ],
+  "rejectUnlistedMembers": true
+}

@@ -1,0 +1,48 @@
+{
+  "type": "VAOFixtureProvenance",
+  "createdAt": "2026-08-24T17:35:00Z",
+  "sourceDataset": {
+    "name": "AcousticRooms",
+    "repository": "https://github.com/facebookresearch/AcousticRooms",
+    "commit": "3c87318a0188e1b441fc75846d54b487ca215fbb",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "citation": "Liu et al., Hearing Anywhere in Any Environment, CVPR 2025"
+  },
+  "selection": {
+    "room": "Bathrooms/Bathrooms_idx_0",
+    "pair": "S000_R0011",
+    "metadataArchive": {
+      "path": "metadata.zip",
+      "gitLFSOID": "sha256:1a7c64a1bbfcc1d4f5d1110eaf5d39719394203781bf3a41d73d26f29fcd6f01",
+      "byteSize": 116009327,
+      "member": "metadata/Bathrooms/Bathrooms_idx_0/S000_R0011.json"
+    },
+    "rirArchive": {
+      "path": "single_channel_ir.zip",
+      "gitLFSOID": "sha256:bdf4351726e7c2d358baa0b4d9b6b2332afffd1ecfd65175ad5a2355dcd19d35",
+      "byteSize": 4111842040,
+      "nestedMember": "single_channel_ir_1/Bathrooms.zip",
+      "member": "Bathrooms/Bathrooms_idx_0/S000_R0011_hybrid_IR.wav"
+    },
+    "mesh": "room_mesh_obj_format/Bathrooms/Bathrooms_idx_0.obj",
+    "simulation": "simulation_info/Bathrooms/Bathrooms_idx_0/simulation.json"
+  },
+  "derivative": {
+    "source": "payload/geometry/Bathrooms_idx_0.obj",
+    "output": "payload/geometry/Bathrooms_idx_0.glb",
+    "software": {
+      "name": "Blender",
+      "version": "5.1.1",
+      "gltfExporter": "Khronos glTF Blender I/O v5.1.19"
+    },
+    "operation": "Import OBJ as right-handed +Z-up with +Y forward; export glTF 2.0 GLB with +Y up.",
+    "transformFromGLTFFrameToDatasetFrameRowMajor": [
+      1, 0, 0, 0,
+      0, 0, -1, 0,
+      0, 1, 0, 0,
+      0, 0, 0, 1
+    ],
+    "sourceSHA256": "b86f60267314fe314d0ebacd716c1770dd029a8c5ad851a56b1162ac4975b6ff",
+    "outputSHA256": "03e1bb41f2db881da22212184baa765a71ae9e3248ef610237f67322b039798a"
+  }
+}

@@ -1,0 +1,14 @@
+OrgRec
+Copyright 2026 Dominik Ukolov and contributors.
+
+Software source is available under Apache License 2.0. Documentation, schemas,
+semantic artifacts, metadata, and synthetic fixtures are available under
+Creative Commons Attribution 4.0 International except where a file or notice
+states otherwise.
+
+The vendored VAO 0.5.0 normative artifacts are from the Virtual Acoustic Object
+(VAO) Standard 0.5.0, DOI 10.5281/zenodo.22214248, and are licensed CC BY 4.0.
+The corresponding reference tools are licensed Apache-2.0.
+
+Third-party names and marks remain the property of their owners. No endorsement
+is implied.

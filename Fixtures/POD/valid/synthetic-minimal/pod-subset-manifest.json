@@ -1,0 +1,59 @@
+{
+  "contractVersion": "orgrec-pod-subset/1",
+  "createdAt": "2026-08-31T00:00:00Z",
+  "creators": [
+    {
+      "name": "OrgRec test suite",
+      "role": "fixture creator"
+    }
+  ],
+  "dataset": {
+    "attribution": "Synthetic interoperability metadata created for the OrgRec test suite; no MODAVIS POD data are included.",
+    "identifier": "urn:orgrec:fixture:pod-subset:synthetic-minimal",
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "title": "OrgRec synthetic POD subset fixture",
+    "version": "1.0.0"
+  },
+  "files": [
+    {
+      "channel": 0,
+      "id": "urn:orgrec:fixture:file:records",
+      "instrumentIdentifier": "synthetic-instrument-1",
+      "mediaType": "application/x-ndjson",
+      "midiNote": 60,
+      "path": "payload/records.jsonl",
+      "rankIdentifier": "synthetic-rank-1",
+      "role": "synthetic-metadata",
+      "sha256": "a89e117b614d51731d83bf2ccd8ef7fc8b5e0dba32e144f81b42b570f3476815",
+      "sourceItemIdentifier": "urn:orgrec:fixture:source-item:1",
+      "sourceRelativePath": "records/synthetic-item-1.json",
+      "stopName": "Synthetic Principal 8",
+      "takeIdentifier": "synthetic-take-1",
+      "transformation": {
+        "activity": "synthetic-generation",
+        "parameters": {
+          "containsSourceBytes": "false"
+        }
+      },
+      "byteSize": 172
+    }
+  ],
+  "publicationStatus": "synthetic-fixture",
+  "selection": {
+    "byteSize": 172,
+    "criteria": [
+      "exercise the manifest decoder and exact checksum verification",
+      "contain no source dataset bytes"
+    ],
+    "fileCount": 1,
+    "instrumentCount": 1,
+    "method": "manually authored synthetic record",
+    "protocolIdentifier": "urn:orgrec:fixture:pod-selection:1",
+    "purpose": "interoperability testing",
+    "sourceItemCount": 1
+  },
+  "source": {
+    "releaseVersion": "1.5",
+    "title": "MODAVIS Pipe Organ Dataset"
+  }
+}

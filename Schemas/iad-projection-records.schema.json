@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modavis.org/schemas/instrumental-audio-dataset-projection-records-1.0.json",
+  "title": "IAD MODAVIS candidate projection records",
+  "description": "Each JSONL line validates against the definition named for its manifest. Local identifiers are candidate references and never canonical MODAVIS identifiers.",
+  "oneOf": [
+    { "$ref": "#/$defs/session" }, { "$ref": "#/$defs/file" }, { "$ref": "#/$defs/take" },
+    { "$ref": "#/$defs/channel" }, { "$ref": "#/$defs/segment" }, { "$ref": "#/$defs/device" },
+    { "$ref": "#/$defs/registration" }, { "$ref": "#/$defs/observation" }, { "$ref": "#/$defs/paradata" },
+    { "$ref": "#/$defs/calibration" }, { "$ref": "#/$defs/temperamentAnalysis" }
+  ],
+  "$defs": {
+    "uuid": { "type": "string", "format": "uuid" },
+    "candidate": { "const": "candidate-proposals" },
+    "targetTable": { "enum": ["audio.recording_take", "audio.channel", "audio.segment", "measurement.observation", "paradata.generic"] },
+    "session": {
+      "type": "object",
+      "required": ["localSessionID", "targetTables", "projectionStatus", "sessionCode", "organStateMDVSID", "venueLabel", "startedAt", "operatorName", "institution", "purpose", "rightsStatement", "timezoneIdentifier", "clockSource", "environmentalConditions", "notes"],
+      "properties": {
+        "localSessionID": { "$ref": "#/$defs/uuid" },
+        "targetTables": { "const": ["prov.activity", "audio.recording_session"] },
+        "projectionStatus": { "$ref": "#/$defs/candidate" },
+        "sessionCode": { "type": "string", "minLength": 1 },
+        "organStateMDVSID": { "type": "string", "minLength": 1 },
+        "venueLabel": { "type": "string" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "endedAt": { "type": ["string", "null"], "format": "date-time" },
+        "operatorName": { "type": "string" }, "institution": { "type": "string" },
+        "purpose": { "type": "string" }, "rightsStatement": { "type": "string" },
+        "timezoneIdentifier": { "type": "string" }, "clockSource": { "type": "string" },
+        "environmentalConditions": { "type": "object" }, "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "file": {
+      "type": "object",
+      "required": ["localFileID", "targetTables", "projectionStatus", "relativePath", "name", "byteSize", "sha256", "mimeType", "container", "encoding", "bitDepth", "sampleRate", "channelCount", "frameCount"],
+      "properties": {
+        "localFileID": { "$ref": "#/$defs/uuid" },
+        "targetTables": { "type": "array", "contains": { "const": "media.bitstream" } },
+        "projectionStatus": { "$ref": "#/$defs/candidate" },
+        "relativePath": { "type": "string", "pattern": "^audio/.+\\.wav$" },
+        "name": { "type": "string", "minLength": 1 }, "byteSize": { "type": "integer", "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }, "mimeType": { "const": "audio/wav" },
+        "container": { "type": "string" }, "encoding": { "type": "string" },
+        "bitDepth": { "type": "integer", "minimum": 1 }, "sampleRate": { "type": "number", "exclusiveMinimum": 0 },
+        "channelCount": { "type": "integer", "minimum": 1 }, "frameCount": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "take": {
+      "type": "object",
+      "required": ["localTakeID", "targetTable", "projectionStatus", "localSessionID", "localFileID", "takeNumber", "recordedAt", "status", "performanceInstruction", "roadmapItemID", "componentLocator"],
+      "properties": {
+        "localTakeID": { "$ref": "#/$defs/uuid" }, "targetTable": { "const": "audio.recording_take" },
+        "projectionStatus": { "$ref": "#/$defs/candidate" }, "localSessionID": { "$ref": "#/$defs/uuid" },
+        "localFileID": { "$ref": "#/$defs/uuid" }, "localMicrophoneSetupID": { "type": ["string", "null"], "format": "uuid" },
+        "takeNumber": { "type": "integer", "minimum": 1 }, "recordedAt": { "type": "string", "format": "date-time" },
+        "durationSeconds": { "type": ["number", "null"], "minimum": 0 }, "status": { "type": "string" },
+        "performanceInstruction": { "type": "string", "minLength": 1 }, "roadmapItemID": { "$ref": "#/$defs/uuid" },
+        "componentLocator": { "type": "object" }, "localRegistrationID": { "type": ["string", "null"], "format": "uuid" },
+        "physicalSoundTargetID": { "type": ["string", "null"] },
+        "equivalentComponentLocators": { "type": ["array", "null"], "items": { "type": "object" } },
+        "activationRoutes": { "type": ["array", "null"], "items": { "type": "object" } }
+      },
+      "additionalProperties": false
+    },
+    "channel": { "type": "object", "required": ["localChannelID", "targetTable", "projectionStatus", "localFileID", "channelNumber", "role", "label"], "properties": { "localChannelID": { "type": "string" }, "targetTable": { "const": "audio.channel" }, "projectionStatus": { "$ref": "#/$defs/candidate" }, "localFileID": { "$ref": "#/$defs/uuid" }, "channelNumber": { "type": "integer", "minimum": 1 }, "role": { "type": "string" }, "label": { "type": "string" }, "microphoneLocalID": { "type": ["string", "null"], "format": "uuid" }, "gainDB": { "type": ["number", "null"] }, "phantomPower": { "type": ["boolean", "null"] } }, "additionalProperties": false },
+    "segment": { "type": "object", "required": ["localSegmentID", "targetTable", "projectionStatus", "localFileID", "segmentType", "startSeconds", "endSeconds", "source"], "properties": { "localSegmentID": { "type": "string" }, "targetTable": { "const": "audio.segment" }, "projectionStatus": { "$ref": "#/$defs/candidate" }, "localFileID": { "$ref": "#/$defs/uuid" }, "segmentType": { "enum": ["attack", "sustain", "release", "tail"] }, "startSeconds": { "type": "number", "minimum": 0 }, "endSeconds": { "type": "number", "exclusiveMinimum": 0 }, "source": { "type": "string" } }, "additionalProperties": false },
+    "device": { "type": "object", "required": ["localDeviceID", "targetTables", "projectionStatus", "kind", "manufacturer", "model", "serialNumber", "details"], "properties": { "localDeviceID": { "$ref": "#/$defs/uuid" }, "targetTables": { "type": "array" }, "projectionStatus": { "$ref": "#/$defs/candidate" }, "kind": { "enum": ["audioInterface", "microphone", "controller", "sensor"] }, "manufacturer": { "type": "string" }, "model": { "type": "string" }, "serialNumber": { "type": "string" }, "existingMODAVISManifestationID": { "type": ["string", "null"] }, "details": { "type": "object", "additionalProperties": { "type": "string" } } }, "additionalProperties": false },
+    "registration": { "type": "object", "required": ["localRegistrationID", "projectionStatus", "revision", "activatedStops", "activatedCouplers", "activatedAccessories", "notes"], "properties": { "localRegistrationID": { "$ref": "#/$defs/uuid" }, "projectionStatus": { "$ref": "#/$defs/candidate" }, "revision": { "type": "integer", "minimum": 1 }, "name": { "type": ["string", "null"] }, "purpose": { "type": ["string", "null"] }, "activatedStops": { "type": "array" }, "activatedCouplers": { "type": "array" }, "activatedAccessories": { "type": "array" }, "notes": { "type": "string" } }, "additionalProperties": false },
+    "observation": { "type": "object", "required": ["localObservationID", "targetTable", "projectionStatus", "localTakeID", "measuredComponent", "property", "numericValue", "unit", "method", "algorithmVersion", "analyzedAt"], "properties": { "localObservationID": { "type": "string" }, "targetTable": { "const": "measurement.observation" }, "projectionStatus": { "$ref": "#/$defs/candidate" }, "localTakeID": { "$ref": "#/$defs/uuid" }, "measuredComponent": { "type": "object" }, "property": { "type": "string" }, "numericValue": { "type": "number" }, "unit": { "type": "string" }, "method": { "type": "string" }, "algorithmVersion": { "type": "string" }, "analyzedAt": { "type": "string", "format": "date-time" }, "uncertainty": { "type": ["number", "null"], "minimum": 0 }, "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }, "analysisRunID": { "type": ["string", "null"], "format": "uuid" } }, "additionalProperties": false },
+    "paradata": { "type": "object", "required": ["localParadataID", "targetTable", "projectionStatus", "localTakeID", "reviewDecisionCount", "captureFaultCount"], "properties": { "localParadataID": { "type": "string" }, "targetTable": { "const": "paradata.generic" }, "projectionStatus": { "$ref": "#/$defs/candidate" }, "localTakeID": { "$ref": "#/$defs/uuid" }, "analysisRelativePath": { "type": ["string", "null"] }, "annotationRelativePath": { "type": ["string", "null"] }, "bwfRelativePath": { "type": ["string", "null"] }, "provenanceContract": { "type": ["string", "null"] }, "analysisMethod": { "type": ["string", "null"] }, "algorithmVersion": { "type": ["string", "null"] }, "reviewDecisionCount": { "type": "integer", "minimum": 0 }, "captureFaultCount": { "type": "integer", "minimum": 0 } }, "additionalProperties": false },
+    "calibration": { "type": "object", "required": ["localCalibrationID", "targetTables", "projectionStatus", "calibration"], "properties": { "localCalibrationID": { "$ref": "#/$defs/uuid" }, "targetTables": { "const": ["prov.activity", "measurement.observation", "audio.recording_session"] }, "projectionStatus": { "$ref": "#/$defs/candidate" }, "calibration": { "type": "object" }, "audioRelativePath": { "type": ["string", "null"], "pattern": "^audio/calibration-.+\\.wav$" } }, "additionalProperties": false },
+    "temperamentAnalysis": { "type": "object", "required": ["localAnalysisID", "targetTables", "projectionStatus", "analysis"], "properties": { "localAnalysisID": { "$ref": "#/$defs/uuid" }, "targetTables": { "const": ["measurement.observation", "paradata.generic"] }, "projectionStatus": { "$ref": "#/$defs/candidate" }, "analysis": { "type": "object" } }, "additionalProperties": false }
+  }
+}

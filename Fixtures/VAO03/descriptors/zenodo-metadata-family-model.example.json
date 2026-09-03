@@ -1,0 +1,23 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/zenodo-metadata.json",
+  "type": "VAOZenodoMetadata",
+  "formatVersion": "0.3.3",
+  "releaseId": "urn:uuid:03100000-0000-4000-8000-000000000101",
+  "publicationRecordId": "urn:uuid:03100000-0000-4000-8000-000000000120",
+  "recordRole": "family-member",
+  "metadata": {
+    "upload_type": "dataset",
+    "title": "Example instrument VAO — exclusive 3D model pack",
+    "description": "Version-pinned 3D realizations and their VAO pack manifest for one VAO release.",
+    "creators": [{ "name": "Example, Ada", "affiliation": "Example Institute" }],
+    "publication_date": "2026-08-24",
+    "version": "1.0.0-model-pack",
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "keywords": ["Virtual Acoustic Object", "VAO 0.3", "3D model", "asset pack"],
+    "related_identifiers": [
+      { "identifier": "https://doi.org/10.5281/zenodo.2234567", "relation": "isPartOf", "resource_type": "dataset" }
+    ],
+    "language": "eng"
+  }
+}

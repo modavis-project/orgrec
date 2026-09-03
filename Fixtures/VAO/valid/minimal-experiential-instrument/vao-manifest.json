@@ -1,0 +1,935 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.2/schema/manifest.json",
+  "@context": [
+    "https://w3id.org/modavis/vao/0.2/context.jsonld"
+  ],
+  "analyses": [
+    {
+      "analysisType": "https://w3id.org/modavis/vao/vocab/analysis/pipe-sample-characterization",
+      "generatedAt": "2026-08-16T00:00:00Z",
+      "id": "urn:vao:fixture:analysis:sample",
+      "inputIds": [
+        "urn:vao:fixture:asset:audio"
+      ],
+      "method": "fixture frequency-dependent onset and stable-pitch analysis",
+      "observations": [
+        {
+          "applicability": "applicable",
+          "channelIndices": [
+            0
+          ],
+          "confidence": 0.9,
+          "evidenceCount": 10,
+          "property": "https://w3id.org/modavis/vao/vocab/observation/fundamental-frequency",
+          "sourceRegionId": "urn:vao:fixture:region:sample",
+          "status": "observed",
+          "subjectId": "urn:vao:fixture:take:sample",
+          "timeRange": {
+            "clockAssetId": "urn:vao:fixture:asset:audio",
+            "endFrameExclusive": 1000,
+            "endSeconds": 0.020833333333333332,
+            "sampleRate": 48000.0,
+            "startFrameInclusive": 0,
+            "startSeconds": 0.0
+          },
+          "uncertainty": 0.25,
+          "unit": "http://qudt.org/vocab/unit/HZ",
+          "value": 440.0
+        }
+      ],
+      "outputIds": [
+        "urn:vao:fixture:take:sample"
+      ],
+      "paradataId": "urn:vao:fixture:activity:sample-analysis",
+      "qualityFlags": [],
+      "version": "1"
+    }
+  ],
+  "acoustics": {
+    "coordinateFrames": [
+      {
+        "id": "urn:vao:fixture:frame:local-model",
+        "dimension": 3,
+        "coordinateType": "cartesian",
+        "unit": "http://qudt.org/vocab/unit/M",
+        "handedness": "right",
+        "upAxis": "+Y",
+        "forwardAxis": "-Z"
+      }
+    ],
+    "poses": [
+      {
+        "id": "urn:vao:fixture:pose:listening-point",
+        "subjectId": "urn:vao:fixture:experiential:listening-point",
+        "frameId": "urn:vao:fixture:frame:local-model",
+        "position": [0.0, 1.6, 2.0],
+        "orientationXYZW": [0.0, 0.0, 0.0, 1.0],
+        "interpolation": "none"
+      }
+    ],
+    "geometryBindings": [],
+    "materialModels": [],
+    "responseSets": [],
+    "metricSets": [],
+    "audioScenes": [],
+    "renderConfigurations": []
+  },
+  "assets": [
+    {
+      "aboutEntityIds": [
+        "urn:vao:fixture:experiential:root",
+        "urn:vao:fixture:experiential:listening-point",
+        "urn:vao:fixture:experiential:target-component"
+      ],
+      "byteSize": 42,
+      "id": "urn:vao:fixture:asset:model",
+      "mediaType": "model/gltf-binary",
+      "path": "payload/media/model.glb",
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#animationBindings": {
+          "blendPolicy": "parallel",
+          "layers": [
+            {
+              "clip": "fixture-motion",
+              "targetEntityIds": [
+                "urn:vao:fixture:experiential:target-component"
+              ]
+            }
+          ]
+        },
+        "https://w3id.org/modavis/vao/ontology#coordinateSystem": "local-model",
+        "https://w3id.org/modavis/vao/ontology#coordinateUnit": "http://qudt.org/vocab/unit/M",
+        "https://w3id.org/modavis/vao/ontology#handedness": "right",
+        "https://w3id.org/modavis/vao/ontology#physicalDimensions": {
+          "depth": 1.0,
+          "height": 1.0,
+          "unit": "http://qudt.org/vocab/unit/M",
+          "width": 1.0
+        },
+        "https://w3id.org/modavis/vao/ontology#upAxis": "Y"
+      },
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/three-dimensional-model",
+        "https://w3id.org/modavis/vao/vocab/asset-role/spatial-model",
+        "https://w3id.org/modavis/vao/vocab/asset-role/animation"
+      ],
+      "sha256": "ad4bc05942b852fa24117414e0092cdeb8789cfa3a2bd7b307ed351752c3567d"
+    },
+    {
+      "aboutEntityIds": [
+        "urn:vao:fixture:experiential:root",
+        "urn:vao:fixture:experiential:performance",
+        "urn:vao:fixture:experiential:listening-point"
+      ],
+      "byteSize": 28,
+      "id": "urn:vao:fixture:asset:audio",
+      "mediaType": "audio/wav",
+      "path": "payload/media/performance.wav",
+      "properties": {},
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/performance-media",
+        "https://w3id.org/modavis/vao/vocab/asset-role/spatial-listening-audio"
+      ],
+      "sha256": "6d592c00e41ce2178fc697a6eda650028542f891a9c167634c868029c66a60fc"
+    },
+    {
+      "aboutEntityIds": [
+        "urn:vao:fixture:experiential:root",
+        "urn:vao:fixture:experiential:carrier-a",
+        "urn:vao:fixture:experiential:carrier-b"
+      ],
+      "byteSize": 53,
+      "id": "urn:vao:fixture:asset:image",
+      "mediaType": "image/png",
+      "path": "payload/media/target.png",
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#physicalDimensions": {
+          "height": 0.2,
+          "unit": "http://qudt.org/vocab/unit/M",
+          "width": 0.2
+        }
+      },
+      "representationStatus": "https://w3id.org/modavis/vao/vocab/representation-status/authored",
+      "roles": [
+        "https://w3id.org/modavis/vao/vocab/asset-role/image-target",
+        "https://w3id.org/modavis/vao/vocab/asset-role/carrier-label-image"
+      ],
+      "sha256": "106c0fecac0936db1dfe9323918d165e6750bd58fc38ffe7c71502bb718ad0ac"
+    }
+  ],
+  "conformsTo": [
+    "https://w3id.org/modavis/vao/profile/core/0.2",
+    "https://w3id.org/modavis/vao/profile/research/0.2",
+    "https://w3id.org/modavis/vao/profile/playable/0.2",
+    "https://w3id.org/modavis/vao/profile/spatial/0.2",
+    "https://w3id.org/modavis/vao/profile/experiential/0.2"
+  ],
+  "createdAt": "2026-08-15T00:00:00Z",
+  "description": {
+    "en": "Positive fixture for every standard experiential capability."
+  },
+  "entities": [
+    {
+      "id": "urn:vao:fixture:experiential:root",
+      "kind": "instrument",
+      "labels": {
+        "en": "Experiential fixture instrument"
+      },
+      "properties": {},
+      "types": [
+        "https://w3id.org/modavis/ontology/instrument#MusicalInstrument"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:target-component",
+      "kind": "component",
+      "labels": {
+        "en": "Animated target"
+      },
+      "properties": {},
+      "types": [
+        "https://w3id.org/modavis/ontology/instrument#InstrumentComponent"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:listening-point",
+      "kind": "spatialRegion",
+      "labels": {
+        "en": "Listening point"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#coordinateSystem": "local-model",
+        "https://w3id.org/modavis/vao/ontology#coordinateUnit": "http://qudt.org/vocab/unit/M",
+        "https://w3id.org/modavis/vao/ontology#handedness": "right",
+        "https://w3id.org/modavis/vao/ontology#position": {
+          "unit": "http://qudt.org/vocab/unit/M",
+          "x": 0.0,
+          "y": 1.6,
+          "z": 2.0
+        },
+        "https://w3id.org/modavis/vao/ontology#upAxis": "Y"
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#SpatialRegion"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:performance",
+      "kind": "performance",
+      "labels": {
+        "en": "Recorded performance"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#timelineClock": {
+          "duration": 10.0,
+          "offset": 0.0,
+          "timeUnit": "http://qudt.org/vocab/unit/SEC"
+        },
+        "https://w3id.org/modavis/vao/ontology#transportPolicy": {
+          "masterClock": "audio",
+          "pause": "hold",
+          "seek": "allowed",
+          "start": "explicit",
+          "stop": "reset"
+        }
+      },
+      "types": [
+        "https://w3id.org/modavis/ontology/events#Performance"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:configuration-a",
+      "kind": "configuration",
+      "labels": {
+        "en": "Carrier A installed"
+      },
+      "properties": {},
+      "types": [
+        "https://w3id.org/modavis/ontology/instrument#InstrumentConfiguration"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:configuration-b",
+      "kind": "configuration",
+      "labels": {
+        "en": "Carrier B installed"
+      },
+      "properties": {},
+      "types": [
+        "https://w3id.org/modavis/ontology/instrument#InstrumentConfiguration"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:carrier-a",
+      "kind": "digitalObject",
+      "labels": {
+        "en": "Carrier A"
+      },
+      "properties": {},
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#DigitalAsset"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:carrier-b",
+      "kind": "digitalObject",
+      "labels": {
+        "en": "Carrier B"
+      },
+      "properties": {},
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#DigitalAsset"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:media-interaction",
+      "kind": "interaction",
+      "labels": {
+        "en": "Install, play, stop, and eject carrier"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#actionSequence": [
+          {
+            "action": "select",
+            "targetId": "urn:vao:fixture:experiential:configuration-a"
+          },
+          {
+            "action": "install",
+            "targetId": "urn:vao:fixture:experiential:carrier-a"
+          },
+          {
+            "action": "play",
+            "targetId": "urn:vao:fixture:experiential:performance"
+          },
+          {
+            "action": "stop",
+            "targetId": "urn:vao:fixture:experiential:performance"
+          },
+          {
+            "action": "eject",
+            "targetId": "urn:vao:fixture:experiential:carrier-a"
+          }
+        ],
+        "https://w3id.org/modavis/vao/ontology#controlDomain": {
+          "commands": [
+            "select",
+            "install",
+            "play",
+            "stop",
+            "eject"
+          ]
+        },
+        "https://w3id.org/modavis/vao/ontology#controlProtocol": {
+          "binding": "declarative-host-actions"
+        },
+        "https://w3id.org/modavis/vao/ontology#interactionType": "https://w3id.org/modavis/vao/vocab/interaction/media-transport",
+        "https://w3id.org/modavis/vao/ontology#timingPolicy": {
+          "clock": "performance-audio"
+        }
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Interaction"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:offline-group",
+      "kind": "assetGroup",
+      "labels": {
+        "en": "Offline fixture media"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#assetGroupPolicy": {
+          "availability": "offline-optional",
+          "defaultSelected": true,
+          "selection": "independent"
+        }
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#AssetGroup"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:experience:model",
+      "kind": "experience",
+      "labels": {
+        "en": "Model viewing"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#experienceCapability": "https://w3id.org/modavis/vao/vocab/capability/generic-model-viewing"
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Experience"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:experience:sync",
+      "kind": "experience",
+      "labels": {
+        "en": "Synchronized media and animation"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#experienceCapability": "https://w3id.org/modavis/vao/vocab/capability/synchronized-media-animation"
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Experience"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:experience:image-ar",
+      "kind": "experience",
+      "labels": {
+        "en": "Image-target AR"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#experienceCapability": "https://w3id.org/modavis/vao/vocab/capability/image-target-ar"
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Experience"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:experience:surface-ar",
+      "kind": "experience",
+      "labels": {
+        "en": "Surface-placement AR"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#experienceCapability": "https://w3id.org/modavis/vao/vocab/capability/surface-placement-ar",
+        "https://w3id.org/modavis/vao/ontology#placementPolicy": {
+          "allowUniformScale": true,
+          "modelAnchor": "base-center",
+          "surfaceAlignment": "horizontal"
+        }
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Experience"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:experience:listening",
+      "kind": "experience",
+      "labels": {
+        "en": "Spatial listening map"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#experienceCapability": "https://w3id.org/modavis/vao/vocab/capability/spatial-listening-map"
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Experience"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:experience:offline",
+      "kind": "experience",
+      "labels": {
+        "en": "Offline acquisition"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#experienceCapability": "https://w3id.org/modavis/vao/vocab/capability/offline-asset-groups"
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Experience"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:experiential:experience:replaceable",
+      "kind": "experience",
+      "labels": {
+        "en": "Replaceable performance media"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#experienceCapability": "https://w3id.org/modavis/vao/vocab/capability/replaceable-performance-media",
+        "https://w3id.org/modavis/vao/ontology#selectionPolicy": "exclusive"
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Experience"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:interaction:sample",
+      "kind": "interaction",
+      "labels": {
+        "en": "Play reviewed sample"
+      },
+      "properties": {
+        "https://w3id.org/modavis/vao/ontology#controlDomain": {
+          "keyMaximum": 69,
+          "keyMinimum": 69,
+          "velocityMaximum": 127,
+          "velocityMinimum": 1
+        },
+        "https://w3id.org/modavis/vao/ontology#controlProtocol": {
+          "binding": "host-note-gate"
+        },
+        "https://w3id.org/modavis/vao/ontology#interactionType": "https://w3id.org/modavis/vao/vocab/interaction/excite",
+        "https://w3id.org/modavis/vao/ontology#timingPolicy": {
+          "attack": "sample-accurate",
+          "release": "natural"
+        }
+      },
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#Interaction"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:parameters:sample",
+      "kind": "parameterSet",
+      "labels": {
+        "en": "Reviewed sample playback parameters"
+      },
+      "properties": {
+        "https://w3id.org/modavis/ontology/audio#channelPolicy": {
+          "mode": "preserve",
+          "sourceChannelIndices": [
+            0
+          ]
+        },
+        "https://w3id.org/modavis/ontology/audio#envelope": {
+          "attackSeconds": 0.0,
+          "curve": "natural",
+          "releaseSeconds": 0.1,
+          "sustainLevel": 1.0
+        },
+        "https://w3id.org/modavis/ontology/audio#gainDB": 0.0,
+        "https://w3id.org/modavis/ontology/audio#maximumKeyNumber": 69,
+        "https://w3id.org/modavis/ontology/audio#maximumVelocity": 127,
+        "https://w3id.org/modavis/ontology/audio#minimumKeyNumber": 69,
+        "https://w3id.org/modavis/ontology/audio#minimumVelocity": 1,
+        "https://w3id.org/modavis/ontology/audio#noteOffPolicy": "naturalRelease",
+        "https://w3id.org/modavis/ontology/audio#pitchTrackingMode": "resampleToTarget",
+        "https://w3id.org/modavis/ontology/audio#rootKeyNumber": 69,
+        "https://w3id.org/modavis/ontology/audio#sourceFundamentalHz": 440.0,
+        "https://w3id.org/modavis/ontology/audio#status": "accepted",
+        "https://w3id.org/modavis/ontology/audio#targetFrequencyHz": 440.0,
+        "https://w3id.org/modavis/ontology/audio#tuningOffsetCents": 0.0
+      },
+      "types": [
+        "https://w3id.org/modavis/ontology/audio#SamplePlaybackParameters"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:tuning-map",
+      "kind": "parameterSet",
+      "labels": {
+        "en": "Fixture tuning map"
+      },
+      "properties": {
+        "https://w3id.org/modavis/ontology/audio#referenceA4Hz": 440.0,
+        "https://w3id.org/modavis/ontology/audio#referenceKeyNumber": 69,
+        "https://w3id.org/modavis/ontology/audio#temperamentIdentifier": "https://w3id.org/modavis/vao/vocab/temperament/fixture",
+        "https://w3id.org/modavis/ontology/audio#tuningEntries": [
+          {
+            "componentId": "urn:vao:fixture:experiential:target-component",
+            "keyNumber": 69,
+            "targetFrequencyHz": 440.0,
+            "tuningOffsetCents": 0.0
+          }
+        ]
+      },
+      "types": [
+        "https://w3id.org/modavis/ontology/audio#TuningMap"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:region:sample",
+      "kind": "signalRegion",
+      "labels": {
+        "en": "Exact extracted sample interval"
+      },
+      "properties": {
+        "https://w3id.org/modavis/ontology/audio#boundaryConfidence": 0.9,
+        "https://w3id.org/modavis/ontology/audio#censoring": "none",
+        "https://w3id.org/modavis/ontology/audio#endFrameExclusive": 1000,
+        "https://w3id.org/modavis/ontology/audio#referenceChannelIndex": 0,
+        "https://w3id.org/modavis/ontology/audio#regionRole": "complete-note",
+        "https://w3id.org/modavis/ontology/audio#sampleRate": 48000.0,
+        "https://w3id.org/modavis/ontology/audio#sourceAudioSHA256": "6d592c00e41ce2178fc697a6eda650028542f891a9c167634c868029c66a60fc",
+        "https://w3id.org/modavis/ontology/audio#startFrameInclusive": 0,
+        "https://w3id.org/modavis/ontology/audio#totalFrames": 1000
+      },
+      "types": [
+        "https://w3id.org/modavis/ontology/audio#SampleExtractionRegion"
+      ]
+    },
+    {
+      "id": "urn:vao:fixture:take:sample",
+      "kind": "digitalObject",
+      "labels": {
+        "en": "Derived note sample"
+      },
+      "properties": {},
+      "types": [
+        "https://w3id.org/modavis/vao/ontology#DigitalAsset"
+      ]
+    }
+  ],
+  "extensions": {},
+  "formatVersion": "0.2.2",
+  "id": "https://example.org/vao/fixture/minimal-experiential-instrument",
+  "integrity": {
+    "algorithm": "sha256",
+    "assetCount": 3,
+    "totalPayloadBytes": 123
+  },
+  "modavisBinding": {
+    "mappingVersion": "vao-modavis-mapping/0.2.2",
+    "notes": "Fixture binding; not a released MODAVIS claim.",
+    "ontologyIRI": "https://w3id.org/modavis/ontology",
+    "ontologyStatus": "development",
+    "ontologyVersion": "0.1.0-dev"
+  },
+  "modifiedAt": "2026-08-15T21:38:07Z",
+  "paradata": [
+    {
+      "activityType": "https://w3id.org/modavis/vao/vocab/activity/AcousticalAnalysis",
+      "id": "urn:vao:fixture:activity:sample-analysis",
+      "inputIds": [
+        "urn:vao:fixture:asset:audio"
+      ],
+      "outputIds": [
+        "urn:vao:fixture:take:sample"
+      ],
+      "parameters": {
+        "frequencyDependentDetection": true,
+        "frameLength": 2048,
+        "hopLength": 256
+      },
+      "software": {
+        "name": "VAO fixture generator",
+        "version": "0.2.2"
+      },
+      "startedAt": "2026-08-16T00:00:00Z"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "https://w3id.org/modavis/vao/profile/core/0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/core-graph",
+        "https://w3id.org/modavis/vao/vocab/capability/fixity"
+      ],
+      "version": "0.2"
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/research/0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/paradata",
+        "https://w3id.org/modavis/vao/vocab/capability/source-segmentation",
+        "https://w3id.org/modavis/vao/vocab/capability/acoustical-analysis",
+        "https://w3id.org/modavis/vao/vocab/capability/tuning-map"
+      ],
+      "version": "0.2"
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/playable/0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/interaction",
+        "https://w3id.org/modavis/vao/vocab/capability/sampled-instrument-playback"
+      ],
+      "version": "0.2"
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/spatial/0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/spatial"
+      ],
+      "version": "0.2"
+    },
+    {
+      "id": "https://w3id.org/modavis/vao/profile/experiential/0.2",
+      "requiredCapabilities": [
+        "https://w3id.org/modavis/vao/vocab/capability/generic-model-viewing",
+        "https://w3id.org/modavis/vao/vocab/capability/synchronized-media-animation",
+        "https://w3id.org/modavis/vao/vocab/capability/image-target-ar",
+        "https://w3id.org/modavis/vao/vocab/capability/surface-placement-ar",
+        "https://w3id.org/modavis/vao/vocab/capability/spatial-listening-map",
+        "https://w3id.org/modavis/vao/vocab/capability/offline-asset-groups",
+        "https://w3id.org/modavis/vao/vocab/capability/replaceable-performance-media"
+      ],
+      "version": "0.2"
+    }
+  ],
+  "relations": [
+    {
+      "id": "urn:vao:fixture:relation:001",
+      "objectId": "urn:vao:fixture:experiential:root",
+      "predicate": "https://w3id.org/modavis/vao/ontology#presents",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:model"
+    },
+    {
+      "id": "urn:vao:fixture:relation:002",
+      "objectId": "urn:vao:fixture:asset:model",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesModel",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:model"
+    },
+    {
+      "id": "urn:vao:fixture:relation:003",
+      "objectId": "urn:vao:fixture:experiential:root",
+      "predicate": "https://w3id.org/modavis/vao/ontology#presents",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:sync"
+    },
+    {
+      "id": "urn:vao:fixture:relation:004",
+      "objectId": "urn:vao:fixture:experiential:performance",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasPerformance",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:sync"
+    },
+    {
+      "id": "urn:vao:fixture:relation:005",
+      "objectId": "urn:vao:fixture:asset:audio",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesMedia",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:performance"
+    },
+    {
+      "id": "urn:vao:fixture:relation:006",
+      "objectId": "urn:vao:fixture:asset:model",
+      "predicate": "https://w3id.org/modavis/vao/ontology#drivesAnimation",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:performance"
+    },
+    {
+      "id": "urn:vao:fixture:relation:007",
+      "objectId": "urn:vao:fixture:experiential:root",
+      "predicate": "https://w3id.org/modavis/vao/ontology#presents",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:image-ar"
+    },
+    {
+      "id": "urn:vao:fixture:relation:008",
+      "objectId": "urn:vao:fixture:asset:model",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesModel",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:image-ar"
+    },
+    {
+      "id": "urn:vao:fixture:relation:009",
+      "objectId": "urn:vao:fixture:asset:image",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesTarget",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:image-ar"
+    },
+    {
+      "id": "urn:vao:fixture:relation:010",
+      "objectId": "urn:vao:fixture:experiential:root",
+      "predicate": "https://w3id.org/modavis/vao/ontology#presents",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:surface-ar"
+    },
+    {
+      "id": "urn:vao:fixture:relation:011",
+      "objectId": "urn:vao:fixture:asset:model",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesModel",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:surface-ar"
+    },
+    {
+      "id": "urn:vao:fixture:relation:012",
+      "objectId": "urn:vao:fixture:experiential:listening-point",
+      "predicate": "https://w3id.org/modavis/vao/ontology#presents",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:listening"
+    },
+    {
+      "id": "urn:vao:fixture:relation:013",
+      "objectId": "urn:vao:fixture:experiential:listening-point",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasListeningPoint",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:listening"
+    },
+    {
+      "id": "urn:vao:fixture:relation:014",
+      "objectId": "urn:vao:fixture:asset:audio",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesMedia",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:listening-point"
+    },
+    {
+      "id": "urn:vao:fixture:relation:015",
+      "objectId": "urn:vao:fixture:experiential:root",
+      "predicate": "https://w3id.org/modavis/vao/ontology#presents",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:offline"
+    },
+    {
+      "id": "urn:vao:fixture:relation:016",
+      "objectId": "urn:vao:fixture:experiential:offline-group",
+      "predicate": "https://w3id.org/modavis/vao/ontology#offersAssetGroup",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:offline"
+    },
+    {
+      "id": "urn:vao:fixture:relation:017",
+      "objectId": "urn:vao:fixture:asset:model",
+      "predicate": "https://w3id.org/modavis/vao/ontology#includesAsset",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:offline-group"
+    },
+    {
+      "id": "urn:vao:fixture:relation:018",
+      "objectId": "urn:vao:fixture:asset:audio",
+      "predicate": "https://w3id.org/modavis/vao/ontology#includesAsset",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:offline-group"
+    },
+    {
+      "id": "urn:vao:fixture:relation:019",
+      "objectId": "urn:vao:fixture:experiential:root",
+      "predicate": "https://w3id.org/modavis/vao/ontology#presents",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:replaceable"
+    },
+    {
+      "id": "urn:vao:fixture:relation:020",
+      "objectId": "urn:vao:fixture:experiential:configuration-a",
+      "predicate": "https://w3id.org/modavis/vao/ontology#offersConfiguration",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:replaceable"
+    },
+    {
+      "id": "urn:vao:fixture:relation:021",
+      "objectId": "urn:vao:fixture:experiential:configuration-b",
+      "predicate": "https://w3id.org/modavis/vao/ontology#offersConfiguration",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:replaceable"
+    },
+    {
+      "id": "urn:vao:fixture:relation:022",
+      "objectId": "urn:vao:fixture:experiential:carrier-a",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesCarrier",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:configuration-a"
+    },
+    {
+      "id": "urn:vao:fixture:relation:023",
+      "objectId": "urn:vao:fixture:experiential:carrier-b",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesCarrier",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:configuration-b"
+    },
+    {
+      "id": "urn:vao:fixture:relation:024",
+      "objectId": "urn:vao:fixture:asset:image",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasLabelImage",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:carrier-a"
+    },
+    {
+      "id": "urn:vao:fixture:relation:025",
+      "objectId": "urn:vao:fixture:asset:image",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasLabelImage",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:carrier-b"
+    },
+    {
+      "id": "urn:vao:fixture:relation:026",
+      "objectId": "urn:vao:fixture:experiential:performance",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasPerformance",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:carrier-a"
+    },
+    {
+      "id": "urn:vao:fixture:relation:027",
+      "objectId": "urn:vao:fixture:experiential:performance",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasPerformance",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:carrier-b"
+    },
+    {
+      "id": "urn:vao:fixture:relation:028",
+      "objectId": "urn:vao:fixture:experiential:target-component",
+      "predicate": "https://w3id.org/modavis/vao/ontology#targets",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:performance"
+    },
+    {
+      "id": "urn:vao:fixture:relation:029",
+      "objectId": "urn:vao:fixture:experiential:media-interaction",
+      "predicate": "https://w3id.org/modavis/vao/ontology#hasInteraction",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:experience:replaceable"
+    },
+    {
+      "id": "urn:vao:fixture:relation:030",
+      "objectId": "urn:vao:fixture:experiential:performance",
+      "predicate": "https://w3id.org/modavis/vao/ontology#activates",
+      "status": "asserted",
+      "subjectId": "urn:vao:fixture:experiential:media-interaction"
+    },
+    {
+      "id": "urn:vao:fixture:relation:031",
+      "objectId": "urn:vao:fixture:experiential:target-component",
+      "predicate": "https://w3id.org/modavis/vao/ontology#activates",
+      "status": "accepted",
+      "subjectId": "urn:vao:fixture:interaction:sample"
+    },
+    {
+      "id": "urn:vao:fixture:relation:032",
+      "objectId": "urn:vao:fixture:asset:audio",
+      "predicate": "https://w3id.org/modavis/vao/ontology#usesSample",
+      "status": "accepted",
+      "subjectId": "urn:vao:fixture:interaction:sample"
+    },
+    {
+      "id": "urn:vao:fixture:relation:033",
+      "objectId": "urn:vao:fixture:parameters:sample",
+      "predicate": "https://w3id.org/modavis/ontology/audio#usesPlaybackParameters",
+      "status": "accepted",
+      "subjectId": "urn:vao:fixture:interaction:sample"
+    },
+    {
+      "id": "urn:vao:fixture:relation:034",
+      "objectId": "urn:vao:fixture:tuning-map",
+      "predicate": "https://w3id.org/modavis/ontology/audio#usesTuningMap",
+      "status": "accepted",
+      "subjectId": "urn:vao:fixture:interaction:sample"
+    },
+    {
+      "id": "urn:vao:fixture:relation:035",
+      "objectId": "urn:vao:fixture:tuning-map",
+      "predicate": "https://w3id.org/modavis/ontology/audio#hasTuningMap",
+      "status": "accepted",
+      "subjectId": "urn:vao:fixture:experiential:root"
+    },
+    {
+      "id": "urn:vao:fixture:relation:036",
+      "objectId": "urn:vao:fixture:asset:audio",
+      "predicate": "https://w3id.org/modavis/ontology/audio#appliesToSignal",
+      "status": "accepted",
+      "subjectId": "urn:vao:fixture:region:sample"
+    },
+    {
+      "id": "urn:vao:fixture:relation:037",
+      "objectId": "urn:vao:fixture:region:sample",
+      "predicate": "https://w3id.org/modavis/ontology/audio#extractedFromRegion",
+      "status": "accepted",
+      "subjectId": "urn:vao:fixture:take:sample"
+    }
+  ],
+  "revision": 1,
+  "rights": [
+    {
+      "accessCondition": "Test use only.",
+      "appliesToIds": [
+        "https://example.org/vao/fixture/minimal-experiential-instrument"
+      ],
+      "statement": {
+        "en": "Conformance-test material; no external rights are implied."
+      }
+    }
+  ],
+  "primaryEntityId": "urn:vao:fixture:experiential:root",
+  "focusEntityIds": [
+    "urn:vao:fixture:experiential:root"
+  ],
+  "title": {
+    "en": "Minimal experiential instrument fixture"
+  },
+  "type": "VirtualAcousticObject"
+}

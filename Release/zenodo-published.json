@@ -1,0 +1,10 @@
+{
+  "contract": "orgrec-zenodo-publication/1",
+  "recordId": 22216026,
+  "versionDoi": "10.5281/zenodo.22216026",
+  "conceptDoi": "10.5281/zenodo.22216025",
+  "publicationDate": "2026-09-01",
+  "publishedAtUtc": "2026-08-31T22:39:12Z",
+  "resourceType": "software",
+  "version": "0.3.0"
+}

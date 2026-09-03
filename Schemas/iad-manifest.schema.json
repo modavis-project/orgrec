@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modavis.org/schemas/instrumental-audio-dataset-1.0.json",
+  "title": "MODAVIS Instrumental Audio Dataset Package Manifest",
+  "type": "object",
+  "required": [
+    "contractVersion", "datasetID", "generatedAt", "title", "producer", "projectID", "organ",
+    "releaseBinding", "navigatorPayloadSHA256", "modavisSnapshotSHA256", "projectionMode",
+    "manifests", "counts", "files", "integrity"
+  ],
+  "properties": {
+    "contractVersion": { "const": "org.modavis.instrumental-audio-dataset/1.0" },
+    "datasetID": { "$ref": "#/$defs/uuid" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "title": { "type": "string", "minLength": 1 },
+    "producer": { "const": "OrgRec" },
+    "projectID": { "$ref": "#/$defs/uuid" },
+    "organ": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mdvsID", "name", "venueName"],
+      "properties": {
+        "mdvsID": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "venueName": { "type": "string" }
+      }
+    },
+    "releaseBinding": { "$ref": "#/$defs/releaseBinding" },
+    "navigatorPayloadSHA256": { "$ref": "#/$defs/sha256" },
+    "modavisSnapshotSHA256": { "$ref": "#/$defs/sha256" },
+    "projectionMode": { "const": "candidate-proposals" },
+    "manifests": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sessions", "takes", "files", "channels", "segments", "devices", "registrations", "observations", "paradata"],
+      "properties": {
+        "sessions": { "const": "manifests/sessions.jsonl" },
+        "takes": { "const": "manifests/takes.jsonl" },
+        "files": { "const": "manifests/files.jsonl" },
+        "channels": { "const": "manifests/channels.jsonl" },
+        "segments": { "const": "manifests/segments.jsonl" },
+        "devices": { "const": "manifests/devices.jsonl" },
+        "registrations": { "const": "manifests/registrations.jsonl" },
+        "observations": { "const": "manifests/observations.jsonl" },
+        "paradata": { "const": "manifests/paradata.jsonl" },
+        "calibrations": { "const": "manifests/calibrations.jsonl" },
+        "temperamentAnalyses": { "const": "manifests/temperament-analyses.jsonl" }
+      }
+    },
+    "counts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sessions", "takes", "files", "channels", "segments", "devices", "registrations", "observations", "paradata"],
+      "properties": {
+        "sessions": { "$ref": "#/$defs/count" }, "takes": { "$ref": "#/$defs/count" },
+        "files": { "$ref": "#/$defs/count" }, "channels": { "$ref": "#/$defs/count" },
+        "segments": { "$ref": "#/$defs/count" }, "devices": { "$ref": "#/$defs/count" },
+        "registrations": { "$ref": "#/$defs/count" }, "observations": { "$ref": "#/$defs/count" },
+        "paradata": { "$ref": "#/$defs/count" },
+        "calibrations": { "$ref": "#/$defs/count" },
+        "temperamentAnalyses": { "$ref": "#/$defs/count" }
+      }
+    },
+    "files": { "type": "array", "items": { "$ref": "#/$defs/payloadFile" } },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "format": "uuid" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "count": { "type": "integer", "minimum": 0 },
+    "relativePath": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" },
+    "releaseBinding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["requestedRelease", "releaseState", "canonicalSourceRelease", "protectedFingerprintSHA256", "navigatorContractVersion"],
+      "properties": {
+        "requestedRelease": { "type": "string", "minLength": 1 },
+        "releaseState": { "type": "string", "minLength": 1 },
+        "canonicalSourceRelease": { "type": "string", "minLength": 1 },
+        "protectedFingerprintSHA256": { "$ref": "#/$defs/sha256" },
+        "navigatorContractVersion": { "type": "string", "minLength": 1 }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/relativePath" },
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    },
+    "payloadFile": {
+      "type": "object", "additionalProperties": false,
+      "required": ["relativePath", "sha256", "byteSize", "mediaType", "role"],
+      "properties": {
+        "relativePath": { "$ref": "#/$defs/relativePath" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "byteSize": { "type": "integer", "minimum": 0 },
+        "mediaType": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "additionalProperties": false
+}

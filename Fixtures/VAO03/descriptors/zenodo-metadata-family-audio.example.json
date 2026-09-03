@@ -1,0 +1,22 @@
+{
+  "$schema": "https://w3id.org/modavis/vao/0.3/schema/zenodo-metadata.json",
+  "type": "VAOZenodoMetadata",
+  "formatVersion": "0.3.3",
+  "releaseId": "urn:uuid:03100000-0000-4000-8000-000000000101",
+  "publicationRecordId": "urn:uuid:03100000-0000-4000-8000-000000000130",
+  "recordRole": "family-member",
+  "metadata": {
+    "upload_type": "dataset",
+    "title": "Reusable spatial-audio pack for Virtual Acoustic Objects",
+    "description": "A versioned spatial-audio pack that may be required by more than one VAO and therefore does not claim exclusive ownership by one root record.",
+    "creators": [{ "name": "Audio Lab, Example" }],
+    "publication_date": "2026-08-24",
+    "version": "2.1.0",
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "keywords": ["Virtual Acoustic Object", "VAO 0.3", "spatial audio", "reusable asset pack"],
+    "related_identifiers": [],
+    "language": "eng",
+    "notes": "The VAO root declares the exact requires relation; this shared record does not assert isPartOf."
+  }
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "shortDescription" : "CREPE tiny pitch activation model for OrgRec",
+    "metadataOutputVersion" : "3.0",
+    "outputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32)",
+        "shortDescription" : "360 pitch-bin confidence activations",
+        "shape" : "[]",
+        "name" : "activation",
+        "type" : "MultiArray"
+      }
+    ],
+    "version" : "torchcrepe-tiny\/0.0.24; orgrec-coreml\/1",
+    "modelParameters" : [
+
+    ],
+    "author" : "CREPE authors; converted by OrgRec",
+    "specificationVersion" : 4,
+    "storagePrecision" : "Float32",
+    "license" : "MIT",
+    "computePrecision" : "Float16",
+    "stateSchema" : [
+
+    ],
+    "isUpdatable" : "0",
+    "availability" : {
+      "macOS" : "10.15",
+      "tvOS" : "13.0",
+      "visionOS" : "1.0",
+      "watchOS" : "6.0",
+      "iOS" : "13.0",
+      "macCatalyst" : "13.0"
+    },
+    "modelType" : {
+      "name" : "MLModelType_neuralNetwork"
+    },
+    "inputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 1024)",
+        "shortDescription" : "Normalized 1024-sample mono frame at 16 kHz",
+        "shape" : "[1, 1024]",
+        "name" : "audio",
+        "type" : "MultiArray"
+      }
+    ],
+    "userDefinedMetadata" : {
+      "com.github.apple.coremltools.conversion_date" : "2026-08-12",
+      "com.github.apple.coremltools.source" : "torch==2.7.0",
+      "com.github.apple.coremltools.version" : "9.0",
+      "com.github.apple.coremltools.source_dialect" : "TorchScript"
+    },
+    "generatedClassName" : "crepe_tiny_nn",
+    "neuralNetworkLayerTypeHistogram" : {
+      "ActivationSigmoid" : 1,
+      "ActivationReLU" : 6,
+      "ReshapeStatic" : 1,
+      "Transpose" : 1,
+      "PoolingINVALID" : 6,
+      "ExpandDims" : 2,
+      "BatchNorm" : 6,
+      "Convolution" : 6,
+      "PaddingConstant" : 6,
+      "InnerProduct" : 1
+    },
+    "method" : "predict"
+  }
+]
