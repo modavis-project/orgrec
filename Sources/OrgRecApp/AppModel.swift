@@ -5,6 +5,9 @@ import Foundation
 import OrgRecCore
 
 enum AppPage: String, CaseIterable, Identifiable {
+    case audioAnalysis = "Analyze Audio"
+    case gettingStarted = "Getting Started"
+    case podDatabase = "Install POD"
     case projects = "Projects"
     case datasetImport = "Data Exchange"
     case organSearch = "Find Organ"
@@ -20,6 +23,9 @@ enum AppPage: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var symbol: String {
         switch self {
+        case .audioAnalysis: "waveform.badge.magnifyingglass"
+        case .gettingStarted: "list.number"
+        case .podDatabase: "arrow.down.circle"
         case .projects: "square.grid.2x2"
         case .datasetImport: "shippingbox.and.arrow.backward"
         case .organSearch: "magnifyingglass"
@@ -143,7 +149,7 @@ private enum PersistenceCompletion {
 final class AppModel: ObservableObject {
     @Published var project: OrgRecProject?
     @Published var projectURL: URL?
-    @Published var page: AppPage = .projects
+    @Published var page: AppPage = (UserDefaults.standard.string(forKey: "org.modavis.OrgRec.lastProjectPath") ?? "").isEmpty ? .gettingStarted : .projects
     @Published var selectedRoadmapID: UUID? {
         didSet {
             if oldValue != selectedRoadmapID, capture.isRecording == false {
@@ -181,7 +187,7 @@ final class AppModel: ObservableObject {
     @Published var podDatabaseInspection: PODDatabaseInspection?
     @Published var podDatabaseSourceURL: URL?
     @Published var podDatabaseCacheURL: URL?
-    @Published var podDatabaseDownloadURL = ""
+    @Published var podDatabaseDownloadURL = PODDatabaseContract.downloadURL.absoluteString
     @Published var podDatabaseStatus: String?
     @Published var isCalibrating = false
     @Published var temperamentProgress: String?
@@ -205,6 +211,7 @@ final class AppModel: ObservableObject {
     let capture = AudioCaptureEngine()
     let livePitch = LivePitchMonitor()
     let audioSystem = CoreAudioDeviceManager()
+    let standaloneAudio = StandaloneAudioModel()
     let playback = AudioPlaybackController()
     let midiControl = MIDIControlCenter()
     let interactionSensors = InteractionSensorCenter()
@@ -876,12 +883,12 @@ final class AppModel: ObservableObject {
             if let path = UserDefaults.standard.string(forKey: podDatabasePathKey) {
                 let databaseURL = URL(fileURLWithPath: path)
                 if FileManager.default.fileExists(atPath: databaseURL.path),
-                   let inspection = try? PODDatabaseReader.inspect(databaseURL: databaseURL),
+                   let inspection = try? await Task.detached(priority: .utility, operation: { try PODDatabaseReader.inspect(databaseURL: databaseURL) }).value,
                    inspection.isCompatible,
                    inspection.matchesPublishedArtifact {
                     podDatabaseCacheURL = databaseURL
                     podDatabaseInspection = inspection
-                    podDatabaseStatus = "Loaded the verified local POD \(inspection.releaseVersion ?? "1.5") database."
+                    podDatabaseStatus = "Loaded the verified local POD \(inspection.releaseVersion ?? "1.6.0") database."
                 } else {
                     UserDefaults.standard.removeObject(forKey: podDatabasePathKey)
                 }
@@ -930,6 +937,12 @@ final class AppModel: ObservableObject {
     /// still restoring the last project. Queue and replay them only after that
     /// bootstrap transaction has fully completed.
     func openIncomingURL(_ url: URL) async {
+        let type = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType
+        if type?.conforms(to: .audio) == true {
+            page = .audioAnalysis
+            await standaloneAudio.load(url)
+            return
+        }
         pendingOpenURLs.append(url)
         guard isProcessingOpenURLs == false else { return }
         isProcessingOpenURLs = true
@@ -1325,16 +1338,16 @@ final class AppModel: ObservableObject {
 
     func inspectPODDatabase(at source: URL) async {
         isWorking = true
-        podDatabaseStatus = "Checking SQLite integrity, the Release 1.5 metadata contract, schema, FTS indexes, and SHA-256 digest…"
+        podDatabaseStatus = "Checking SQLite integrity, the Release 1.6.0 metadata contract, schema, FTS indexes, and SHA-256 digest…"
         defer { isWorking = false }
         do {
-            let inspection = try PODDatabaseReader.inspect(databaseURL: source)
+            let inspection = try await Task.detached(priority: .userInitiated, operation: { try PODDatabaseReader.inspect(databaseURL: source) }).value
             podDatabaseSourceURL = source
             podDatabaseInspection = inspection
             if inspection.isCompatible, inspection.matchesPublishedArtifact {
-                podDatabaseStatus = "Verified POD \(inspection.releaseVersion ?? "1.5"): \(inspection.organCount.formatted()) organs and \(inspection.componentCount.formatted()) components."
+                podDatabaseStatus = "Verified POD \(inspection.releaseVersion ?? "1.6.0"): \(inspection.organCount.formatted()) organs and \(inspection.componentCount.formatted()) components."
             } else if inspection.isCompatible {
-                podDatabaseStatus = "The schema is compatible, but this is not the pinned POD 1.5 OrgRec artifact; caching is blocked."
+                podDatabaseStatus = "The schema is compatible, but this is not the pinned POD 1.6.0 OrgRec artifact; caching is blocked."
             } else {
                 podDatabaseStatus = "Validation failed: " + inspection.errors.prefix(3).joined(separator: "; ")
             }
@@ -1363,7 +1376,7 @@ final class AppModel: ObservableObject {
             podDatabaseInspection = imported
             UserDefaults.standard.set(destination.path, forKey: podDatabasePathKey)
             podDatabaseStatus = "Cached the exact verified database. The selected source file was not modified."
-            notice = "POD \(imported.releaseVersion ?? "1.5") is now the local OrgRec organ catalogue and roadmap source."
+            notice = "POD \(imported.releaseVersion ?? "1.6.0") is now the local OrgRec organ catalogue and roadmap source."
         } catch {
             podDatabaseStatus = "Import failed; the incomplete staging file was removed."
             errorMessage = "Could not import the reduced POD database: \(error.localizedDescription)"
@@ -1371,6 +1384,7 @@ final class AppModel: ObservableObject {
     }
 
     func downloadPODDatabase() async {
+        guard !isWorking else { return }
         guard let remoteURL = URL(string: podDatabaseDownloadURL.trimmingCharacters(in: .whitespacesAndNewlines)) else {
             errorMessage = "Enter the complete HTTPS Zenodo database URL."
             return
@@ -1385,10 +1399,10 @@ final class AppModel: ObservableObject {
             podDatabaseSourceURL = nil
             podDatabaseInspection = imported
             UserDefaults.standard.set(destination.path, forKey: podDatabasePathKey)
-            podDatabaseStatus = "Downloaded, validated, and cached POD \(imported.releaseVersion ?? "1.5")."
+            podDatabaseStatus = "Downloaded, validated, and cached POD \(imported.releaseVersion ?? "1.6.0")."
             notice = "The verified local POD database is ready for organ search and roadmap creation."
         } catch {
-            podDatabaseStatus = "Download or verification failed; no incomplete cache was retained."
+            podDatabaseStatus = "Download or verification failed. Check your connection and free disk space, then choose Download, verify & install to retry. You can also select an unpacked SQLite database. No incomplete cache was retained."
             errorMessage = "Could not retrieve the reduced POD database: \(error.localizedDescription)"
         }
     }
@@ -4581,7 +4595,7 @@ final class AppModel: ObservableObject {
             return
         }
         guard let baseURL = validatedNavigatorBaseURL() else {
-            errorMessage = "Import the local POD 1.5 database or enter a complete HTTP or HTTPS Navigator base URL."
+            errorMessage = "Import the local POD 1.6.0 database or enter a complete HTTP or HTTPS Navigator base URL."
             return
         }
         isWorking = true
@@ -4609,7 +4623,7 @@ final class AppModel: ObservableObject {
                     throw NSError(
                         domain: "OrgRec.Navigator",
                         code: 10,
-                        userInfo: [NSLocalizedDescriptionKey: "Import the local POD 1.5 database or enter a complete Navigator base URL."]
+                        userInfo: [NSLocalizedDescriptionKey: "Import the local POD 1.6.0 database or enter a complete Navigator base URL."]
                     )
                 }
                 guard let fetched = try await navigator.fetchRoadmap(baseURL: baseURL, organID: organ.mdvsID) else {

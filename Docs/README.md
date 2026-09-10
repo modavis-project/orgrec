@@ -14,6 +14,10 @@ python3 Tools/vpo_reproduce.py --help
 
 ## Application and analysis
 
+- [Getting Started](GETTING_STARTED.md)
+- [Standalone audio analysis and exports](STANDALONE_AUDIO_ANALYSIS.md)
+- [POD 1.6.0 compatibility](POD_1.6_COMPATIBILITY.md)
+
 - [Audio and spectral analysis](AUDIO_AND_SPECTRAL_ANALYSIS.md)
 - [Timbre analysis](TIMBRE_ANALYSIS.md)
 - [Advanced acoustic analysis](ADVANCED_ACOUSTIC_ANALYSIS.md)

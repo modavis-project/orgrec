@@ -2,18 +2,34 @@ import CryptoKit
 import Foundation
 import SQLite3
 
-/// Compatibility boundary for the reduced MODAVIS Pipe Organ Dataset 1.5
+/// Compatibility boundary for the reduced MODAVIS Pipe Organ Dataset 1.6.0
 /// SQLite projection published for OrgRec. The database is always opened
 /// read-only; OrgRec copies a verified database into its local cache instead of
 /// changing the published bytes.
 public enum PODDatabaseContract {
-    public static let releaseVersion = "1.5.0"
+    public static let releaseVersion = "1.6.0"
     public static let projectionProfile = "orgrec"
     public static let artifactProfile = "public_structured_dataset"
-    public static let databaseContract = "modavis.release-1.5-public-preparation/v1"
-    public static let preferredFilename = "modavis-pod-1.5-orgrec.sqlite"
-    public static let publishedByteSize: Int64 = 418_177_024
-    public static let publishedSHA256 = "dd57394627c91d9fa3f4f3bfd1770c773184345448af80bef63d834de0cbc464"
+    public static let databaseContract = "modavis.release-1.6.0-public-preparation/v1"
+    public static let preferredFilename = "modavis-pod-1.6.0-orgrec.sqlite"
+    public static let publishedByteSize: Int64 = 5_814_468_608
+    public static let publishedSHA256 = "e8c97e7cc2b9d36a11d66ea317335367175e1cc9542ce0c4275fd27089c8b1e0"
+
+    public static let downloadURL = URL(string: "https://zenodo.org/records/22308263/files/modavis-pod-1.6.0-orgrec.sqlite.gz?download=1")!
+    public static let compressedByteSize: Int64 = 1_791_863_814
+    public static let compressedSHA256 = "df6090ab11629cb8894fc088b352d4261ddd4ea83fc438d321b6332ddcbb44a3"
+
+    static func identity(for version: String?) -> (contract: String, bytes: Int64, sha256: String)? {
+        switch version {
+        case releaseVersion: return (databaseContract, publishedByteSize, publishedSHA256)
+        case "1.5.0": return ("modavis.release-1.5-public-preparation/v1", 418_177_024,
+            "dd57394627c91d9fa3f4f3bfd1770c773184345448af80bef63d834de0cbc464")
+        default: return nil
+        }
+    }
+
+    // These are the three disclosed label classes admitted by POD 1.6.0 FTS.
+    static let disclosedComponentPredicate = "label_disclosure_state IN ('fact_label_included', 'public_structured_label', 'structured_source_fact')"
 
     static let requiredColumns: [String: Set<String>] = [
         "metadata": ["key", "value"],
@@ -46,7 +62,8 @@ public struct PODDatabaseInspection: Codable, Hashable, Sendable {
     public var componentCount: Int64 { rowCounts["component"] ?? 0 }
     public var roadmapEligibleOrganCount: Int64 { rowCounts["roadmap_eligibility"] ?? 0 }
     public var matchesPublishedArtifact: Bool {
-        fileSize == PODDatabaseContract.publishedByteSize && sha256 == PODDatabaseContract.publishedSHA256
+        guard isCompatible, let identity = PODDatabaseContract.identity(for: releaseVersion) else { return false }
+        return fileSize == identity.bytes && sha256 == identity.sha256
     }
 }
 
@@ -140,7 +157,13 @@ public enum PODDatabaseReader {
             let organSearchCount = try connection.scalarInt64("SELECT count(*) FROM organ_search") ?? -1
             let componentSearchCount = try connection.scalarInt64("SELECT count(*) FROM component_search") ?? -1
             if organSearchCount != rowCounts["organ"] { errors.append("The organ FTS5 index is incomplete.") }
-            if componentSearchCount != rowCounts["component"] { errors.append("The component FTS5 index is incomplete.") }
+            let expectedComponentCount = metadata["release_version"] == "1.6.0"
+                ? try connection.scalarInt64("SELECT count(*) FROM component WHERE \(PODDatabaseContract.disclosedComponentPredicate)")
+                : rowCounts["component"]
+            if componentSearchCount != expectedComponentCount { errors.append("The component FTS5 index does not match the disclosed component set.") }
+            // Component FTS rowids are assigned after disclosure filtering and
+            // are not component-table rowids. The published artifact digest
+            // establishes exact index identity; do not join these row clocks.
         } catch {
             errors.append("The POD FTS5 search indexes cannot be queried: \(error.localizedDescription)")
         }
@@ -288,6 +311,7 @@ public enum PODDatabaseReader {
             FROM component AS c
             LEFT JOIN component_provenance AS p ON p.component_id = c.component_id
             WHERE c.organ_mdvs_id = ?1
+              AND (\(metadata["release_version"] == "1.6.0" ? PODDatabaseContract.disclosedComponentPredicate : "1"))
             ORDER BY c.component_type, c.division_label COLLATE NOCASE, c.label COLLATE NOCASE, c.component_id
             """,
             bindings: [.text(organID)]
@@ -399,9 +423,9 @@ public enum PODDatabaseReader {
             sourceURLs: sourceURLs.isEmpty ? nil : sourceURLs
         )
         let release = ReleaseBinding(
-            requestedRelease: PODDatabaseContract.releaseVersion,
+            requestedRelease: metadata["release_version"] ?? PODDatabaseContract.releaseVersion,
             releaseState: metadata["artifact_profile"] ?? PODDatabaseContract.artifactProfile,
-            canonicalSourceRelease: PODDatabaseContract.releaseVersion,
+            canonicalSourceRelease: metadata["release_version"] ?? PODDatabaseContract.releaseVersion,
             protectedFingerprintSHA256: databaseSHA256,
             navigatorContractVersion: metadata["contract"] ?? PODDatabaseContract.databaseContract
         )
@@ -418,7 +442,7 @@ public enum PODDatabaseReader {
                 evidenceStatus: row.supportState,
                 sourcePath: "pod-sqlite/technical_parameter/\(row.factID ?? "pitch_standard")",
                 sourceRecordID: row.sourceRecordID,
-                modavisRelease: PODDatabaseContract.releaseVersion
+                modavisRelease: metadata["release_version"] ?? PODDatabaseContract.releaseVersion
             )
         }
         return NavigatorRoadmapProfile(
@@ -462,11 +486,14 @@ public enum PODDatabaseReader {
     }
 
     private static func validateMetadata(_ metadata: [String: String], errors: inout [String]) {
+        guard let identity = PODDatabaseContract.identity(for: metadata["release_version"]) else {
+            errors.append("Unsupported POD release_version; expected 1.6.0 or 1.5.0.")
+            return
+        }
         let expected = [
-            "release_version": PODDatabaseContract.releaseVersion,
             "projection_profile": PODDatabaseContract.projectionProfile,
             "artifact_profile": PODDatabaseContract.artifactProfile,
-            "contract": PODDatabaseContract.databaseContract,
+            "contract": identity.contract,
         ]
         for (key, value) in expected where metadata[key] != value {
             errors.append("POD metadata \(key) must equal \(value).")
@@ -541,7 +568,7 @@ public actor PODDatabaseImporter {
             throw OrgRecError.invalidProject("POD database validation failed: " + sourceInspection.errors.prefix(3).joined(separator: "; "))
         }
         if enforcePublishedArtifactFixity && !sourceInspection.matchesPublishedArtifact {
-            throw OrgRecError.invalidProject("The POD database matches the schema but not the pinned Release 1.5 OrgRec artifact size and SHA-256 digest.")
+            throw OrgRecError.invalidProject("The POD database matches the schema but not the pinned supported OrgRec artifact size and SHA-256 digest.")
         }
         let manager = FileManager.default
         guard !manager.fileExists(atPath: destination.path) else {
@@ -589,7 +616,13 @@ public actor PODDatabaseImporter {
         guard response.url?.scheme?.lowercased() == "https" else {
             throw OrgRecError.invalidProject("The POD database download redirected away from HTTPS.")
         }
-        let inspection = try PODDatabaseReader.inspect(databaseURL: temporaryURL)
+        let header = try FileHandle(forReadingFrom: temporaryURL)
+        let magic = try header.read(upToCount: 2)
+        try header.close()
+        let expanded = magic == Data([0x1f, 0x8b]) ? try Self.expandPublishedArchive(at: temporaryURL) : nil
+        defer { if let expanded { try? FileManager.default.removeItem(at: expanded) } }
+        let databaseURL = expanded ?? temporaryURL
+        let inspection = try PODDatabaseReader.inspect(databaseURL: databaseURL)
         let requiredSHA256 = expectedSHA256 ?? PODDatabaseContract.publishedSHA256
         let requiredByteSize = expectedByteSize ?? PODDatabaseContract.publishedByteSize
         if inspection.sha256 != requiredSHA256.lowercased() {
@@ -598,8 +631,48 @@ public actor PODDatabaseImporter {
         if inspection.fileSize != requiredByteSize {
             throw OrgRecError.invalidProject("The downloaded POD database does not match the expected byte size.")
         }
-        return try importVerifiedDatabase(from: temporaryURL, to: destination)
+        return try importVerifiedDatabase(from: databaseURL, to: destination)
     }
+
+    /// Verify compressed bytes before invoking the decoder; both representations
+    /// are independently pinned by the published POD manifest.
+    static func expandPublishedArchive(
+        at source: URL,
+        compressedBytes: Int64 = PODDatabaseContract.compressedByteSize,
+        compressedSHA256: String = PODDatabaseContract.compressedSHA256,
+        decodedBytes: Int64 = PODDatabaseContract.publishedByteSize,
+        decodedSHA256: String = PODDatabaseContract.publishedSHA256
+    ) throws -> URL {
+        let size = try source.resourceValues(forKeys: [.fileSizeKey]).fileSize
+        guard Int64(size ?? -1) == compressedBytes, try sha256(of: source) == compressedSHA256 else {
+            throw OrgRecError.invalidProject("The compressed POD archive does not match the published size and SHA-256 digest.")
+        }
+        let output = FileManager.default.temporaryDirectory.appendingPathComponent("orgrec-pod-expanded-\(UUID().uuidString).sqlite")
+        guard FileManager.default.createFile(atPath: output.path, contents: nil) else {
+            throw OrgRecError.invalidProject("Cannot create temporary storage for the POD database.")
+        }
+        do {
+            let handle = try FileHandle(forWritingTo: output)
+            defer { try? handle.close() }
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/gzip")
+            process.arguments = ["-dc", source.path]
+            process.standardOutput = handle
+            process.standardError = FileHandle.nullDevice
+            try process.run()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0,
+                  Int64(try output.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? -1) == decodedBytes,
+                  try sha256(of: output) == decodedSHA256 else {
+                throw OrgRecError.invalidProject("The expanded POD database failed size or SHA-256 verification.")
+            }
+            return output
+        } catch {
+            try? FileManager.default.removeItem(at: output)
+            throw error
+        }
+    }
+
 }
 
 private struct PODFrozenProjection: Codable {

@@ -15,6 +15,9 @@ struct ContentView: View {
                 Divider()
                 Group {
                     switch model.page {
+                    case .audioAnalysis: StandaloneAudioView(model: model.standaloneAudio)
+                    case .gettingStarted: GettingStartedView()
+                    case .podDatabase: PODDatabaseImportView()
                     case .projects: ProjectsView()
                     case .datasetImport: DatasetImportView()
                     case .organSearch: OrganSearchView()
@@ -69,6 +72,13 @@ struct ContentView: View {
             guard let displayedNotice = model.notice else { return }
             try? await Task.sleep(for: .seconds(6))
             if model.notice == displayedNotice { model.notice = nil }
+        }
+        .dropDestination(for: URL.self) { urls, _ in
+            guard urls.count == 1, let url = urls.first, url.isFileURL,
+                  let type = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType,
+                  type.conforms(to: .audio), !model.standaloneAudio.isWorking else { return false }
+            model.page = .audioAnalysis
+            return model.standaloneAudio.accept(urls)
         }
         .onOpenURL { url in
             Task { await model.openIncomingURL(url) }
@@ -130,6 +140,8 @@ private struct SidebarView: View {
 
             List {
                 Section("Library") {
+                    SidebarDestination(page: .gettingStarted)
+                    SidebarDestination(page: .audioAnalysis)
                     SidebarDestination(page: .projects)
                     SidebarDestination(page: .datasetImport)
                     SidebarDestination(page: .organSearch)
@@ -161,12 +173,12 @@ private struct SidebarView: View {
                 HStack {
                     Text("MODAVIS").font(.caption.bold())
                     Spacer()
-                    Text("Release \(model.project?.snapshot.release.requestedRelease ?? "1.1")").font(.caption2)
+                    Text(model.project.map { "Release \($0.snapshot.release.requestedRelease)" } ?? "No source selected").font(.caption2)
                         .padding(.horizontal, 7).padding(.vertical, 3)
                         .background(OrgRecTheme.ai.opacity(0.12), in: Capsule())
                         .foregroundStyle(OrgRecTheme.ai)
                 }
-                Text("Frozen Navigator snapshot")
+                Text(model.project?.organMDVSID == "MDVS:ORGN:DEMO" ? "Demonstration project" : "Frozen source snapshot")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -240,7 +252,7 @@ private struct ProjectHeader: View {
                 .foregroundStyle(OrgRecTheme.shu)
                 .help("Retry saving the active project")
             }
-            if model.page != .projects && model.page != .organSearch {
+            if ![AppPage.projects, .organSearch, .gettingStarted, .podDatabase, .audioAnalysis].contains(model.page) {
                 CoveragePill(summary: model.coverage)
             }
             if model.capture.isRecording {
@@ -257,6 +269,9 @@ private struct ProjectHeader: View {
 
     private var headerTitle: String {
         switch model.page {
+        case .audioAnalysis: "Standalone audio analysis"
+        case .gettingStarted: "Welcome to OrgRec"
+        case .podDatabase: "Set up the organ catalogue"
         case .projects: "Pipe-organ recording projects"
         case .datasetImport: "Dataset and VAO tools"
         case .organSearch: "Find a pipe organ"
@@ -267,6 +282,9 @@ private struct ProjectHeader: View {
 
     private var headerSubtitle: String {
         switch model.page {
+        case .audioAnalysis: return "Inspect a file · review evidence · export results"
+        case .gettingStarted: return "Choose a source · prepare a project · check your recording setup"
+        case .podDatabase: return "Download once · verify · search offline"
         case .projects: return "Organ-grouped library · create, plan, import, and export"
         case .datasetImport: return "Inspect · verify identities and mappings · preserve · validate"
         case .organSearch: return "Search MODAVIS Navigator and compile a recording roadmap"
@@ -281,7 +299,7 @@ private struct ProjectHeader: View {
 private enum DatasetImportKind: String, CaseIterable, Identifiable {
     case audioDataset = "Audio dataset"
     case grandOrgue = "GrandOrgue"
-    case podDatabase = "POD 1.5 database"
+    case podDatabase = "POD 1.6.0 database"
     var id: String { rawValue }
 }
 
@@ -349,7 +367,7 @@ private struct DatasetImportView: View {
                     converterCard(
                         kind: .podDatabase,
                         symbol: "externaldrive.badge.checkmark",
-                        title: "POD 1.5 local database",
+                        title: "POD 1.6.0 local database",
                         description: "Verify and cache the separately published SQLite projection of MODAVIS Pipe Organ Dataset 1.5. Use it offline for organ search and specification-derived roadmaps.",
                         evidence: "Evidence: SQLite integrity + release metadata + schema + exact fixity"
                     )
@@ -376,7 +394,7 @@ private struct DatasetImportView: View {
         switch kind {
         case .audioDataset: "AUDIO DATASET WORKFLOW"
         case .grandOrgue: "GRANDORGUE WORKFLOW"
-        case .podDatabase: "POD 1.5 DATABASE WORKFLOW"
+        case .podDatabase: "POD 1.6.0 DATABASE WORKFLOW"
         }
     }
 
@@ -420,10 +438,28 @@ private struct PODDatabaseImportView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 7) {
-                    Text("Install the POD 1.5 database")
+                    Text("Install the POD 1.6.0 database")
                         .font(.system(.largeTitle, design: .serif, weight: .semibold))
-                    Text("Select the separately published SQLite file or retrieve it from an HTTPS Zenodo URL. OrgRec validates the Release 1.5 projection contract, SQLite integrity, schema, search indexes, relationships, and exact digest before creating a local cache.")
+                    Text("Download the organ catalogue once to search offline and create recording plans. No Zenodo account or API key is needed. If you already have the unpacked OrgRec SQLite database, select it below and choose Cache verified database.")
                         .foregroundStyle(.secondary)
+                }
+
+                Text("Download: 1.8 GB · Installed database: 5.8 GB. Allow at least 15 GB free on the startup disk for the download, extraction and cache copies. Installation and verification can take several minutes; keep OrgRec open until the catalogue is ready.")
+                    .font(.callout)
+
+                GroupBox("Retrieve from Zenodo") {
+                    HStack {
+                        TextField("HTTPS database download URL", text: $model.podDatabaseDownloadURL)
+                            .textFieldStyle(.roundedBorder)
+                            .privacySensitive()
+                        Button {
+                            Task { await model.downloadPODDatabase() }
+                        } label: {
+                            Label("Download, verify & install", systemImage: "arrow.down.circle")
+                        }
+                        .disabled(model.isWorking || model.podDatabaseDownloadURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                    .padding(.top, 6)
                 }
 
                 GroupBox("Local source") {
@@ -437,21 +473,6 @@ private struct PODDatabaseImportView: View {
                             Label("Choose SQLite database…", systemImage: "externaldrive")
                         }
                         .disabled(model.isWorking)
-                    }
-                    .padding(.top, 6)
-                }
-
-                GroupBox("Retrieve from Zenodo") {
-                    HStack {
-                        TextField("HTTPS database download URL", text: $model.podDatabaseDownloadURL)
-                            .textFieldStyle(.roundedBorder)
-                            .privacySensitive()
-                        Button {
-                            Task { await model.downloadPODDatabase() }
-                        } label: {
-                            Label("Download & verify", systemImage: "arrow.down.circle")
-                        }
-                        .disabled(model.isWorking || model.podDatabaseDownloadURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                     .padding(.top, 6)
                 }
@@ -485,8 +506,18 @@ private struct PODDatabaseImportView: View {
                     }
                 }
 
+                if model.isWorking {
+                    ProgressView("Installing or checking the catalogue…")
+                        .accessibilityLabel("Catalogue operation in progress")
+                }
                 if let status = model.podDatabaseStatus {
                     Text(status).font(.callout).foregroundStyle(.secondary)
+                }
+                if model.podDatabaseCacheURL != nil {
+                    Label("Catalogue installed — ready for offline organ search", systemImage: "checkmark.circle.fill")
+                    Button("Continue to Find Organ") { model.page = .organSearch }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(model.isWorking)
                 }
 
                 HStack {
@@ -501,10 +532,11 @@ private struct PODDatabaseImportView: View {
                     if model.podDatabaseCacheURL != nil {
                         Button("Reveal cache") { model.revealPODDatabaseCache() }
                         Button("Remove cached copy", role: .destructive) { model.removePODDatabaseCache() }
+                            .disabled(model.isWorking)
                     }
                 }
 
-                Text("The database contains structured public facts, identifiers, and source citations; it declares that raw source media and descriptive prose are excluded. The Zenodo URL is user-provided and is never stored in a project or committed to the repository.")
+                Text("The POD 1.6.0 download expands to 5.8 GB. The database contains structured public facts, identifiers, and source citations; it declares that raw source media and descriptive prose are excluded. The prefilled URL points to the published OrgRec projection. You can also create a local project or import recordings without installing POD.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -516,7 +548,7 @@ private struct PODDatabaseImportView: View {
 
     private func selectSource() {
         let panel = NSOpenPanel()
-        panel.title = "Choose the POD 1.5 OrgRec SQLite database"
+        panel.title = "Choose the POD 1.6.0 OrgRec SQLite database"
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.allowsMultipleSelection = false
@@ -709,7 +741,13 @@ private struct ProjectsView: View {
             }
             .padding(24)
         }
-        .task { await model.refreshProjectLibrary() }
+        .task {
+            if model.newProjectRequestID != nil {
+                showNewProject = true
+                model.newProjectRequestID = nil
+            }
+            await model.refreshProjectLibrary()
+        }
         .sheet(isPresented: $showNewProject) {
             NewProjectSheet().environmentObject(model)
         }
@@ -932,13 +970,13 @@ private struct OrganSearchView: View {
                     .overlay(RoundedRectangle(cornerRadius: OrgRecTheme.cornerRadius, style: .continuous).stroke(OrgRecTheme.shu.opacity(0.48)))
                     HStack {
                         if let inspection = model.podDatabaseInspection, model.podDatabaseCacheURL != nil {
-                            Label("Local POD \(inspection.releaseVersion ?? "1.5") SQLite catalogue", systemImage: "internaldrive.fill")
+                            Label("Local POD \(inspection.releaseVersion ?? "1.6.0") SQLite catalogue", systemImage: "internaldrive.fill")
                             Text("\(inspection.organCount.formatted()) organs · read-only")
                         } else {
                             Text("Navigator")
                             TextField("Base URL", text: $model.navigatorURL)
                                 .textFieldStyle(.roundedBorder).frame(width: 310)
-                            Text("Install POD 1.5 under Datasets or provide a service endpoint.")
+                            Button("Install POD 1.6.0…") { model.page = .podDatabase }
                         }
                         Spacer()
                         Button("Back to projects") { model.page = .projects }
@@ -5437,7 +5475,7 @@ private struct PipeSoundBehaviorPanel: View {
     }
 }
 
-private struct PerceptualSpectralPanel: View {
+struct PerceptualSpectralPanel: View {
     let summary: PerceptualSpectralSummary
     private let columns = [GridItem(.adaptive(minimum: 145), spacing: 8)]
 
@@ -5507,7 +5545,7 @@ private struct PerceptualSpectralPanel: View {
     }
 }
 
-private struct AcousticDecayEvidencePanel: View {
+struct AcousticDecayEvidencePanel: View {
     let analysis: AcousticResponseAnalysis
     private let columns = [GridItem(.adaptive(minimum: 145), spacing: 8)]
 
@@ -5588,7 +5626,7 @@ private struct AcousticDecayEvidencePanel: View {
     }
 }
 
-private struct PlaybackBar: View {
+struct PlaybackBar: View {
     @ObservedObject var playback: AudioPlaybackController
 
     var body: some View {

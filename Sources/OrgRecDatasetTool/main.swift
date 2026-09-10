@@ -227,7 +227,7 @@ struct OrgRecDatasetTool {
                 throw OrgRecError.invalidProject(inspection.errors.joined(separator: "; "))
             }
             guard inspection.matchesPublishedArtifact else {
-                throw OrgRecError.invalidProject("The database is schema-compatible but does not match the pinned POD 1.5 OrgRec artifact size and SHA-256 digest.")
+                throw OrgRecError.invalidProject("The database is schema-compatible but does not match the pinned POD 1.6.0 OrgRec artifact size and SHA-256 digest.")
             }
             print("Compatible POD \(inspection.releaseVersion ?? "unknown") OrgRec database: \(inspection.organCount) organs, \(inspection.componentCount) components, \(inspection.fileSize) bytes.")
             print("SHA-256 \(inspection.sha256)")

@@ -4,6 +4,38 @@ This file records changes to the OrgRec application and its command-line tools.
 The separate [VAO standard changelog](Docs/VAO_CHANGELOG.md) records changes to
 the exchange-format contract.
 
+## 0.3.2 — 2026-09-11
+
+### Added
+
+- Standalone audio-file analysis through drag-and-drop, a file picker and Finder
+  opening, without a project or POD catalogue.
+- Channel, sound-type, reference-pitch and excerpt controls; linked waveform,
+  spectrogram, pitch and partial displays; complete measurement inspection.
+- PDF reports, full JSON, six CSV tables, editable SVG and PNG figures, and a
+  complete export folder with the analyzed excerpt, provenance and checksums.
+- First-launch guidance covering catalogue installation, local projects,
+  microphone access, capture setup and test recordings.
+
+### Changed
+
+- Support the published POD 1.6.0 OrgRec projection, including gzip verification,
+  source-version preservation and disclosed-component roadmap selection.
+- Retain the pinned POD 1.5.0 projection as a supported source.
+- Keep catalogue inspection off the main UI actor and provide installation
+  activity, retry guidance and a direct continuation to organ search.
+- Defer project loading while new users remain in Getting Started or Analyze Audio.
+- Release the universal macOS app and source as version 0.3.2, build 13.
+
+### Reliability
+
+- Preserve original audio and exact excerpt coordinates; bound decoded excerpt
+  size; reject non-finite samples and invalid selections; retain completed
+  results after failed reanalysis; stage folder exports before installation.
+- Qualify unknown-source pitch interpretations and use the existing detected-
+  partial confidence threshold for exported figures. Full candidate evidence
+  remains available in the data exports.
+
 ## 0.3.1 — 2026-09-10
 
 ### Fixed

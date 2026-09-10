@@ -1,3 +1,7 @@
+# POD integration
+
+Current supported releases and installation behavior are documented in [POD 1.6.0 compatibility](POD_1.6_COMPATIBILITY.md). The original 1.5 integration specification follows for historical reference.
+
 # MODAVIS POD 1.5 local database integration
 
 Status: SQLite compatibility implemented and verified against the private

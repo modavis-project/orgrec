@@ -5,15 +5,20 @@ turns an instrument specification into a field-work roadmap, records
 multichannel Broadcast Wave audio, retains capture and review provenance, and
 exports research packages for preservation and exchange.
 
-The current source release is OrgRec 0.3.1, build 9, tagged `v0.3.1` in
-`modavis-project/orgrec`. The preceding 0.3.0 release is archived at
-[`10.5281/zenodo.22216026`](https://doi.org/10.5281/zenodo.22216026).
-The 0.3.0 macOS candidate is ad-hoc signed; version 0.3.1 is a source update.
-Developer ID signing and notarization remain required for normal Gatekeeper
-distribution.
+The current release is **OrgRec 0.3.2, build 13**. Download the universal macOS
+app and source archive from [GitHub Releases](https://github.com/modavis-project/orgrec/releases/tag/v0.3.2)
+or [Zenodo](https://doi.org/10.5281/zenodo.22698744).
+The app supports Apple Silicon and Intel Macs running macOS 14 or later.
+It is ad-hoc signed and is not notarized.
+
+For first use, open [Getting Started](Docs/GETTING_STARTED.md). To inspect an
+existing recording, drop an audio file onto OrgRec or choose **Analyze Audio**.
+This workflow requires no project, catalogue, account or microphone access.
 
 ## Capabilities
 
+- standalone audio analysis with PDF, JSON, CSV, PNG and SVG exports;
+- first-launch guidance and direct audio-file opening;
 - MODAVIS Navigator search and specification-bound recording roadmaps;
 - session planning, equipment and microphone-geometry records, and field QA;
 - Core Audio input selection and multichannel 24-bit PCM BWF recording;
@@ -22,7 +27,7 @@ distribution.
   inspection;
 - editable `.orgrec` projects and checked VAO/IAD import and export;
 - dataset and GrandOrgue conversion tools;
-- exact validation, offline search, and roadmap import for the POD 1.5 SQLite database.
+- exact validation, offline search, and roadmap import for the POD 1.6.0 SQLite database, with POD 1.5.0 compatibility retained.
 
 OrgRec requires macOS 14 or later. Capture and hardware behavior are macOS-only;
 the Python VAO reference tools are cross-platform.
@@ -46,19 +51,25 @@ packages and a historical 0.2 reader. It does not reinterpret a near version as
 0.5.0. The compatibility declaration is in
 [`Docs/VAO_0.5.0_MIGRATION_PLAN.md`](Docs/VAO_0.5.0_MIGRATION_PLAN.md).
 
-## POD 1.5 local database
+## POD 1.6.0 local database
 
-The separately published, reduced MODAVIS Pipe Organ Dataset 1.5 OrgRec
-projection is an optional read-only SQLite catalogue. OrgRec can retrieve or
-select it, verify SQLite integrity, Release 1.5 metadata, the required schema,
-FTS5 indexes, relationships, byte size, and pinned SHA-256, then atomically
-cache it for offline organ search and roadmap creation. No POD database or raw
-source media are included in this repository.
+The optional [POD 1.6.0 OrgRec projection](https://doi.org/10.5281/zenodo.22308263)
+is a read-only SQLite catalogue. OrgRec downloads the published gzip archive,
+verifies the compressed and expanded checksums, validates the database, and
+installs a local cache for offline organ search and recording roadmaps.
+The 1.8 GB download expands to 5.8 GB; allow at least 15 GB free during installation.
+No POD database or source media are included in the application or this repository.
+See [POD compatibility](Docs/POD_1.6_COMPATIBILITY.md) for exact artifact identities
+and disclosure rules.
 
-The private Zenodo draft was verified; its access URL is intentionally not
-stored. The public URL will be added after publication. See
-[`Docs/POD_INTEGRATION_PLAN.md`](Docs/POD_INTEGRATION_PLAN.md) for the pinned
-artifact identity, observed row counts, commands, and compatibility limits.
+## Analyze an audio file
+
+Drop one audio file onto OrgRec, or choose **File → Analyze Audio File…**.
+Short files are analyzed automatically; longer recordings offer explicit
+excerpt selection. Choose a channel and sound type, inspect measurements and
+linked plots, then export results. The original file stays unchanged.
+See [Standalone audio analysis](Docs/STANDALONE_AUDIO_ANALYSIS.md) for available
+measurements, interpretation limits, source provenance and export formats.
 
 ## Build
 

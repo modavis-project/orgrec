@@ -22,6 +22,8 @@ final class OrgRecApplicationDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        model?.standaloneAudio.cancel()
+        model?.standaloneAudio.clearResult()
         if let sleepObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(sleepObserver)
         }
@@ -30,6 +32,14 @@ final class OrgRecApplicationDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if model?.standaloneAudio.isWorking == true {
+            let alert = NSAlert()
+            alert.messageText = "Audio analysis or export is still running"
+            alert.informativeText = "Wait for the operation to finish, or cancel analysis in Analyze Audio before quitting."
+            alert.addButton(withTitle: "Keep Open")
+            alert.runModal()
+            return .terminateCancel
+        }
         guard let model,
               model.hasActiveCapture || model.persistenceState.requiresResolution || model.isWorking else {
             return .terminateNow
@@ -86,13 +96,24 @@ struct OrgRecApplication: App {
             ContentView()
                 .environmentObject(model)
                 .frame(minWidth: 1_080, minHeight: 700)
-                .task { await model.bootstrap() }
+                .task {
+                    if model.page != .gettingStarted && model.page != .audioAnalysis { await model.bootstrap() }
+                }
+                .onChange(of: model.page) { _, page in
+                    if page != .gettingStarted && page != .audioAnalysis { Task { await model.bootstrap() } }
+                }
                 .onAppear { applicationDelegate.model = model }
         }
         .defaultSize(width: 1_380, height: 860)
         .windowToolbarStyle(.unified)
         .commands {
             CommandGroup(replacing: .newItem) {
+                Button("Analyze Audio File…") {
+                    model.page = .audioAnalysis
+                    model.standaloneAudio.chooseFile()
+                }
+                .keyboardShortcut("a", modifiers: [.command, .shift])
+                Divider()
                 Button("New Local Project…") { model.requestNewProject() }
                     .keyboardShortcut("n", modifiers: [.command])
                 Button("Open or Import…") { presentImportPanel() }

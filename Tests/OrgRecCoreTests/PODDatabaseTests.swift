@@ -12,6 +12,7 @@ final class PODDatabaseTests: XCTestCase {
         let inspection = try PODDatabaseReader.inspect(databaseURL: databaseURL)
         XCTAssertTrue(inspection.isCompatible, inspection.errors.joined(separator: "; "))
         XCTAssertEqual(inspection.releaseVersion, PODDatabaseContract.releaseVersion)
+        XCTAssertTrue(inspection.matchesPublishedArtifact)
         XCTAssertGreaterThan(inspection.organCount, 200_000)
         XCTAssertGreaterThan(inspection.componentCount, 400_000)
         XCTAssertGreaterThan(inspection.roadmapEligibleOrganCount, 20_000)
@@ -109,6 +110,69 @@ final class PODDatabaseTests: XCTestCase {
         XCTAssertTrue(inspection.errors.contains { $0.contains("roadmap_eligibility") })
     }
 
+    func testPOD160PreservesReleaseAndExcludesUndisclosedComponents() throws {
+        let fixture = try makeDatabase(releaseVersion: "1.6.0")
+        defer { try? FileManager.default.removeItem(at: fixture.deletingLastPathComponent()) }
+        var db: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(fixture.path, &db), SQLITE_OK)
+        let database = try XCTUnwrap(db)
+        defer { sqlite3_close(database) }
+        try execute(database, """
+            INSERT INTO component VALUES('withheld','MDVS:ENTY:TEST-0001-1','stop','Withheld','Great','8','source_structured',1,'descriptive_source_text_withheld');
+            INSERT INTO component_provenance VALUES('withheld','source:test:1','test','a','a');
+            """)
+        let inspection = try PODDatabaseReader.inspect(databaseURL: fixture)
+        XCTAssertTrue(inspection.isCompatible, inspection.errors.joined(separator: "; "))
+        XCTAssertFalse(inspection.matchesPublishedArtifact)
+        let profile = try PODDatabaseReader.roadmapProfile(databaseURL: fixture, organID: "MDVS:ENTY:TEST-0001-1")
+        XCTAssertEqual(profile.snapshot.release.requestedRelease, "1.6.0")
+        XCTAssertEqual(profile.components.count, 1)
+        XCTAssertEqual(profile.components.first?.label, "Principal 8'")
+        try execute(database, "INSERT INTO component_search(rowid,component_id,organ_mdvs_id,label,division_label) VALUES(2,'withheld','MDVS:ENTY:TEST-0001-1','Withheld','Great');")
+        let leaked = try PODDatabaseReader.inspect(databaseURL: fixture)
+        XCTAssertTrue(leaked.errors.contains { $0.contains("disclosed component set") })
+    }
+
+    func testPOD160RejectsLegacyContractUnderNewVersion() throws {
+        let fixture = try makeDatabase(releaseVersion: "1.6.0")
+        defer { try? FileManager.default.removeItem(at: fixture.deletingLastPathComponent()) }
+        var db: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(fixture.path, &db), SQLITE_OK)
+        let database = try XCTUnwrap(db)
+        defer { sqlite3_close(database) }
+        try execute(database, "UPDATE metadata SET value='modavis.release-1.5-public-preparation/v1' WHERE key='contract';")
+        let inspection = try PODDatabaseReader.inspect(databaseURL: fixture)
+        XCTAssertFalse(inspection.isCompatible)
+        XCTAssertTrue(inspection.errors.contains { $0.contains("contract") })
+    }
+
+    func testGzipExpansionChecksBothRepresentations() throws {
+        let fixture = try makeDatabase(releaseVersion: "1.6.0")
+        defer { try? FileManager.default.removeItem(at: fixture.deletingLastPathComponent()) }
+        let archive = fixture.appendingPathExtension("gz")
+        XCTAssertTrue(FileManager.default.createFile(atPath: archive.path, contents: nil))
+        let handle = try FileHandle(forWritingTo: archive)
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/gzip")
+        process.arguments = ["-c", fixture.path]
+        process.standardOutput = handle
+        try process.run()
+        process.waitUntilExit()
+        try handle.close()
+        XCTAssertEqual(process.terminationStatus, 0)
+        let compressedSize = Int64(try archive.resourceValues(forKeys: [.fileSizeKey]).fileSize!)
+        let decodedSize = Int64(try fixture.resourceValues(forKeys: [.fileSizeKey]).fileSize!)
+        let expanded = try PODDatabaseImporter.expandPublishedArchive(at: archive,
+            compressedBytes: compressedSize, compressedSHA256: sha256(of: archive),
+            decodedBytes: decodedSize, decodedSHA256: sha256(of: fixture))
+        defer { try? FileManager.default.removeItem(at: expanded) }
+        XCTAssertEqual(try sha256(of: expanded), try sha256(of: fixture))
+        XCTAssertThrowsError(try PODDatabaseImporter.expandPublishedArchive(at: archive))
+        XCTAssertThrowsError(try PODDatabaseImporter.expandPublishedArchive(at: archive,
+            compressedBytes: compressedSize, compressedSHA256: sha256(of: archive),
+            decodedBytes: decodedSize, decodedSHA256: String(repeating: "0", count: 64)))
+    }
+
     private func makeDatabase(
         releaseVersion: String = "1.5.0",
         includeRoadmapTable: Bool = true
@@ -145,7 +209,7 @@ final class PODDatabaseTests: XCTestCase {
         let metadata: [String: String] = [
             "artifact_profile": "public_structured_dataset",
             "canonical_uri_base": "https://w3id.org/modavis/",
-            "contract": "modavis.release-1.5-public-preparation/v1",
+            "contract": releaseVersion == "1.6.0" ? "modavis.release-1.6.0-public-preparation/v1" : "modavis.release-1.5-public-preparation/v1",
             "created_at": "2026-09-01T00:00:00Z",
             "projection_profile": "orgrec",
             "raw_source_media_included": "false",

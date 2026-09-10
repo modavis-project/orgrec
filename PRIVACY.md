@@ -55,3 +55,12 @@ that related metadata or media is anonymous.
 
 This statement must be reviewed against the shipped binary and its configured
 services for every public release.
+
+## Standalone audio analysis
+
+Analyze Audio reads the selected source file locally and verifies its checksum.
+Processing and playback use a bounded WAV excerpt in a private temporary folder.
+The excerpt is removed when replaced or on normal application termination.
+A complete analysis-folder export includes that excerpt; other exports contain
+measurements, figures and provenance as described in the standalone guide.
+No project, remote service or microphone permission is required for this mode.

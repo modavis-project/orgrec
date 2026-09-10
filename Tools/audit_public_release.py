@@ -12,8 +12,8 @@ import subprocess
 ROOT = Path(__file__).resolve().parent.parent
 GIT_WARNING_BYTES = 50 * 1024 * 1024
 PRIVATE_PATH = re.compile(r"/(?:Users|Volumes)/[^\s\"']+")
-TARGET_VERSION = "0.3.1"
-TARGET_BUILD = "9"
+TARGET_VERSION = "0.3.2"
+TARGET_BUILD = "13"
 
 
 def git(*arguments: str) -> subprocess.CompletedProcess[str]:
