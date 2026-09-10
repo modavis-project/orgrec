@@ -72,9 +72,12 @@ leakage around stronger neighbors.
 
 ## Partial-offset tracking
 
-After the retained CREPE–pYIN result establishes the fundamental, OrgRec searches independently around
-each harmonic. Search tolerance is adjustable from ±10 to ±150 cents. A
-three-bin parabolic interpolation estimates sub-bin frequency.
+After the retained CREPE–pYIN result establishes the fundamental, OrgRec searches
+around each harmonic. Search tolerance is adjustable from ±10 to ±150 cents,
+with a minimum width of 1.5 FFT bins and ownership clipped at the midpoint to
+each neighboring harmonic. No bin can supply two harmonics. Adjacent harmonics
+with fewer than two bins per fundamental are unresolved. A three-bin parabolic
+interpolation estimates sub-bin frequency.
 
 For every tracked partial OrgRec stores:
 
@@ -145,8 +148,8 @@ recorded masters use this identical path. The complete algorithm, validation
 counts, limitations, field protocol, and scientific sources are documented in
 [`LONG_TAKE_RECORDING.md`](LONG_TAKE_RECORDING.md).
 
-Partial tracks now distinguish valid detections from the largest noise bin in a
-search region. Local and take-relative noise floors, SNR, valid-frame ratio,
+Partial tracks distinguish valid detections from the largest noise bin in a
+search region. Local and observed-quiet-region noise floors, SNR, valid-frame ratio,
 frequency MAD, decay slope, and track confidence accompany every partial.
 Derived pipe summaries include spectral centroid, 85% rolloff, odd/even energy
 ratio, energy-weighted inharmonicity, partial attack spread, and median decay
@@ -185,6 +188,38 @@ strictly separating an ordinary pipe release from a declared room impulse
 response. The algorithms, applicability rules, standards boundary, references,
 exchange mapping, and synthetic verification are documented in
 [`ADVANCED_ACOUSTIC_ANALYSIS.md`](ADVANCED_ACOUSTIC_ANALYSIS.md).
+
+### Spectrum segmentation in analysis v5
+
+`orgrec-analysis/5` records `orgrec-spectrum-segmentation/2`. Stable-sustain
+regions stop before the observed release, using a 120 ms guard for per-take
+analysis and 100 ms for harmonic LTAS. Short regions are never extended into a
+release or tail. Missing boundaries and short sustain remain explicit
+limitations. Transient timestamps and their resolution use the actual sample
+hop, including the minimum 64-sample hop at low sample rates. Silence does not
+produce phase boundaries or perceptual harmonic partitions.
+
+Partial extraction uses at most 2,048 uniformly spaced STFT frames, independent
+of the display time-bin limit. Long sources increase the extraction hop to
+respect this budget; the point timestamps preserve that spacing. Display rows
+are sampled afterward and retain their separate time step. Changing display
+time bins therefore does not change partial tracks or their derived summaries.
+
+Local noise is the median of bins outside the window's main lobe within the
+harmonic ownership region (two bins for Hann/Hamming, four for Blackman–Harris).
+Where no sidebands remain, the search-region median supplies a conservative
+fallback. The temporal noise gate needs at least three complete STFT windows
+before an observed onset or after an observed tail end. Without those windows,
+the temporal noise floor is absent and local spectral contrast supplies the
+validity gate. A continuous tone is no longer rejected because its own sustained
+level was mistaken for noise. Partial decay slopes use only frames at or after
+an observed sound offset and are absent when that boundary is unavailable.
+
+The run records the segmentation version, extraction cap, partial thresholds,
+persistence, source sample rate, reference channel, expected frequency, and
+selected sustain interval in the parameter fingerprint. Synthetic regression
+tests cover release exclusion, unique harmonic ownership, bin-phase power
+accuracy, continuous tones, display independence, low-rate timing, and silence.
 
 ## Collection Analysis v2
 

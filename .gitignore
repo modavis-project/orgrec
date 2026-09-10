@@ -39,3 +39,11 @@ Kinoorgel-VAO/tmp/
 /Cuntz-Positiv-VAO/
 /Kinoorgel-VAO/
 /Silbermann-Orgel-VAO/
+
+# Local verification logs and research drafting material.
+/output/
+/Research/ThesisFigures/
+/Research/ThesisScreenshots/
+/THESIS_COMPARATIVE_STOP_TIMBRE.md
+/Docs/THESIS_COMPARATIVE_STOP_TIMBRE_INTEGRATION.md
+/Docs/SOUND_ANALYSIS_SCIENTIFIC_AUDIT.md

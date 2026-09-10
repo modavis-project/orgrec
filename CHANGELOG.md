@@ -4,6 +4,31 @@ This file records changes to the OrgRec application and its command-line tools.
 The separate [VAO standard changelog](Docs/VAO_CHANGELOG.md) records changes to
 the exchange-format contract.
 
+## 0.3.1 — 2026-09-10
+
+### Fixed
+
+- Bound stable-sustain analysis by the earliest release marker; never extend
+  short intervals into the release tail.
+- Prevent overlapping harmonic-bin ownership and integrate Hann main-lobe
+  power for more stable relative partial levels.
+- Estimate temporal partial noise only from observed quiet regions, preserving
+  continuous tones when no quiet baseline exists.
+- Keep partial extraction independent of spectrogram display time-bin limits.
+- Use the actual transient sample hop for timing and omit spectral partitions
+  for silence or unresolved harmonics.
+
+### Added
+
+- Read-only POD 1.5 SQLite validation, verified offline caching, catalogue
+  search, roadmap projection, and command-line database workflows.
+- Regression fixtures for spectral segmentation and POD database behavior.
+
+### Changed
+
+- Record analysis method versions and segmentation parameters for reproducibility.
+- Update source-release metadata to version 0.3.1, build 9.
+
 ## 0.3.0 — 2026-09-01
 
 ### Added

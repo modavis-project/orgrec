@@ -281,7 +281,7 @@ private struct ProjectHeader: View {
 private enum DatasetImportKind: String, CaseIterable, Identifiable {
     case audioDataset = "Audio dataset"
     case grandOrgue = "GrandOrgue"
-    case podSubset = "Reduced POD subset"
+    case podDatabase = "POD 1.5 database"
     var id: String { rawValue }
 }
 
@@ -313,7 +313,7 @@ private struct DatasetImportView: View {
                     } else if kind == .grandOrgue {
                         GrandOrgueVAOWizard()
                     } else {
-                        PODSubsetImportView()
+                        PODDatabaseImportView()
                     }
                 }
             } else {
@@ -347,11 +347,11 @@ private struct DatasetImportView: View {
                         evidence: "Evidence: GrandOrgue ODF + self-contained source tree"
                     )
                     converterCard(
-                        kind: .podSubset,
+                        kind: .podDatabase,
                         symbol: "externaldrive.badge.checkmark",
-                        title: "Reduced POD subset",
-                        description: "Verify and cache the separately published OrgRec subset derived from MODAVIS Pipe Organ Dataset Release 1.5. The app accepts only its closed, checksum-pinned inventory.",
-                        evidence: "Evidence: dataset identity + selection manifest + exact fixity"
+                        title: "POD 1.5 local database",
+                        description: "Verify and cache the separately published SQLite projection of MODAVIS Pipe Organ Dataset 1.5. Use it offline for organ search and specification-derived roadmaps.",
+                        evidence: "Evidence: SQLite integrity + release metadata + schema + exact fixity"
                     )
                 }
                 GroupBox("Why consistent filenames matter") {
@@ -376,7 +376,7 @@ private struct DatasetImportView: View {
         switch kind {
         case .audioDataset: "AUDIO DATASET WORKFLOW"
         case .grandOrgue: "GRANDORGUE WORKFLOW"
-        case .podSubset: "REDUCED POD SUBSET WORKFLOW"
+        case .podDatabase: "POD 1.5 DATABASE WORKFLOW"
         }
     }
 
@@ -413,42 +413,62 @@ private struct DatasetImportView: View {
     }
 }
 
-private struct PODSubsetImportView: View {
+private struct PODDatabaseImportView: View {
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 7) {
-                    Text("Verify a reduced POD subset")
+                    Text("Install the POD 1.5 database")
                         .font(.system(.largeTitle, design: .serif, weight: .semibold))
-                    Text("OrgRec does not download or bundle POD recordings. Select the unpacked, separately published subset; its version identity and every declared byte are checked before a local cache is created.")
+                    Text("Select the separately published SQLite file or retrieve it from an HTTPS Zenodo URL. OrgRec validates the Release 1.5 projection contract, SQLite integrity, schema, search indexes, relationships, and exact digest before creating a local cache.")
                         .foregroundStyle(.secondary)
                 }
 
-                GroupBox("Source") {
+                GroupBox("Local source") {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(model.podSubsetSourceURL?.path ?? "No subset directory selected")
+                        Text(model.podDatabaseSourceURL?.path ?? "No SQLite database selected")
                             .font(.callout.monospaced())
                             .textSelection(.enabled)
                         Button {
                             selectSource()
                         } label: {
-                            Label("Choose subset directory…", systemImage: "folder")
+                            Label("Choose SQLite database…", systemImage: "externaldrive")
                         }
                         .disabled(model.isWorking)
                     }
                     .padding(.top, 6)
                 }
 
-                if let inspection = model.podSubsetInspection, let manifest = inspection.manifest {
+                GroupBox("Retrieve from Zenodo") {
+                    HStack {
+                        TextField("HTTPS database download URL", text: $model.podDatabaseDownloadURL)
+                            .textFieldStyle(.roundedBorder)
+                            .privacySensitive()
+                        Button {
+                            Task { await model.downloadPODDatabase() }
+                        } label: {
+                            Label("Download & verify", systemImage: "arrow.down.circle")
+                        }
+                        .disabled(model.isWorking || model.podDatabaseDownloadURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                    .padding(.top, 6)
+                }
+
+                if let inspection = model.podDatabaseInspection {
                     GroupBox("Verified release boundary") {
                         VStack(alignment: .leading, spacing: 8) {
-                            LabeledContent("Subset", value: "\(manifest.dataset.title) \(manifest.dataset.version)")
-                            LabeledContent("Source", value: "\(manifest.source.title) Release \(manifest.source.releaseVersion)")
-                            LabeledContent("Status", value: manifest.publicationStatus)
-                            LabeledContent("Inventory", value: "\(inspection.verifiedFileCount) files · \(inspection.verifiedBytes.formatted()) bytes")
-                            LabeledContent("License", value: manifest.dataset.license)
+                            LabeledContent("Release", value: inspection.releaseVersion ?? "Unknown")
+                            LabeledContent("Projection", value: inspection.metadata["projection_profile"] ?? "Unknown")
+                            LabeledContent("Contract", value: inspection.metadata["contract"] ?? "Unknown")
+                            LabeledContent("Pinned artifact", value: inspection.matchesPublishedArtifact ? "Exact match" : "Different bytes")
+                            LabeledContent("Database", value: "\(inspection.organCount.formatted()) organs · \(inspection.componentCount.formatted()) components")
+                            LabeledContent("Roadmap coverage", value: "\(inspection.roadmapEligibleOrganCount.formatted()) eligible organs")
+                            LabeledContent("Size", value: ByteCountFormatter.string(fromByteCount: inspection.fileSize, countStyle: .file))
+                            LabeledContent("SHA-256", value: inspection.sha256)
+                                .font(.caption.monospaced())
+                                .textSelection(.enabled)
                             if inspection.errors.isEmpty == false {
                                 Divider()
                                 ForEach(inspection.errors, id: \.self) { error in
@@ -456,31 +476,35 @@ private struct PODSubsetImportView: View {
                                         .foregroundStyle(.red)
                                 }
                             }
+                            ForEach(inspection.warnings, id: \.self) { warning in
+                                Label(warning, systemImage: "exclamationmark.triangle.fill")
+                                    .foregroundStyle(.orange)
+                            }
                         }
                         .padding(.top, 6)
                     }
                 }
 
-                if let status = model.podSubsetImportStatus {
+                if let status = model.podDatabaseStatus {
                     Text(status).font(.callout).foregroundStyle(.secondary)
                 }
 
                 HStack {
                     Button {
-                        Task { await model.importPODSubset() }
+                        Task { await model.importPODDatabase() }
                     } label: {
-                        Label("Import verified copy", systemImage: "externaldrive.badge.plus")
+                        Label("Cache verified database", systemImage: "externaldrive.badge.plus")
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(model.podSubsetInspection?.isValid != true || model.isWorking)
+                    .disabled(model.podDatabaseSourceURL == nil || model.podDatabaseInspection?.matchesPublishedArtifact != true || model.isWorking)
 
-                    if model.podSubsetCacheURL != nil {
-                        Button("Reveal cache") { model.revealPODSubsetCache() }
-                        Button("Remove cached copy", role: .destructive) { model.removePODSubsetCache() }
+                    if model.podDatabaseCacheURL != nil {
+                        Button("Reveal cache") { model.revealPODDatabaseCache() }
+                        Button("Remove cached copy", role: .destructive) { model.removePODDatabaseCache() }
                     }
                 }
 
-                Text("The synthetic repository fixture tests this workflow but is not POD data. Production metadata must use the final subset DOI, exact POD 1.5 version identifier, source-manifest digest, license, and frozen selection commit.")
+                Text("The database contains structured public facts, identifiers, and source citations; it declares that raw source media and descriptive prose are excluded. The Zenodo URL is user-provided and is never stored in a project or committed to the repository.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -492,12 +516,13 @@ private struct PODSubsetImportView: View {
 
     private func selectSource() {
         let panel = NSOpenPanel()
-        panel.title = "Choose the unpacked reduced POD subset"
-        panel.canChooseDirectories = true
-        panel.canChooseFiles = false
+        panel.title = "Choose the POD 1.5 OrgRec SQLite database"
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
         panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [UTType(filenameExtension: "sqlite") ?? .data]
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        Task { await model.inspectPODSubset(at: url) }
+        Task { await model.inspectPODDatabase(at: url) }
     }
 }
 
@@ -897,16 +922,24 @@ private struct OrganSearchView: View {
                             .onSubmit { Task { await model.searchNavigator() } }
                         Button("Search") { Task { await model.searchNavigator() } }
                             .buttonStyle(.borderedProminent).controlSize(.large)
-                            .disabled(model.navigatorURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model.navigatorQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                            .disabled(
+                                (model.podDatabaseCacheURL == nil && model.navigatorURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                    || model.navigatorQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            )
                     }
                     .padding(18)
                     .background(OrgRecTheme.surface, in: RoundedRectangle(cornerRadius: OrgRecTheme.cornerRadius, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: OrgRecTheme.cornerRadius, style: .continuous).stroke(OrgRecTheme.shu.opacity(0.48)))
                     HStack {
-                        Text("Navigator")
-                        TextField("Base URL", text: $model.navigatorURL)
-                            .textFieldStyle(.roundedBorder).frame(width: 310)
-                        Text("No service endpoint is bundled.")
+                        if let inspection = model.podDatabaseInspection, model.podDatabaseCacheURL != nil {
+                            Label("Local POD \(inspection.releaseVersion ?? "1.5") SQLite catalogue", systemImage: "internaldrive.fill")
+                            Text("\(inspection.organCount.formatted()) organs · read-only")
+                        } else {
+                            Text("Navigator")
+                            TextField("Base URL", text: $model.navigatorURL)
+                                .textFieldStyle(.roundedBorder).frame(width: 310)
+                            Text("Install POD 1.5 under Datasets or provide a service endpoint.")
+                        }
                         Spacer()
                         Button("Back to projects") { model.page = .projects }
                     }
@@ -917,7 +950,7 @@ private struct OrganSearchView: View {
                     ContentUnavailableView(
                         model.navigatorQuery.isEmpty ? "Search the organ database" : "No results loaded",
                         systemImage: "building.columns",
-                        description: Text("OrgRec retrieves the organ and its complete specification through Navigator, freezes the source payload, and compiles a field roadmap.")
+                        description: Text("OrgRec reads the local POD database or Navigator, freezes the selected structured projection, and compiles a field roadmap.")
                     )
                     .frame(maxWidth: .infinity, minHeight: 300)
                 } else {

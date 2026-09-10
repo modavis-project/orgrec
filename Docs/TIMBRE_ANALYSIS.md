@@ -20,7 +20,7 @@ comparison but is not presented as a probability.
 ## Processing contract
 
 The stored contract is `orgrec-timbre-analysis/2`; the signal path is
-`orgrec-harmonic-ltas/1`; and the current transparent family profile is
+`orgrec-harmonic-ltas/2`; and the current transparent family profile is
 `orgrec-hergert-family-profile/1`.
 
 For each recorded key, OrgRec chooses one best usable take, preferring an
@@ -32,8 +32,9 @@ accepted take and then measured-pitch confidence. It then:
 3. converts that channel to 48 kHz with `AVAudioConverter`;
 4. averages Hann-window power spectra over the stable interval;
 5. chooses a pitch-adaptive FFT from 8,192, 16,384, 32,768, or 65,536 samples;
-6. searches harmonic partials 1–20 below 20 kHz and retains a partial only when
-   its peak is at least 6 dB above a local spectral-noise estimate;
+6. searches disjoint regions for harmonic partials 1–20 below 20 kHz, retains a
+   partial only when its peak is at least 6 dB above a local spectral-noise
+   estimate, and integrates noise-subtracted power over its Hann main lobe;
 7. stores the audio SHA-256, source take and analysis-run IDs, channel, stable
    interval, fundamental and its source, FFT, frame count, partial levels, and
    applicability with the observation.
@@ -42,6 +43,23 @@ Every report also embeds the complete parameter object, a SHA-256 fingerprint
 of its canonical JSON representation, and the generating OrgRec software
 name, semantic version, build, and identifier. These are distinct from the
 method and data-contract versions.
+
+Spectrum segmentation `/2` treats the earliest sound-offset or key-up marker
+as a hard upper bound, with a 100 ms guard. The selected sustain is at most ten
+seconds. A short interval is never extended into the release to meet a minimum
+duration. Missing boundaries or less than two seconds of sustain limit the
+observation; an empty or unreadably short interval is refused.
+
+Harmonic bin ownership ends at the midpoint to each neighboring harmonic, with
+each exact midpoint assigned to the higher harmonic. Extraction requires at
+least two bins per fundamental. Relative levels integrate five bins around the
+peak, clipped to this ownership interval, rather than using the peak bin alone.
+This reduces sensitivity to a sinusoid's position between FFT bins. Frequencies
+use three-bin interpolation of log power. The five-bin rule and local-noise
+subtraction are OrgRec choices; windowing and spectral power conventions are
+explained in the [SciPy spectral-analysis guide](https://docs.scipy.org/doc/scipy/tutorial/signal.html#spectral-analysis).
+Levels remain relative and uncalibrated. Stored `orgrec-harmonic-ltas/1` results
+retain their original method identity; comparisons should use a common version.
 
 A measured CREPE–pYIN consensus with confidence at least 0.35 supplies `f₁`.
 When that is unavailable, characterization can use the roadmap expectation but

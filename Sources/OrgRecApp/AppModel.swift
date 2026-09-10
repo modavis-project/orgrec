@@ -178,10 +178,11 @@ final class AppModel: ObservableObject {
     @Published var grandOrgueODFURL: URL?
     @Published var grandOrgueSourcePageURL = ""
     @Published var grandOrgueImportStatus: String?
-    @Published var podSubsetInspection: PODSubsetInspection?
-    @Published var podSubsetSourceURL: URL?
-    @Published var podSubsetCacheURL: URL?
-    @Published var podSubsetImportStatus: String?
+    @Published var podDatabaseInspection: PODDatabaseInspection?
+    @Published var podDatabaseSourceURL: URL?
+    @Published var podDatabaseCacheURL: URL?
+    @Published var podDatabaseDownloadURL = ""
+    @Published var podDatabaseStatus: String?
     @Published var isCalibrating = false
     @Published var temperamentProgress: String?
     @Published var selectedTemperamentReportID: UUID?
@@ -218,7 +219,7 @@ final class AppModel: ObservableObject {
     private let iadImporter = IADPackageImporter()
     private let legacyImporter = LegacyAudioDatasetImporter()
     private let grandOrgueImporter = GrandOrgueSampleSetImporter()
-    private let podSubsetImporter = PODSubsetImporter()
+    private let podDatabaseImporter = PODDatabaseImporter()
     private let longTakeSegmenter = LongTakeSegmenter()
     private let longTakeExporter = LongTakeAudioExporter()
     private let timbreAnalyzer = TimbreAnalysisEngine()
@@ -232,6 +233,7 @@ final class AppModel: ObservableObject {
     private var pendingCapturePreflight: PendingCapturePreflight?
     private var capturePreflightAutoStopTask: Task<Void, Never>?
     private let lastProjectKey = "org.modavis.OrgRec.lastProjectPath"
+    private let podDatabasePathKey = "org.modavis.OrgRec.podDatabasePath"
     private var isBootstrapping = false
     private var hasBootstrapped = false
     private var captureActivity: NSObjectProtocol?
@@ -871,6 +873,19 @@ final class AppModel: ObservableObject {
             if recoveredCalibration { clearCalibrationCaptureJournal(in: url) }
             if recoveredPreflight { clearCapturePreflightJournal(in: url) }
             UserDefaults.standard.set(url.path, forKey: lastProjectKey)
+            if let path = UserDefaults.standard.string(forKey: podDatabasePathKey) {
+                let databaseURL = URL(fileURLWithPath: path)
+                if FileManager.default.fileExists(atPath: databaseURL.path),
+                   let inspection = try? PODDatabaseReader.inspect(databaseURL: databaseURL),
+                   inspection.isCompatible,
+                   inspection.matchesPublishedArtifact {
+                    podDatabaseCacheURL = databaseURL
+                    podDatabaseInspection = inspection
+                    podDatabaseStatus = "Loaded the verified local POD \(inspection.releaseVersion ?? "1.5") database."
+                } else {
+                    UserDefaults.standard.removeObject(forKey: podDatabasePathKey)
+                }
+            }
             await refreshProjectLibrary()
             await runConsistencyAudit()
             if recoveredJournal {
@@ -1308,63 +1323,91 @@ final class AppModel: ObservableObject {
         }
     }
 
-    func inspectPODSubset(at source: URL) async {
+    func inspectPODDatabase(at source: URL) async {
         isWorking = true
-        podSubsetImportStatus = "Checking the release identity, frozen inventory, byte lengths, and SHA-256 digests…"
+        podDatabaseStatus = "Checking SQLite integrity, the Release 1.5 metadata contract, schema, FTS indexes, and SHA-256 digest…"
         defer { isWorking = false }
         do {
-            let inspection = try PODSubsetValidator.inspect(directory: source)
-            podSubsetSourceURL = source
-            podSubsetInspection = inspection
-            if inspection.isValid, let manifest = inspection.manifest {
-                podSubsetImportStatus = "Verified \(inspection.verifiedFileCount) files from the \(manifest.dataset.title) manifest."
+            let inspection = try PODDatabaseReader.inspect(databaseURL: source)
+            podDatabaseSourceURL = source
+            podDatabaseInspection = inspection
+            if inspection.isCompatible, inspection.matchesPublishedArtifact {
+                podDatabaseStatus = "Verified POD \(inspection.releaseVersion ?? "1.5"): \(inspection.organCount.formatted()) organs and \(inspection.componentCount.formatted()) components."
+            } else if inspection.isCompatible {
+                podDatabaseStatus = "The schema is compatible, but this is not the pinned POD 1.5 OrgRec artifact; caching is blocked."
             } else {
-                podSubsetImportStatus = "Validation failed: " + inspection.errors.prefix(3).joined(separator: "; ")
+                podDatabaseStatus = "Validation failed: " + inspection.errors.prefix(3).joined(separator: "; ")
             }
         } catch {
-            podSubsetSourceURL = source
-            podSubsetInspection = nil
-            podSubsetImportStatus = nil
-            errorMessage = "Could not inspect the reduced POD subset: \(error.localizedDescription)"
+            podDatabaseSourceURL = source
+            podDatabaseInspection = nil
+            podDatabaseStatus = nil
+            errorMessage = "Could not inspect the reduced POD database: \(error.localizedDescription)"
         }
     }
 
-    func importPODSubset() async {
-        guard let source = podSubsetSourceURL,
-              let inspection = podSubsetInspection,
-              inspection.isValid,
-              let manifest = inspection.manifest else {
-            errorMessage = "Choose and verify a reduced POD subset first."
+    func importPODDatabase() async {
+        guard let source = podDatabaseSourceURL,
+              let inspection = podDatabaseInspection,
+              inspection.isCompatible else {
+            errorMessage = "Choose and verify the reduced POD SQLite database first."
             return
         }
         isWorking = true
-        podSubsetImportStatus = "Copying the closed inventory into a removable local cache and verifying it again…"
+        podDatabaseStatus = "Copying the database into the removable local cache and verifying the exact bytes again…"
         defer { isWorking = false }
         do {
-            let destination = uniqueManagedPODSubsetURL(stem: "\(manifest.dataset.title)-\(manifest.dataset.version)")
-            let imported = try await podSubsetImporter.importVerifiedSubset(from: source, to: destination)
-            podSubsetCacheURL = destination
-            podSubsetImportStatus = "Imported \(imported.verifiedFileCount) verified files. The source directory was not modified."
-            notice = "The reduced POD subset derived from Release \(manifest.source.releaseVersion) is available in the local OrgRec dataset cache."
+            let destination = uniqueManagedPODDatabaseURL()
+            let imported = try await podDatabaseImporter.importVerifiedDatabase(from: source, to: destination)
+            podDatabaseCacheURL = destination
+            podDatabaseInspection = imported
+            UserDefaults.standard.set(destination.path, forKey: podDatabasePathKey)
+            podDatabaseStatus = "Cached the exact verified database. The selected source file was not modified."
+            notice = "POD \(imported.releaseVersion ?? "1.5") is now the local OrgRec organ catalogue and roadmap source."
         } catch {
-            podSubsetImportStatus = "Import failed; the incomplete staging directory was removed."
-            errorMessage = "Could not import the reduced POD subset: \(error.localizedDescription)"
+            podDatabaseStatus = "Import failed; the incomplete staging file was removed."
+            errorMessage = "Could not import the reduced POD database: \(error.localizedDescription)"
         }
     }
 
-    func revealPODSubsetCache() {
-        guard let podSubsetCacheURL else { return }
-        NSWorkspace.shared.activateFileViewerSelecting([podSubsetCacheURL])
+    func downloadPODDatabase() async {
+        guard let remoteURL = URL(string: podDatabaseDownloadURL.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            errorMessage = "Enter the complete HTTPS Zenodo database URL."
+            return
+        }
+        isWorking = true
+        podDatabaseStatus = "Downloading the POD database to a temporary file; schema and fixity checks follow before caching…"
+        defer { isWorking = false }
+        do {
+            let destination = uniqueManagedPODDatabaseURL()
+            let imported = try await podDatabaseImporter.downloadVerifiedDatabase(from: remoteURL, to: destination)
+            podDatabaseCacheURL = destination
+            podDatabaseSourceURL = nil
+            podDatabaseInspection = imported
+            UserDefaults.standard.set(destination.path, forKey: podDatabasePathKey)
+            podDatabaseStatus = "Downloaded, validated, and cached POD \(imported.releaseVersion ?? "1.5")."
+            notice = "The verified local POD database is ready for organ search and roadmap creation."
+        } catch {
+            podDatabaseStatus = "Download or verification failed; no incomplete cache was retained."
+            errorMessage = "Could not retrieve the reduced POD database: \(error.localizedDescription)"
+        }
     }
 
-    func removePODSubsetCache() {
-        guard let cache = podSubsetCacheURL else { return }
+    func revealPODDatabaseCache() {
+        guard let podDatabaseCacheURL else { return }
+        NSWorkspace.shared.activateFileViewerSelecting([podDatabaseCacheURL])
+    }
+
+    func removePODDatabaseCache() {
+        guard let cache = podDatabaseCacheURL else { return }
         do {
             try FileManager.default.removeItem(at: cache)
-            podSubsetCacheURL = nil
-            podSubsetImportStatus = "Removed the local POD subset cache. The selected source directory was not modified."
+            podDatabaseCacheURL = nil
+            podDatabaseInspection = nil
+            UserDefaults.standard.removeObject(forKey: podDatabasePathKey)
+            podDatabaseStatus = "Removed the local POD database cache. The selected source file was not modified."
         } catch {
-            errorMessage = "Could not remove the local POD subset cache: \(error.localizedDescription)"
+            errorMessage = "Could not remove the local POD database cache: \(error.localizedDescription)"
         }
     }
 
@@ -4526,8 +4569,19 @@ final class AppModel: ObservableObject {
     }
 
     func searchNavigator() async {
+        if let databaseURL = podDatabaseCacheURL {
+            isWorking = true
+            defer { isWorking = false }
+            do {
+                navigatorResults = try PODDatabaseReader.search(databaseURL: databaseURL, query: navigatorQuery)
+                    .map(\.navigatorSummary)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            return
+        }
         guard let baseURL = validatedNavigatorBaseURL() else {
-            errorMessage = "Enter a complete HTTP or HTTPS Navigator base URL."
+            errorMessage = "Import the local POD 1.5 database or enter a complete HTTP or HTTPS Navigator base URL."
             return
         }
         isWorking = true
@@ -4540,16 +4594,29 @@ final class AppModel: ObservableObject {
     }
 
     func importNavigatorOrgan(_ organ: NavigatorOrganSummary) async {
-        guard let baseURL = validatedNavigatorBaseURL() else {
-            errorMessage = "Enter a complete HTTP or HTTPS Navigator base URL."
-            return
-        }
         isWorking = true
         defer { isWorking = false }
         do {
-            guard let profile = try await navigator.fetchRoadmap(baseURL: baseURL, organID: organ.mdvsID) else {
-                notice = "Navigator snapshot is unchanged."
-                return
+            let profile: NavigatorRoadmapProfile
+            if let databaseURL = podDatabaseCacheURL {
+                profile = try PODDatabaseReader.roadmapProfile(
+                    databaseURL: databaseURL,
+                    organID: organ.mdvsID,
+                    databaseSHA256: podDatabaseInspection?.sha256
+                )
+            } else {
+                guard let baseURL = validatedNavigatorBaseURL() else {
+                    throw NSError(
+                        domain: "OrgRec.Navigator",
+                        code: 10,
+                        userInfo: [NSLocalizedDescriptionKey: "Import the local POD 1.5 database or enter a complete Navigator base URL."]
+                    )
+                }
+                guard let fetched = try await navigator.fetchRoadmap(baseURL: baseURL, organID: organ.mdvsID) else {
+                    notice = "Navigator snapshot is unchanged."
+                    return
+                }
+                profile = fetched
             }
             guard let project else { return }
             let compilation = RoadmapEngine.compileSpecification(
@@ -4656,7 +4723,7 @@ final class AppModel: ObservableObject {
         ).appendingPathComponent("OrgRec/VAOWorkspaces", isDirectory: true)
     }
 
-    private func podSubsetsDirectory() throws -> URL {
+    private func podDatabasesDirectory() throws -> URL {
         try FileManager.default.url(
             for: .applicationSupportDirectory,
             in: .userDomainMask,
@@ -4665,17 +4732,14 @@ final class AppModel: ObservableObject {
         ).appendingPathComponent("OrgRec/Datasets/POD", isDirectory: true)
     }
 
-    private func uniqueManagedPODSubsetURL(stem unsafe: String) -> URL {
-        let parent = (try? podSubsetsDirectory()) ?? FileManager.default.temporaryDirectory
+    private func uniqueManagedPODDatabaseURL() -> URL {
+        let parent = (try? podDatabasesDirectory()) ?? FileManager.default.temporaryDirectory
         try? FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
-        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "- "))
-        let slug = unsafe.unicodeScalars.map { allowed.contains($0) ? Character(String($0)) : "-" }
-        let base = String(slug).split(separator: "-").filter { !$0.isEmpty }.joined(separator: "-")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        var candidate = parent.appendingPathComponent(base.isEmpty ? "POD-subset" : base, isDirectory: true)
+        let stem = "modavis-pod-1.5-orgrec"
+        var candidate = parent.appendingPathComponent("\(stem).sqlite")
         var revision = 2
         while FileManager.default.fileExists(atPath: candidate.path) {
-            candidate = parent.appendingPathComponent("\(base.isEmpty ? "POD-subset" : base)-\(revision)", isDirectory: true)
+            candidate = parent.appendingPathComponent("\(stem)-\(revision).sqlite")
             revision += 1
         }
         return candidate

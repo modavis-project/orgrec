@@ -321,10 +321,15 @@ public actor AudioAnalyzer {
         let rate = read.sampleRate
         guard !samples.isEmpty else { throw OrgRecError.unsupportedAudio("The take contains no readable samples.") }
         let duration = Double(samples.count) / rate
-        let features = Self.transientFeatures(samples: samples, window: max(128, Int(rate * 0.02)), hop: max(64, Int(rate * 0.01)))
-        let transient = Self.detectTransient(features: features, hopSeconds: 0.01, totalDuration: duration)
-        let sustainStart = min(duration, transient.sustainStart ?? max(0, (transient.onset ?? 0) + 0.2))
-        let sustainEnd = max(sustainStart, (transient.soundOffset ?? duration) - 0.12)
+        let transientHop = max(64, Int(rate * 0.01))
+        let features = Self.transientFeatures(samples: samples, window: max(128, Int(rate * 0.02)), hop: transientHop)
+        let transient = Self.detectTransient(features: features, hopSeconds: Double(transientHop) / rate, totalDuration: duration)
+        let steadyRegion = SpectrumSegmentation.steadyRegion(
+            duration: duration, sustainStart: transient.sustainStart,
+            soundOffset: transient.soundOffset, keyUp: nil, maximumDuration: duration, releaseGuard: 0.12
+        )
+        let sustainStart = steadyRegion.start
+        let sustainEnd = steadyRegion.end
         let sustainSamples = Self.segment(samples, rate: rate, start: sustainStart, end: sustainEnd)
         let pitch: PitchEstimate?
         let pitchComparison: PitchEstimatorComparison?
@@ -380,7 +385,7 @@ public actor AudioAnalyzer {
         let clipped = samples.reduce(into: 0) { if abs($1) >= 0.999 { $0 += 1 } }
         let nearClipped = samples.reduce(into: 0) { if abs($1) >= 0.98 { $0 += 1 } }
         let signalToNoise = Self.signalToNoiseDB(features: features, transient: transient)
-        var flags: [String] = []
+        var flags = steadyRegion.limitations
         if clipped > 0 { flags.append("Clipping detected") }
         else if nearClipped > max(8, samples.count / 10_000) { flags.append("Near-clipping detected") }
         if abs(mean) > 0.01 { flags.append("DC offset exceeds 1% full scale") }
@@ -418,7 +423,7 @@ public actor AudioAnalyzer {
 
         let runID = UUID()
         let inputHash = try sha256(of: fileURL)
-        let algorithmVersion = "orgrec-analysis/4; \(pitch?.modelVersion ?? "none")"
+        let algorithmVersion = "orgrec-analysis/5; \(pitch?.modelVersion ?? "none")"
         let parameters = Self.analysisParameters(configuration: spectrogramConfiguration)
         var run = AnalysisRunRecord(
             id: runID,
@@ -463,7 +468,8 @@ public actor AudioAnalyzer {
             samples: samples,
             sampleRate: rate,
             configuration: spectrogramConfiguration,
-            fundamentalFrequency: fundamental
+            fundamentalFrequency: fundamental,
+            transient: transient
         )
         analysis.spectralSummary = spectrogram.partialTracks.map(Self.summarizePartials)
         analysis.perceptualSpectralSummary = PerceptualSpectralAnalyzer.analyze(
@@ -518,8 +524,13 @@ public actor AudioAnalyzer {
         }
         if let normalizedConfiguration = spectrogram.configuration {
             run.parameters = Self.analysisParameters(configuration: normalizedConfiguration)
-            run.parameterSHA256 = (try? OrgRecCoding.lineEncoder.encode(run.parameters))?.sha256Hex
         }
+        run.parameters["expectedFrequencyHz"] = expectedFrequency.map { String($0) } ?? "unavailable"
+        run.parameters["sourceSampleRateHz"] = String(rate)
+        run.parameters["referenceChannel"] = String(read.referenceChannel)
+        run.parameters["steadyRegionSeconds"] = "\(sustainStart)...\(sustainEnd)"
+        run.parameterSHA256 = (try? OrgRecCoding.lineEncoder.encode(run.parameters))?.sha256Hex
+        run.finishedAt = .now
         run.outputSummary = analysis
         run.warnings = analysis.qualityFlags
         run.artifactRelativePaths = [
@@ -659,6 +670,13 @@ public actor AudioAnalyzer {
         let levels = features.map(\.levelDB)
         let noiseFloor = quantile(levels, probability: 0.15)
         let peak = levels.max() ?? noiseFloor
+        guard peak > -110 else {
+            return TransientResult(onset: nil, sustainStart: nil, soundOffset: nil, tailEnd: nil,
+                noiseFloorDB: noiseFloor, sustainLevelDB: nil,
+                boundaries: AnalysisMarkerKind.allCases.map {
+                    AnalysisBoundaryEvidence(marker: $0, state: .unresolved, contributingFeatures: ["no usable signal"])
+                })
+        }
         let continuousSignal = peak - noiseFloor < 6 && median(levels) > -70
         let onsetThreshold = continuousSignal ? peak - 3 : max(noiseFloor + 12, peak - 26)
         let sustainThreshold = continuousSignal ? peak - 6 : max(noiseFloor + 9, peak - 36)
@@ -759,7 +777,8 @@ public actor AudioAnalyzer {
         samples: [Float],
         sampleRate: Double,
         configuration requested: SpectrogramConfiguration,
-        fundamentalFrequency: Double?
+        fundamentalFrequency: Double?,
+        transient: TransientResult
     ) -> SpectrogramData {
         var configuration = requested
         configuration.fftSize = [1_024, 2_048, 4_096, 8_192, 16_384, 32_768]
@@ -787,7 +806,9 @@ public actor AudioAnalyzer {
         defer { vDSP_destroy_fftsetup(setup) }
         let window = spectralWindow(configuration.window, size: fftSize)
         let availableFrames = max(1, 1 + (samples.count - fftSize) / configuration.hopSize)
-        let frameDecimation = max(1, Int(ceil(Double(availableFrames) / Double(configuration.maximumTimeBins))))
+        // Extraction has its own fixed budget. Display controls must not change
+        // the partial evidence or the inferred phase boundaries.
+        let frameDecimation = max(1, Int(ceil(Double(availableFrames) / Double(SpectrumSegmentation.maximumPartialFrames))))
         let hop = configuration.hopSize * frameDecimation
         let binWidth = sampleRate / Double(fftSize)
         let lowerBin = max(0, min(fftSize / 2 - 1, Int(floor(configuration.minimumFrequencyHz / binWidth))))
@@ -796,7 +817,7 @@ public actor AudioAnalyzer {
 
         var spectra: [[Float]] = []
         var offset = 0
-        while offset + fftSize <= samples.count && spectra.count < configuration.maximumTimeBins {
+        while offset + fftSize <= samples.count && spectra.count < SpectrumSegmentation.maximumPartialFrames {
             var frame = Array(samples[offset..<(offset + fftSize)])
             vDSP_vmul(frame, 1, window, 1, &frame, 1, vDSP_Length(fftSize))
             var real = [Float](repeating: 0, count: fftSize / 2)
@@ -825,8 +846,10 @@ public actor AudioAnalyzer {
         }
         let globalPeak = spectra.flatMap { $0[lowerBin...upperBin] }.max() ?? 0
         let floor = globalPeak - Float(max(20, configuration.dynamicRangeDB))
-        let output = spectra.map { spectrum in
-            displayFrequencies.map { frequency -> Float in
+        let displayStride = max(1, Int(ceil(Double(spectra.count) / Double(configuration.maximumTimeBins))))
+        let output = stride(from: 0, to: spectra.count, by: displayStride).map { index in
+            let spectrum = spectra[index]
+            return displayFrequencies.map { frequency -> Float in
                 let center = max(lowerBin, min(upperBin, Int((frequency / binWidth).rounded())))
                 let radius = max(1, Int(ceil(Double(upperBin - lowerBin) / Double(configuration.displayFrequencyBins) / 2)))
                 let start = max(lowerBin, center - radius)
@@ -841,7 +864,8 @@ public actor AudioAnalyzer {
                 fftSize: fftSize,
                 hopSize: hop,
                 fundamental: $0,
-                configuration: configuration
+                configuration: configuration,
+                transient: transient
             )
         } ?? []
         return SpectrogramData(
@@ -849,7 +873,7 @@ public actor AudioAnalyzer {
             timeBins: output.count,
             frequencyBins: displayFrequencies.count,
             maximumFrequency: configuration.maximumFrequencyHz,
-            timeStepSeconds: Double(hop) / sampleRate,
+            timeStepSeconds: Double(hop * displayStride) / sampleRate,
             frequencyAxisHz: displayFrequencies,
             configuration: configuration,
             partialTracks: partials
@@ -896,17 +920,26 @@ public actor AudioAnalyzer {
         fftSize: Int,
         hopSize: Int,
         fundamental: Double,
-        configuration: SpectrogramConfiguration
+        configuration: SpectrogramConfiguration,
+        transient: TransientResult
     ) -> [PartialTrack] {
-        guard fundamental > 0, !spectra.isEmpty else { return [] }
+        guard fundamental.isFinite, fundamental > 0, !spectra.isEmpty, configuration.partialCount > 0 else { return [] }
         let binWidth = sampleRate / Double(fftSize)
         return (1...max(1, configuration.partialCount)).compactMap { harmonic in
             let expected = fundamental * Double(harmonic)
             guard expected >= configuration.minimumFrequencyHz, expected <= configuration.maximumFrequencyHz else { return nil }
             let ratio = pow(2, configuration.partialSearchCents / 1200)
-            let lower = max(1, Int(floor(expected / ratio / binWidth)))
-            let upper = min(fftSize / 2 - 2, Int(ceil(expected * ratio / binWidth)))
-            guard lower <= upper else { return nil }
+            guard let region = SpectrumSegmentation.harmonicBins(
+                harmonic: harmonic, fundamental: fundamental, binWidth: binWidth,
+                toleranceHz: max(binWidth * 1.5, expected * (ratio - 1)),
+                lowerBin: 1, upperBin: fftSize / 2 - 2
+            ) else { return nil }
+            let lower = region.lowerBound, upper = region.upperBound
+            let noiseRegion = SpectrumSegmentation.harmonicBins(
+                harmonic: harmonic, fundamental: fundamental, binWidth: binWidth,
+                toleranceHz: fundamental / 2, lowerBin: 1, upperBin: fftSize / 2 - 2
+            ) ?? region
+            let mainLobeRadius = configuration.window == .blackmanHarris ? 4 : 2
             var points: [PartialTrackPoint] = []
             for (frameIndex, spectrum) in spectra.enumerated() {
                 guard let bin = (lower...upper).max(by: { spectrum[$0] < spectrum[$1] }) else { continue }
@@ -915,7 +948,8 @@ public actor AudioAnalyzer {
                 let right = Double(spectrum[bin + 1])
                 let denominator = left - 2 * center + right
                 let correction = denominator == 0 ? 0 : max(-0.5, min(0.5, 0.5 * (left - right) / denominator))
-                let localNoise = quantile(Array(spectrum[lower...upper]).map(Double.init), probability: 0.35)
+                let sidebands = noiseRegion.filter { abs($0 - bin) > mainLobeRadius }.map { Double(spectrum[$0]) }
+                let localNoise = quantile(sidebands.isEmpty ? Array(spectrum[region]).map(Double.init) : sidebands, probability: 0.5)
                 let localSNR = center - localNoise
                 points.append(PartialTrackPoint(
                     timeSeconds: Double(frameIndex * hopSize) / sampleRate,
@@ -926,9 +960,16 @@ public actor AudioAnalyzer {
                 ))
             }
             guard let peak = points.map(\.amplitudeDB).max() else { return nil }
-            let noiseFloor = quantile(points.map(\.amplitudeDB), probability: 0.15)
-            for index in points.indices {
-                points[index].isValid = points[index].isValid == true && points[index].amplitudeDB >= noiseFloor + 5
+            let quiet = points.filter { point in
+                let windowEnd = point.timeSeconds + Double(fftSize) / sampleRate
+                return transient.onset.map { windowEnd <= $0 } == true
+                    || transient.tailEnd.map { point.timeSeconds >= $0 } == true
+            }.map(\.amplitudeDB)
+            let noiseFloor = quiet.count >= 3 ? quantile(quiet, probability: 0.5) : nil
+            if let noiseFloor {
+                for index in points.indices {
+                    points[index].isValid = points[index].isValid == true && points[index].amplitudeDB >= noiseFloor + 5
+                }
             }
             let onsetThreshold = peak - configuration.partialOnsetBelowPeakDB
             let offsetThreshold = peak - configuration.partialOffsetBelowPeakDB
@@ -942,8 +983,8 @@ public actor AudioAnalyzer {
             let validRatio = Double(points.filter { $0.isValid == true }.count) / Double(max(1, points.count))
             let medianSNR = median(points.compactMap(\.localSignalToNoiseDB))
             let decayPoints: [(Double, Double)]
-            if let peakIndex = points.indices.max(by: { points[$0].amplitudeDB < points[$1].amplitudeDB }) {
-                decayPoints = points[peakIndex...].filter { $0.isValid == true }.map { ($0.timeSeconds, $0.amplitudeDB) }
+            if let soundOffset = transient.soundOffset {
+                decayPoints = points.filter { $0.timeSeconds >= soundOffset && $0.isValid == true }.map { ($0.timeSeconds, $0.amplitudeDB) }
             } else {
                 decayPoints = []
             }
@@ -1154,14 +1195,19 @@ public actor AudioAnalyzer {
             "partialCount": String(configuration.partialCount),
             "partialSearchCents": String(configuration.partialSearchCents),
             "maximumDurationSeconds": String(configuration.maximumAnalysisDurationSeconds),
-            "transientDetector": "adaptive-multifeature/2",
+            "transientDetector": "adaptive-multifeature/3",
+            "spectrumSegmentation": SpectrumSegmentation.version,
+            "partialAnalysisFrameLimit": String(SpectrumSegmentation.maximumPartialFrames),
+            "partialOnsetBelowPeakDB": String(configuration.partialOnsetBelowPeakDB),
+            "partialOffsetBelowPeakDB": String(configuration.partialOffsetBelowPeakDB),
+            "partialPersistenceFrames": String(configuration.partialPersistenceFrames),
             "pitchDecoder": "CREPE+pYIN-consensus/3",
             "pyinThresholdPrior": "beta(alpha=2,beta=18); 100 thresholds",
             "pyinCandidateLimit": "5 per frame",
             "pyinTemporalDecoder": "voiced/unvoiced Viterbi; 700-cent hard-jump penalty",
             "pitchMismatchMaterialCents": "25",
             "pitchMismatchCriticalCents": "50 at both confidences >= 0.55",
-            "perceptualSpectrum": "Hann-STFT+ERB32+harmonic-tristimulus/1",
+            "perceptualSpectrum": "Hann-STFT+ERB32+disjoint-harmonic-tristimulus/2",
             "modulationAnalysis": "detrended-sinusoidal-scan/1; 0.2...20 Hz",
             "releaseDecay": "noise-truncated-Schroeder+deltaBIC-multislope/1; descriptive-not-RT60",
         ]

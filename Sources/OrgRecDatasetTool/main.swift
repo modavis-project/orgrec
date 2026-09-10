@@ -214,25 +214,55 @@ struct OrgRecDatasetTool {
             try FileManager.default.copyItem(at: source, to: destination)
             _ = try await VAO05PackageReader().inspect(destination)
             print("Copied and revalidated the immutable VAO 0.5.0 package to \(destination.path)")
-        case "pod-validate":
+        case "pod-db-validate":
             guard arguments.count == 2 || arguments.count == 3 else { printUsage(); return }
-            let source = URL(fileURLWithPath: arguments[1], isDirectory: true)
-            let inspection = try PODSubsetValidator.inspect(directory: source)
+            let source = URL(fileURLWithPath: arguments[1])
+            let inspection = try PODDatabaseReader.inspect(databaseURL: source)
             if arguments.count == 3 {
                 let output = URL(fileURLWithPath: arguments[2])
                 try FileManager.default.createDirectory(at: output.deletingLastPathComponent(), withIntermediateDirectories: true)
                 try OrgRecCoding.encoder.encode(inspection).write(to: output, options: .atomic)
             }
-            guard inspection.isValid else {
+            guard inspection.isCompatible else {
                 throw OrgRecError.invalidProject(inspection.errors.joined(separator: "; "))
             }
-            print("Valid reduced POD subset derived from Release \(inspection.manifest?.source.releaseVersion ?? "unknown"): \(inspection.verifiedFileCount) files, \(inspection.verifiedBytes) verified bytes.")
-        case "pod-import":
+            guard inspection.matchesPublishedArtifact else {
+                throw OrgRecError.invalidProject("The database is schema-compatible but does not match the pinned POD 1.5 OrgRec artifact size and SHA-256 digest.")
+            }
+            print("Compatible POD \(inspection.releaseVersion ?? "unknown") OrgRec database: \(inspection.organCount) organs, \(inspection.componentCount) components, \(inspection.fileSize) bytes.")
+            print("SHA-256 \(inspection.sha256)")
+        case "pod-db-import":
             guard arguments.count == 3 else { printUsage(); return }
-            let source = URL(fileURLWithPath: arguments[1], isDirectory: true)
-            let destination = URL(fileURLWithPath: arguments[2], isDirectory: true)
-            let inspection = try await PODSubsetImporter().importVerifiedSubset(from: source, to: destination)
-            print("Imported and revalidated \(inspection.verifiedFileCount) reduced POD files at \(destination.path)")
+            let source = URL(fileURLWithPath: arguments[1])
+            let destination = URL(fileURLWithPath: arguments[2])
+            let inspection = try await PODDatabaseImporter().importVerifiedDatabase(from: source, to: destination)
+            print("Imported and revalidated POD \(inspection.releaseVersion ?? "unknown") database at \(destination.path)")
+            print("SHA-256 \(inspection.sha256)")
+        case "pod-db-download":
+            guard arguments.count >= 3, let remoteURL = URL(string: arguments[1]) else { printUsage(); return }
+            let destination = URL(fileURLWithPath: arguments[2])
+            let expectedSHA256 = option("--sha256", in: arguments)
+            let expectedBytes = option("--bytes", in: arguments).flatMap(Int64.init)
+            let inspection = try await PODDatabaseImporter().downloadVerifiedDatabase(
+                from: remoteURL,
+                to: destination,
+                expectedSHA256: expectedSHA256,
+                expectedByteSize: expectedBytes
+            )
+            print("Downloaded, validated, and cached POD \(inspection.releaseVersion ?? "unknown") database at \(destination.path)")
+            print("SHA-256 \(inspection.sha256)")
+        case "pod-db-search":
+            guard arguments.count >= 3 else { printUsage(); return }
+            let database = URL(fileURLWithPath: arguments[1])
+            let query = arguments[2]
+            let limit = option("--limit", in: arguments).flatMap(Int.init) ?? 30
+            let results = try PODDatabaseReader.search(databaseURL: database, query: query, limit: limit)
+            for result in results {
+                let builder = result.builders.map { " · \($0)" } ?? ""
+                let stops = result.stopCount.map { " · \($0) stops" } ?? ""
+                print("\(result.mdvsID)\t\(result.title)\(builder)\(stops)")
+            }
+            print("\(results.count) result(s)")
         case "roundtrip":
             guard arguments.count == 3 else { printUsage(); return }
             let source = URL(fileURLWithPath: arguments[1], isDirectory: true)
@@ -714,8 +744,10 @@ struct OrgRecDatasetTool {
           OrgRecDatasetTool vao-workspace-import <source.vao> <destination-directory>
           OrgRecDatasetTool vao-extract-asset <source.vao> <realization-id> <destination-file>
           OrgRecDatasetTool vao-copy <source.vao> <destination.vao>
-          OrgRecDatasetTool pod-validate <subset-directory> [inspection.json]
-          OrgRecDatasetTool pod-import <subset-directory> <cache-directory>
+          OrgRecDatasetTool pod-db-validate <database.sqlite> [inspection.json]
+          OrgRecDatasetTool pod-db-import <database.sqlite> <cache.sqlite>
+          OrgRecDatasetTool pod-db-download <https-url> <cache.sqlite> [--sha256 <digest>] [--bytes <count>]
+          OrgRecDatasetTool pod-db-search <database.sqlite> <query> [--limit <count>]
           OrgRecDatasetTool roundtrip <source.orgrec-capture> <destination.orgrec>
           OrgRecDatasetTool native-corpus-inspect <inspection.json> <root> [root ...] [--wav-smpl-limit <n>]
           OrgRecDatasetTool grandorgue-inspect <source.organ> <inspection.json> [--source-url <url>]

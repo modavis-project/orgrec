@@ -103,7 +103,7 @@ public struct PerceptualSpectralSummary: Codable, Hashable, Sendable {
     public var validationErrors: [String] {
         var errors: [String] = []
         if fftSize < 1_024 || !fftSize.isMultiple(of: 2) { errors.append("Perceptual spectral FFT size is invalid.") }
-        if hopSize <= 0 || hopSize > fftSize { errors.append("Perceptual spectral hop size is invalid.") }
+        if hopSize <= 0 { errors.append("Perceptual spectral hop size is invalid.") }
         if analyzedFrameCount <= 0 || !analyzedDurationSeconds.isFinite || analyzedDurationSeconds <= 0 { errors.append("Perceptual spectral evidence has an invalid extent.") }
         let finiteValues = [spectralSpreadHz, spectralSkewness, spectralKurtosis, spectralCrestDB, auditoryCentroidERB, auditorySpreadERB, harmonicSpectralSlopeDBPerOctave, harmonicSpectralDeviationDB, amplitudeModulationRateHz, amplitudeModulationDepthDB, spectralCentroidModulationRateHz, spectralCentroidModulationDepthERB]
         if finiteValues.compactMap({ $0 }).contains(where: { !$0.isFinite }) { errors.append("Perceptual spectral evidence contains a non-finite value.") }
@@ -143,6 +143,8 @@ public enum PerceptualSpectralAnalyzer {
         } else {
             samples = source
         }
+        guard samples.allSatisfy({ $0.isFinite }),
+              samples.reduce(0.0, { $0 + Double($1) * Double($1) }) / Double(samples.count) > 1e-20 else { return nil }
         let candidates = [1_024, 2_048, 4_096, 8_192]
         let desired = fundamentalFrequency.map { frequency in
             max(2_048, min(8_192, Int((sampleRate * 8 / max(20, frequency)).rounded(.up))))
@@ -231,6 +233,8 @@ public enum PerceptualSpectralAnalyzer {
         ]
         if fundamentalFrequency == nil {
             limitations.append("Harmonic-energy, slope, deviation, and tristimulus descriptors are unavailable without a defensible fundamental.")
+        } else if harmonic == nil {
+            limitations.append("Harmonic descriptors are unavailable: insufficient energy or frequency resolution.")
         }
         return PerceptualSpectralSummary(
             fftSize: fftSize,
@@ -259,7 +263,7 @@ public enum PerceptualSpectralAnalyzer {
             spectralCentroidModulationRateHz: centroidModulation?.rate,
             spectralCentroidModulationDepthERB: centroidModulation?.depth,
             spectralCentroidModulationConfidence: centroidModulation?.confidence,
-            method: "Hann STFT power descriptors, 32-band ERB-rate triangular summary, harmonic-region energy, tristimulus, and detrended sinusoidal modulation scan (0.2–20 Hz)",
+            method: "Hann STFT power descriptors, 32-band ERB-rate triangular summary, disjoint harmonic-region energy/2, tristimulus, and detrended sinusoidal modulation scan (0.2–20 Hz)",
             limitations: limitations
         )
     }
@@ -316,7 +320,8 @@ public enum PerceptualSpectralAnalyzer {
         powers: [Double], binWidth: Double, lowerBin: Int, upperBin: Int, fundamental: Double?
     ) -> (energyRatio: Double, slope: Double?, deviation: Double?, tristimulus: (Double, Double, Double))? {
         guard let fundamental, fundamental.isFinite, fundamental >= 20 else { return nil }
-        let total = max(1e-24, powers[lowerBin...upperBin].reduce(0, +))
+        let total = powers[lowerBin...upperBin].reduce(0, +)
+        guard total.isFinite, total > 1e-24 else { return nil }
         let maximumHarmonic = min(64, Int((Double(upperBin) * binWidth / fundamental).rounded(.down)))
         guard maximumHarmonic >= 1 else { return nil }
         var usedBins = Set<Int>()
@@ -324,15 +329,16 @@ public enum PerceptualSpectralAnalyzer {
         for harmonic in 1...maximumHarmonic {
             let expected = fundamental * Double(harmonic)
             let toleranceHz = max(binWidth * 1.5, expected * (pow(2, 35.0 / 1_200) - 1))
-            let lower = max(lowerBin, Int(floor((expected - toleranceHz) / binWidth)))
-            let upper = min(upperBin, Int(ceil((expected + toleranceHz) / binWidth)))
-            guard lower <= upper else { continue }
-            let region = lower...upper
+            guard let region = SpectrumSegmentation.harmonicBins(
+                harmonic: harmonic, fundamental: fundamental, binWidth: binWidth,
+                toleranceHz: toleranceHz, lowerBin: lowerBin, upperBin: upperBin
+            ) else { continue }
             region.forEach { usedBins.insert($0) }
             partials.append((harmonic, region.reduce(0.0) { $0 + powers[$1] }))
         }
         let harmonicPower = usedBins.reduce(0.0) { $0 + powers[$1] }
-        let partialTotal = max(1e-24, partials.reduce(0.0) { $0 + $1.power })
+        let partialTotal = partials.reduce(0.0) { $0 + $1.power }
+        guard partialTotal.isFinite, partialTotal > 1e-24 else { return nil }
         let t1 = (partials.first(where: { $0.number == 1 })?.power ?? 0) / partialTotal
         let t2 = partials.filter { (2...4).contains($0.number) }.reduce(0.0) { $0 + $1.power } / partialTotal
         let t3 = max(0, 1 - t1 - t2)

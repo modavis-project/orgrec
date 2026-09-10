@@ -2,11 +2,10 @@ cff-version: 1.2.0
 message: "Cite the exact tagged OrgRec release used in your work."
 title: "OrgRec"
 type: software
-version: "0.3.0"
-doi: "10.5281/zenodo.22216026"
-date-released: 2026-09-01
+version: "0.3.1"
+date-released: 2026-09-10
 repository-code: "https://github.com/modavis-project/orgrec"
-url: "https://doi.org/10.5281/zenodo.22216026"
+url: "https://github.com/modavis-project/orgrec/releases/tag/v0.3.1"
 authors:
   - family-names: Ukolov
     given-names: Dominik

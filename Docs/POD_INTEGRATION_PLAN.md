@@ -1,112 +1,118 @@
-# Reduced POD integration plan
+# MODAVIS POD 1.5 local database integration
 
-Status: application boundary implemented; final dataset deposit pending
+Status: SQLite compatibility implemented and verified against the private
+Zenodo draft artifact; public download URL pending
 
-OrgRec is expected to use a highly reduced MODAVIS Pipe Organ Dataset (POD)
-subset derived from Dataset Release 1.5. The import boundary is implemented;
-the final subset identity and payload remain pending. This document fixes what
-the separate dataset release must provide.
+OrgRec uses the reduced MODAVIS Pipe Organ Dataset (POD) 1.5 OrgRec projection
+as an optional, read-only local organ catalogue and roadmap source. The
+database is published separately on Zenodo and is not part of the application
+bundle or Git repository.
 
-## Dataset identity
+## Pinned artifact
 
-The reduced collection is a derivative dataset, not a renamed copy of POD
-Release 1.5. Give it:
+- filename: `modavis-pod-1.5-orgrec.sqlite`
+- size: `418177024` bytes
+- SHA-256:
+  `dd57394627c91d9fa3f4f3bfd1770c773184345448af80bef63d834de0cbc464`
+- database metadata release: `1.5.0`
+- projection profile: `orgrec`
+- artifact profile: `public_structured_dataset`
+- database contract: `modavis.release-1.5-public-preparation/v1`
 
-- its own title, semantic version, creators/contributors, release date, and
-  Zenodo dataset DOI;
-- an exact reference to the immutable POD 1.5 version identifier or DOI;
-- a documented selection purpose and algorithm;
-- its own license or a clear statement of the inherited per-item licenses;
-- a change log independent of the OrgRec software version.
+The public Zenodo URL is deliberately absent until the record is published.
+Private draft URLs and access tokens must never be stored in source, project
+metadata, logs, or release artifacts. Changing only the download URL does not
+change the pinned database identity; changed bytes require an explicit size and
+digest update plus a new compatibility run.
 
-Use the exact POD 1.5 version identifier for provenance. A concept DOI or
-project home page may be added for discovery but does not replace the version
-pin.
+## Observed release contents
 
-## Selection manifest
+The verified draft contains:
 
-Before copying any payload, create a machine-readable manifest containing:
+| Table | Rows |
+| --- | ---: |
+| `organ` | 215,769 |
+| `organ_alias` | 3,881 |
+| `builder` | 11,778 |
+| `organ_builder` | 151,233 |
+| `component` | 503,980 |
+| `component_provenance` | 503,980 |
+| `technical_parameter` | 115,814 |
+| `source` | 25 |
+| `roadmap_eligibility` | 23,586 |
 
-- source dataset title, version, version identifier, and manifest SHA-256;
-- subset title, version, creation time, and responsible agents;
-- selection protocol identifier and source-code commit;
-- each included source item identifier and source-relative path;
-- source and subset SHA-256, byte size, media type, and technical metadata;
-- instrument, division, stop/rank, pitch, channel, and take identifiers needed
-  by the intended test;
-- original and derivative license identifiers, rights holder, attribution, and
-  any access or use condition;
-- transformation activity and parameters for every changed byte stream;
-- exclusions and their reasons;
-- the expected aggregate counts and byte total.
+It also contains contentless FTS5 indexes for organ and component search. The
+database declares that structured facts, identifiers, and source citations are
+included while raw source media and raw descriptive prose are excluded.
 
-Do not record workstation mount points, account names, access tokens, or
-mutable download URLs as identity fields.
+## Compatibility behavior
 
-## Minimum useful subset
+OrgRec opens the database using SQLite's read-only mode and enables
+`query_only`. Validation checks:
 
-Select the smallest set that exercises the product claim. A defensible
-integration fixture should cover only the required combinations, for example:
+- a regular, non-symbolic input file and successful SQLite `quick_check`;
+- exact Release 1.5, projection, artifact, and contract metadata;
+- required tables and columns, allowing compatible additive columns;
+- non-empty core tables and one provenance row per component;
+- component and roadmap references to existing organs;
+- working FTS5 organ and component indexes;
+- SHA-256 stability while the file is inspected;
+- exact published byte size and digest before local cache admission.
 
-- at least two contrasting stops or ranks;
-- more than one pitch where pitch-dependent behavior is under test;
-- the metadata required to construct a roadmap and resolve audio;
-- one expected import success and one deliberately invalid metadata case;
-- explicit rights and provenance records.
+A selected local file is copied to a temporary sibling, fully revalidated, and
+then atomically moved into `Application Support/OrgRec/Datasets/POD`. A failed
+copy or validation removes the staging file. The source is never modified.
+The app remembers only the verified cache path, not a Zenodo URL or token.
 
-Do not call the subset representative of POD 1.5 unless a separate sampling
-analysis supports that claim. A compact interoperability example and a
-scientific evaluation sample are different products and may need different
-selection designs.
+The HTTPS retrieval path downloads to a system temporary file, rejects failed
+or non-HTTPS final responses, checks the pinned size and digest, validates the
+database contract, and only then admits the file to the cache. Once cached,
+search and roadmap creation work without network access.
 
-## Repository and Zenodo placement
+## Local catalogue and roadmap projection
 
-Keep only the manifest, schema, tiny synthetic test material, and download or
-verification tooling in the OrgRec repository. Deposit cleared POD-derived
-payloads in a separate Zenodo dataset record. The application may support an
-explicit user-initiated download, but it must verify the expected version,
-length, and digest before using the data and must also work without network
-access.
+Organ search uses `organ_search` for labels and MDVS identifiers and the
+builder relations for builder-name matches. Alias identifiers resolve through
+`organ_alias`. OrgRec exposes only
+`component_comparison_ready` organs for specification-derived roadmap import;
+`technical_facts_only` records remain searchable but cannot silently produce an
+incomplete component roadmap.
 
-Do not use Git LFS to obscure the publication boundary. LFS is storage, not
-rights management or dataset versioning.
+For a selected eligible organ, OrgRec freezes a deterministic JSON projection
+containing the database metadata, organ, builders, component provenance, and
+technical parameters. Its digest becomes the project snapshot digest; the
+database digest becomes the protected Release 1.5 fingerprint. Stops,
+couplers, accessories, divisions, pitch labels, documented pitch standards,
+builders, action facts, wind facts, and source citations are transferred where
+the database provides them. Missing compass metadata remains unknown and is
+not inferred.
 
-## Application work
+## Command-line workflows
 
-OrgRec 0.3.0 now provides:
+```text
+OrgRecDatasetTool pod-db-validate <database.sqlite> [inspection.json]
+OrgRecDatasetTool pod-db-import <database.sqlite> <cache.sqlite>
+OrgRecDatasetTool pod-db-download <https-url> <cache.sqlite> [--sha256 <digest>] [--bytes <count>]
+OrgRecDatasetTool pod-db-search <database.sqlite> <query> [--limit <count>]
+```
 
-- a versioned POD subset manifest decoder and validator;
-- item and source identifier mapping that does not treat filenames as canonical
-  organ identity;
-- checksum-verified import with a staging directory and atomic commit;
-- explicit handling for missing, extra, corrupt, and wrong-release files;
-- UI and CLI wording that names the derivative subset and Release 1.5 source;
-- a removable local cache with no bundled user recordings;
-- a synthetic, source-free fixture for success and failure tests.
+The download command defaults to the pinned size and digest. Explicit values
+add a caller-supplied check and do not bypass the application's pinned
+cached-release identity.
 
-Export provenance that cites the final subset and exact source release cannot
-be enabled until their version identifiers exist. The manifest validator
-requires those fields for `published-subset` records and rejects a synthetic
-fixture that impersonates a published identifier.
+## Verification
 
-## Acceptance tests
+`PODDatabaseTests` creates source-free SQLite fixtures for positive validation,
+search, aliases, roadmap projection, documented pitch transfer, atomic import,
+wrong-release rejection, and incomplete-schema rejection. Setting
+`ORGREC_POD_DATABASE` runs the release-level test against an external database,
+including the full row-count thresholds, FTS search, and roadmap compilation.
 
-The dataset integration is complete when tests demonstrate:
+Before publishing a new POD database artifact:
 
-- clean acquisition from the published dataset record;
-- anonymous resolution of the version DOI and every required file;
-- exact manifest, file-count, byte-count, and SHA-256 agreement;
-- deterministic selection or a frozen item inventory;
-- rejection of altered bytes, wrong source release, duplicate identifiers, and
-  path traversal;
-- the same application result from a fresh offline cache;
-- no unreviewed source data in the software source archive or app bundle;
-- license and attribution display in the app and exported provenance.
-
-Current automated tests cover exact local validation, staged import, altered
-bytes, wrong source release, and path traversal. Acquisition, anonymous DOI
-resolution, final aggregate checks, and fresh-cache scientific equivalence must
-be completed against the published dataset record.
-
-The dataset DOI, subset version, and checksums remain absent from release
-metadata until the final deposit exists.
+1. run the complete Swift test suite;
+2. run the release-level test with `ORGREC_POD_DATABASE`;
+3. run `pod-db-validate` and `pod-db-search` on the downloaded Zenodo bytes;
+4. confirm anonymous resolution of the final public URL;
+5. replace the pending URL in public documentation without committing draft
+   credentials.

@@ -5,11 +5,12 @@ turns an instrument specification into a field-work roadmap, records
 multichannel Broadcast Wave audio, retains capture and review provenance, and
 exports research packages for preservation and exchange.
 
-The current release is OrgRec 0.3.0, build 8. Its source is held in the private
-`modavis-project/orgrec` repository. The release record is published at
-[`10.5281/zenodo.22216026`](https://doi.org/10.5281/zenodo.22216026). The macOS
-candidate is ad-hoc signed; a normal Gatekeeper distribution still requires
-Developer ID signing and notarization.
+The current source release is OrgRec 0.3.1, build 9, tagged `v0.3.1` in
+`modavis-project/orgrec`. The preceding 0.3.0 release is archived at
+[`10.5281/zenodo.22216026`](https://doi.org/10.5281/zenodo.22216026).
+The 0.3.0 macOS candidate is ad-hoc signed; version 0.3.1 is a source update.
+Developer ID signing and notarization remain required for normal Gatekeeper
+distribution.
 
 ## Capabilities
 
@@ -21,7 +22,7 @@ Developer ID signing and notarization.
   inspection;
 - editable `.orgrec` projects and checked VAO/IAD import and export;
 - dataset and GrandOrgue conversion tools;
-- exact validation and local caching for the reduced POD subset contract.
+- exact validation, offline search, and roadmap import for the POD 1.5 SQLite database.
 
 OrgRec requires macOS 14 or later. Capture and hardware behavior are macOS-only;
 the Python VAO reference tools are cross-platform.
@@ -45,21 +46,19 @@ packages and a historical 0.2 reader. It does not reinterpret a near version as
 0.5.0. The compatibility declaration is in
 [`Docs/VAO_0.5.0_MIGRATION_PLAN.md`](Docs/VAO_0.5.0_MIGRATION_PLAN.md).
 
-## Reduced POD subset
+## POD 1.5 local database
 
-The planned OrgRec subset is a separate dataset derived from MODAVIS Pipe Organ
-Dataset Release 1.5. No POD audio or source record is included in this
-repository. OrgRec now provides the production import boundary:
+The separately published, reduced MODAVIS Pipe Organ Dataset 1.5 OrgRec
+projection is an optional read-only SQLite catalogue. OrgRec can retrieve or
+select it, verify SQLite integrity, Release 1.5 metadata, the required schema,
+FTS5 indexes, relationships, byte size, and pinned SHA-256, then atomically
+cache it for offline organ search and roadmap creation. No POD database or raw
+source media are included in this repository.
 
-- a versioned manifest with derivative and source identities;
-- exact Release 1.5 provenance;
-- a frozen item inventory, selection protocol, license, and attribution;
-- path, size, SHA-256, duplicate, and closed-inventory checks;
-- staging, revalidation, atomic cache import, and cache removal.
-
-`Fixtures/POD/valid/synthetic-minimal` contains synthetic metadata only. The
-real subset DOI and checksums remain intentionally absent until its dataset
-deposit is final. See [`Docs/POD_INTEGRATION_PLAN.md`](Docs/POD_INTEGRATION_PLAN.md).
+The private Zenodo draft was verified; its access URL is intentionally not
+stored. The public URL will be added after publication. See
+[`Docs/POD_INTEGRATION_PLAN.md`](Docs/POD_INTEGRATION_PLAN.md) for the pinned
+artifact identity, observed row counts, commands, and compatibility limits.
 
 ## Build
 
@@ -112,8 +111,8 @@ checks are tracked in
 ```sh
 swift run OrgRecDatasetTool vao-validate Instrument.vao
 swift run OrgRecDatasetTool vao-inspect Instrument.vao inspection.json
-swift run OrgRecDatasetTool pod-validate /path/to/pod-subset
-swift run OrgRecDatasetTool pod-import /path/to/pod-subset /path/to/local-cache
+swift run OrgRecDatasetTool pod-db-validate /path/to/modavis-pod-1.5-orgrec.sqlite
+swift run OrgRecDatasetTool pod-db-search /path/to/modavis-pod-1.5-orgrec.sqlite "St Laurentius"
 python3 Tools/vao05.py validate Instrument.vao
 ```
 
@@ -133,6 +132,11 @@ The repository audit is:
 ```sh
 python3 Tools/audit_public_release.py
 ```
+
+Because earlier private commits contained restricted and machine-specific
+material, the first public repository must be created from a clean exported
+source snapshot or from reviewed rewritten history. Removing files only from the
+latest commit is insufficient.
 
 ## Documentation
 

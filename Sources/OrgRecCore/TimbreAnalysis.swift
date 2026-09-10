@@ -212,7 +212,7 @@ public struct TimbreAnalysisParameters: Codable, Hashable, Sendable {
 
 public enum TimbreMethodology {
     public static let contractVersion = "orgrec-timbre-analysis/2"
-    public static let algorithmVersion = "orgrec-harmonic-ltas/1"
+    public static let algorithmVersion = "orgrec-harmonic-ltas/2"
     public static let familyProfileVersion = "orgrec-hergert-family-profile/1"
     public static let targetSampleRate = 48_000.0
     public static let slopeExponent = 1.729
@@ -661,9 +661,10 @@ public actor TimbreAnalysisEngine {
     public func analyze(input: TimbreAnalysisInput, mode: TimbreAnalysisMode) throws -> PipeTimbreObservation {
         let parameters = TimbreMethodology.parameters
         let measuredIsUsable = (input.measuredConfidence ?? 0) >= parameters.minimumMeasuredPitchConfidence
-            && (input.measuredFrequencyHz ?? 0) > 0
+            && input.measuredConfidence?.isFinite == true
+            && input.measuredFrequencyHz?.isFinite == true && (input.measuredFrequencyHz ?? 0) > 0
         guard let fundamental = measuredIsUsable ? input.measuredFrequencyHz : input.expectedFrequencyHz,
-              fundamental > 0 else {
+              fundamental.isFinite, fundamental > 0 else {
             throw OrgRecError.unsupportedAudio("Timbre analysis requires a measured or documented fundamental frequency.")
         }
         let source: TimbreFundamentalSource = measuredIsUsable ? .measuredConsensus : .roadmapExpectation
@@ -672,11 +673,12 @@ public actor TimbreAnalysisEngine {
         let duration = Double(file.length) / format.sampleRate
         guard duration > 0 else { throw OrgRecError.unsupportedAudio("The recording is empty.") }
         let selectedChannel = max(0, min(Int(format.channelCount) - 1, input.referenceChannel))
-        let region = Self.steadyRegion(
+        let region = SpectrumSegmentation.steadyRegion(
             duration: duration,
             sustainStart: input.sustainStartSeconds,
             soundOffset: input.soundOffsetSeconds,
-            keyUp: input.keyUpSeconds
+            keyUp: input.keyUpSeconds,
+            maximumDuration: parameters.maximumStableDurationSeconds
         )
         let samples = try Self.read(file: file, channel: selectedChannel, start: region.start, end: region.end)
         guard samples.count >= 512 else {
@@ -706,19 +708,16 @@ public actor TimbreAnalysisEngine {
         let byHarmonic = Dictionary(uniqueKeysWithValues: measurements.map { ($0.harmonicNumber, $0.relativeLevelDB) })
         let levels: [Double?] = (1...TimbreMethodology.maximumPartialCount).map { byHarmonic[$0] }
         let features = TimbreFeatureCalculator.calculate(relativePartialLevelsDB: levels)
-        var warnings: [String] = []
+        var warnings = region.limitations
         if source == .roadmapExpectation {
             warnings.append("The measured pitch was unavailable or low-confidence; harmonic bins use the roadmap frequency.")
-        }
-        if region.end - region.start < 2 {
-            warnings.append("Less than two seconds of stable sustain were available; LTAS stability is limited.")
         }
         if measurements.count < parameters.minimumDetectedPartials {
             warnings.append("Fewer than \(parameters.minimumDetectedPartials) harmonic partials exceeded the local \(Self.fixed(parameters.localSignalToNoiseThresholdDB, decimals: 0)) dB noise threshold.")
         }
         let applicable = features.normalizedSpectralCentroid != nil && features.weightedAverageSlopeDBPerOctave != nil
         var applicability: TimbreAnalysisApplicability = applicable
-            ? (measurements.count >= parameters.minimumDetectedPartials && source == .measuredConsensus ? .applicable : .limited)
+            ? (measurements.count >= parameters.minimumDetectedPartials && source == .measuredConsensus && region.limitations.isEmpty ? .applicable : .limited)
             : .notApplicable
         let classification = Self.classify(features: features)
         var candidates = mode == .familySuggestion && applicability != .notApplicable
@@ -897,14 +896,6 @@ public actor TimbreAnalysisEngine {
         return (.applicable, [])
     }
 
-    private static func steadyRegion(duration: Double, sustainStart: Double?, soundOffset: Double?, keyUp: Double?) -> (start: Double, end: Double) {
-        let start = min(duration, max(0, sustainStart ?? min(duration * 0.25, 1.0)))
-        let documentedEnd = [soundOffset, keyUp].compactMap { $0 }.filter { $0 > start }.min()
-        var end = min(duration, documentedEnd.map { $0 - 0.1 } ?? min(duration * 0.85, start + 10))
-        if end - start < 0.5 { end = min(duration, start + max(0.5, duration - start)) }
-        return (start, max(start, end))
-    }
-
     private static func read(file: AVAudioFile, channel: Int, start: Double, end: Double) throws -> [Float] {
         let rate = file.processingFormat.sampleRate
         let startFrame = max(Int64(0), min(file.length, Int64((start * rate).rounded(.down))))
@@ -998,20 +989,35 @@ public actor TimbreAnalysisEngine {
             guard target < min(parameters.maximumPartialFrequencyHz, sampleRate * 0.47) else { break }
             let center = Int((target / binWidth).rounded())
             let radius = max(1, Int(ceil(max(binWidth * 1.5, fundamental * 0.035) / binWidth)))
-            let lower = max(1, center - radius)
-            let upper = min(power.count - 2, center + radius)
-            guard lower <= upper else { continue }
+            guard let region = SpectrumSegmentation.harmonicBins(
+                harmonic: harmonic, fundamental: fundamental, binWidth: binWidth,
+                toleranceHz: Double(radius) * binWidth, lowerBin: 1, upperBin: power.count - 2
+            ) else { continue }
+            let lower = region.lowerBound, upper = region.upperBound
             guard let peakBin = (lower...upper).max(by: { power[$0] < power[$1] }) else { continue }
             let peakPower = max(power[peakBin], 1e-24)
             let noiseLower = max(1, center - radius * 5)
             let noiseUpper = min(power.count - 2, center + radius * 5)
             let noiseValues = (noiseLower...noiseUpper).filter { abs($0 - peakBin) > radius }.map { power[$0] }.sorted()
             let noise = noiseValues.isEmpty ? 1e-24 : max(noiseValues[noiseValues.count / 2], 1e-24)
+            // Integrate the Hann main lobe to avoid bin-phase scalloping in
+            // relative harmonic power; never integrate a neighboring harmonic.
+            guard let ownership = SpectrumSegmentation.harmonicBins(
+                harmonic: harmonic, fundamental: fundamental, binWidth: binWidth,
+                toleranceHz: fundamental / 2, lowerBin: 1, upperBin: power.count - 2
+            ) else { continue }
+            let lobe = max(ownership.lowerBound, peakBin - 2)...min(ownership.upperBound, peakBin + 2)
+            let integratedPower = max(1e-24, power[lobe].reduce(0, +) - Double(lobe.count) * noise)
+            let left = log(max(1e-24, power[peakBin - 1]))
+            let centerPower = log(peakPower)
+            let right = log(max(1e-24, power[peakBin + 1]))
+            let denominator = left - 2 * centerPower + right
+            let correction = abs(denominator) > 1e-12 ? min(0.5, max(-0.5, 0.5 * (left - right) / denominator)) : 0
             result.append(ExtractedPartial(
                 harmonic: harmonic,
-                frequency: Double(peakBin) * binWidth,
-                power: peakPower,
-                levelDB: 10 * log10(peakPower),
+                frequency: (Double(peakBin) + correction) * binWidth,
+                power: integratedPower,
+                levelDB: 10 * log10(integratedPower),
                 snrDB: 10 * log10(peakPower / noise)
             ))
         }
