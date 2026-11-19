@@ -5,11 +5,14 @@ turns an instrument specification into a field-work roadmap, records
 multichannel Broadcast Wave audio, retains capture and review provenance, and
 exports research packages for preservation and exchange.
 
-The current release is **OrgRec 0.3.2, build 13**. Download the universal macOS
-app and source archive from [GitHub Releases](https://github.com/modavis-project/orgrec/releases/tag/v0.3.2)
-or [Zenodo](https://doi.org/10.5281/zenodo.22698744).
-The app supports Apple Silicon and Intel Macs running macOS 14 or later.
-It is ad-hoc signed and is not notarized.
+[OrgRec 0.4.0, build 14](https://github.com/modavis-project/orgrec/releases/tag/v0.4.0)
+is a source release with a command-line export to VAO 0.6.0. Build it on
+macOS 14 or later with Xcode 16 or newer.
+
+The previous universal macOS app is available from the
+[0.3.2 release](https://github.com/modavis-project/orgrec/releases/tag/v0.3.2)
+and its [Zenodo archive](https://doi.org/10.5281/zenodo.22698744). That bundle
+is ad-hoc signed.
 
 For first use, open [Getting Started](Docs/GETTING_STARTED.md). To inspect an
 existing recording, drop an audio file onto OrgRec or choose **Analyze Audio**.
@@ -34,7 +37,7 @@ the Python VAO reference tools are cross-platform.
 
 ## VAO 0.5.0
 
-VAO 0.5.0 is the default public export format. OrgRec writes a self-contained
+The macOS app exports VAO 0.5.0. OrgRec writes a self-contained
 preservation closure, verifies its carrier mappings and payload digests, and
 cross-checks generated packages with the independent Python validator.
 

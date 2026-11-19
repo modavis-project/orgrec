@@ -4,6 +4,12 @@ This file records changes to the OrgRec application and its command-line tools.
 The separate [VAO standard changelog](Docs/VAO_CHANGELOG.md) records changes to
 the exchange-format contract.
 
+## 0.4.0 — 2026-11-19
+
+- Export an editable OrgRec project or migrate a complete VAO 0.5.0 carrier to VAO 0.6.0 from the command line.
+- Verify the reference wheel before use and write a migration receipt alongside the carrier. Payload bytes and realization identifiers are preserved.
+- The macOS app exports VAO 0.5.0. The public 0.4.0 archive contains source and build instructions.
+
 ## 0.3.2 — 2026-09-11
 
 ### Added

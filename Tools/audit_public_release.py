@@ -12,8 +12,8 @@ import subprocess
 ROOT = Path(__file__).resolve().parent.parent
 GIT_WARNING_BYTES = 50 * 1024 * 1024
 PRIVATE_PATH = re.compile(r"/(?:Users|Volumes)/[^\s\"']+")
-TARGET_VERSION = "0.3.2"
-TARGET_BUILD = "13"
+TARGET_VERSION = "0.4.0"
+TARGET_BUILD = "14"
 
 
 def git(*arguments: str) -> subprocess.CompletedProcess[str]:
@@ -70,6 +70,9 @@ def main() -> int:
         "Sources/OrgRecCore/VAO05PackageBuilder.swift",
         "Tools/vao05.py",
         "Tools/test_vao05_conformance.py",
+        "Tools/export_vao06.py",
+        "Tools/test_vao06_export.py",
+        "Docs/VAO_0.6_EXPORT.md",
         "Fixtures/VAO05/valid/minimal/vao-manifest.json",
     ]
     missing = [name for name in required_vao if not (ROOT / name).is_file()]
@@ -158,14 +161,14 @@ def main() -> int:
     if not (ROOT / "Release/pod-subset-manifest.json").is_file():
         external.append({"code": "pod-deposit", "detail": "The separately published reduced POD dataset manifest and DOI are not final."})
 
-    history = git("rev-list", "--objects", "--all")
+    history = git("rev-list", "--objects", "HEAD")
     if history.returncode == 0 and (
         "Fixtures/VAO04/valid/cuntz-positiv-acoustic-test/" in history.stdout
         or "Artifacts/CuntzPositivVAO04/" in history.stdout
     ):
         external.append({
             "code": "clean-public-history",
-            "detail": "Private history contains excluded material; create the public repository from a clean export or reviewed rewritten history.",
+            "detail": "The release commit reaches excluded material. Prepare the release from a clean public history.",
         })
 
     tag = git("rev-parse", "-q", "--verify", f"refs/tags/v{TARGET_VERSION}")
