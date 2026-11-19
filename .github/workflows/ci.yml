@@ -27,6 +27,14 @@ jobs:
         run: python3 -m pip install -r requirements-vao05.txt
       - name: Test
         run: VAO05_REFERENCE_PYTHON=python3 swift test
+      - name: VAO 0.6.0 export and migration
+        run: |
+          wheel="$RUNNER_TEMP/vao_standard_tools-0.6.0-py3-none-any.whl"
+          curl --fail --location --silent --show-error --max-time 60 --output "$wheel" \
+            https://github.com/modavis-project/vao-standard/releases/download/v0.6.0/vao_standard_tools-0.6.0-py3-none-any.whl
+          swift build --product OrgRecDatasetTool
+          python3 Tools/test_vao06_export.py \
+            --orgrec-tool "$(swift build --show-bin-path)/OrgRecDatasetTool" --reference-wheel "$wheel"
       - name: Release build
         run: swift build -c release
 

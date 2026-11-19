@@ -51,6 +51,12 @@ packages and a historical 0.2 reader. It does not reinterpret a near version as
 0.5.0. The compatibility declaration is in
 [`Docs/VAO_0.5.0_MIGRATION_PLAN.md`](Docs/VAO_0.5.0_MIGRATION_PLAN.md).
 
+## VAO 0.6.0 export from source
+
+Use the [VAO 0.6.0 export command](Docs/VAO_0.6_EXPORT.md) to write a verified
+preservation carrier and migration receipt from an OrgRec project or a complete
+VAO 0.5.0 carrier.
+
 ## POD 1.6.0 local database
 
 The optional [POD 1.6.0 OrgRec projection](https://doi.org/10.5281/zenodo.22308263)
