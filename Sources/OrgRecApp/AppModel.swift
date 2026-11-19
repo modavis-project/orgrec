@@ -145,6 +145,16 @@ private enum PersistenceCompletion {
     case failed(String)
 }
 
+private enum OrganCatalogue: Equatable {
+    case navigator(URL)
+    case localPOD(URL, sha256: String)
+}
+
+private struct CatalogueSearch: Equatable {
+    let catalogue: OrganCatalogue
+    let query: String
+}
+
 @MainActor
 final class AppModel: ObservableObject {
     @Published var project: OrgRecProject?
@@ -165,9 +175,13 @@ final class AppModel: ObservableObject {
     @Published var errorMessage: String?
     @Published private(set) var persistenceState: ProjectPersistenceState = .clean(lastSavedAt: nil)
     @Published var newProjectRequestID: UUID?
-    @Published var navigatorURL = ""
+    @Published var navigatorURL = NavigatorClient.publicBaseURL.absoluteString
     @Published var navigatorQuery = ""
-    @Published var navigatorResults: [NavigatorOrganSummary] = []
+    @Published var useOnlineCatalogue = false
+    @Published private(set) var isSearchingCatalogue = false
+    @Published private var completedCatalogueSearch: CatalogueSearch?
+    @Published private var foundOrgans: [NavigatorOrganSummary] = []
+    @Published private var searchFailure: String?
     @Published var projectLibrary: [RecordingProjectSummary] = []
     @Published var importedVAO03Inspection: VAO03PackageInspection?
     @Published var importedVAO03WorkspaceURL: URL?
@@ -187,6 +201,7 @@ final class AppModel: ObservableObject {
     @Published var podDatabaseInspection: PODDatabaseInspection?
     @Published var podDatabaseSourceURL: URL?
     @Published var podDatabaseCacheURL: URL?
+    @Published private(set) var cachedPODInspection: PODDatabaseInspection?
     @Published var podDatabaseDownloadURL = PODDatabaseContract.downloadURL.absoluteString
     @Published var podDatabaseStatus: String?
     @Published var isCalibrating = false
@@ -887,6 +902,7 @@ final class AppModel: ObservableObject {
                    inspection.isCompatible,
                    inspection.matchesPublishedArtifact {
                     podDatabaseCacheURL = databaseURL
+                    cachedPODInspection = inspection
                     podDatabaseInspection = inspection
                     podDatabaseStatus = "Loaded the verified local POD \(inspection.releaseVersion ?? "1.6.0") database."
                 } else {
@@ -1103,7 +1119,6 @@ final class AppModel: ObservableObject {
                 referencePitchHz: 440,
                 tuningPitchAssumed: true
             )
-            let template = project
             let created = OrgRecProject(
                 id: projectID,
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "\(cleanOrgan) · Recording project" : title,
@@ -1111,10 +1126,8 @@ final class AppModel: ObservableObject {
                 organName: cleanOrgan,
                 venueName: venueName.trimmingCharacters(in: .whitespacesAndNewlines),
                 snapshot: MODAVISSnapshot(endpoint: "manual://orgrec-project", payloadSHA256: payload.sha256Hex),
-                recipe: template?.recipe ?? CaptureRecipe(),
-                devices: template?.devices ?? [],
-                setups: template?.setups ?? [],
-                spectrogramConfiguration: template?.spectrogramConfiguration ?? SpectrogramConfiguration(),
+                recipe: CaptureRecipe(),
+                setups: Self.plannedMicrophoneSetups(),
                 organComponents: [],
                 roadmapCompilation: emptyReport
             )
@@ -1373,6 +1386,8 @@ final class AppModel: ObservableObject {
             let destination = uniqueManagedPODDatabaseURL()
             let imported = try await podDatabaseImporter.importVerifiedDatabase(from: source, to: destination)
             podDatabaseCacheURL = destination
+            cachedPODInspection = imported
+            useOnlineCatalogue = false
             podDatabaseInspection = imported
             UserDefaults.standard.set(destination.path, forKey: podDatabasePathKey)
             podDatabaseStatus = "Cached the exact verified database. The selected source file was not modified."
@@ -1396,6 +1411,8 @@ final class AppModel: ObservableObject {
             let destination = uniqueManagedPODDatabaseURL()
             let imported = try await podDatabaseImporter.downloadVerifiedDatabase(from: remoteURL, to: destination)
             podDatabaseCacheURL = destination
+            cachedPODInspection = imported
+            useOnlineCatalogue = false
             podDatabaseSourceURL = nil
             podDatabaseInspection = imported
             UserDefaults.standard.set(destination.path, forKey: podDatabasePathKey)
@@ -1417,6 +1434,7 @@ final class AppModel: ObservableObject {
         do {
             try FileManager.default.removeItem(at: cache)
             podDatabaseCacheURL = nil
+            cachedPODInspection = nil
             podDatabaseInspection = nil
             UserDefaults.standard.removeObject(forKey: podDatabasePathKey)
             podDatabaseStatus = "Removed the local POD database cache. The selected source file was not modified."
@@ -4582,130 +4600,172 @@ final class AppModel: ObservableObject {
         notice = "\(label) recorded in session paradata and marked on the take at \(elapsed.formatted(.number.precision(.fractionLength(3)))) s."
     }
 
+    var usingLocalCatalogue: Bool {
+        podDatabaseCacheURL != nil && cachedPODInspection != nil && !useOnlineCatalogue
+    }
+
+    private var catalogueSearch: CatalogueSearch? {
+        let query = navigatorQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return nil }
+        if usingLocalCatalogue, let url = podDatabaseCacheURL, let inspection = cachedPODInspection {
+            return CatalogueSearch(catalogue: .localPOD(url, sha256: inspection.sha256), query: query)
+        }
+        guard let url = validatedNavigatorBaseURL() else { return nil }
+        return CatalogueSearch(catalogue: .navigator(url), query: query)
+    }
+
+    var needsNavigatorAddress: Bool { !usingLocalCatalogue && validatedNavigatorBaseURL() == nil }
+    var canSearchCatalogue: Bool { !isWorking && catalogueSearch != nil }
+    var hasCompletedCatalogueSearch: Bool {
+        completedCatalogueSearch != nil && completedCatalogueSearch == catalogueSearch
+    }
+    var navigatorResults: [NavigatorOrganSummary] { hasCompletedCatalogueSearch ? foundOrgans : [] }
+    var catalogueSearchError: String? { hasCompletedCatalogueSearch ? searchFailure : nil }
+
+    func navigatorPage(for organ: NavigatorOrganSummary) -> URL? {
+        guard hasCompletedCatalogueSearch,
+              case .navigator(let baseURL) = completedCatalogueSearch?.catalogue,
+              let path = organ.pagePath, path.hasPrefix("/organs/"),
+              let page = URLComponents(string: path),
+              page.host == nil, page.scheme == nil, page.query == nil, page.fragment == nil,
+              var destination = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else { return nil }
+        destination.percentEncodedPath = page.percentEncodedPath
+        return destination.url
+    }
+
     func searchNavigator() async {
-        if let databaseURL = podDatabaseCacheURL {
-            isWorking = true
-            defer { isWorking = false }
-            do {
-                navigatorResults = try PODDatabaseReader.search(databaseURL: databaseURL, query: navigatorQuery)
-                    .map(\.navigatorSummary)
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-            return
-        }
-        guard let baseURL = validatedNavigatorBaseURL() else {
-            errorMessage = "Import the local POD 1.6.0 database or enter a complete HTTP or HTTPS Navigator base URL."
-            return
-        }
+        guard !isWorking, let search = catalogueSearch else { return }
+        completedCatalogueSearch = nil
+        isSearchingCatalogue = true
         isWorking = true
-        defer { isWorking = false }
-        do {
-            navigatorResults = try await navigator.search(baseURL: baseURL, query: navigatorQuery)
-        } catch {
-            errorMessage = error.localizedDescription
+        defer {
+            isSearchingCatalogue = false
+            isWorking = false
         }
+        do {
+            let results: [NavigatorOrganSummary]
+            switch search.catalogue {
+            case .localPOD(let databaseURL, _):
+                results = try await Task.detached(priority: .userInitiated) {
+                    try PODDatabaseReader.search(databaseURL: databaseURL, query: search.query).map(\.navigatorSummary)
+                }.value
+            case .navigator(let baseURL):
+                results = try await navigator.search(baseURL: baseURL, query: search.query)
+            }
+            guard search == catalogueSearch else { return }
+            foundOrgans = results
+            searchFailure = nil
+        } catch {
+            guard search == catalogueSearch else { return }
+            foundOrgans = []
+            searchFailure = error.localizedDescription
+        }
+        completedCatalogueSearch = search
+    }
+
+    /// The compiler assigns techniques to these three setup slots. Equipment and measurements
+    /// are supplied by the operator before the corresponding capture can pass Field QA.
+    private static func plannedMicrophoneSetups() -> [MicrophoneSetup] {
+        [CaptureTechnique.closePair, .naveORTF, .rearOmni].map(MicrophoneSetup.planned(for:))
+    }
+
+    static func catalogueProject(
+        profile: NavigatorRoadmapProfile, selection: NavigatorOrganSummary, attachingTo existing: OrgRecProject?
+    ) throws -> OrgRecProject {
+        guard profile.organ.mdvsID == selection.mdvsID else {
+            throw OrgRecError.invalidNavigatorResponse("The specification belongs to a different organ than the selected search result.")
+        }
+        let profileTitle = profile.organ.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let title = profileTitle.isEmpty ? selection.title : profileTitle
+        var imported = existing ?? OrgRecProject(
+            title: "\(title) · OrgRec field project",
+            organMDVSID: selection.mdvsID,
+            organName: title,
+            venueName: "",
+            snapshot: profile.snapshot,
+            recipe: CaptureRecipe()
+        )
+        imported.organMDVSID = selection.mdvsID
+        imported.organName = title
+        if imported.venueName.isEmpty { imported.venueName = profile.organ.location ?? selection.location ?? "" }
+        if imported.setups.isEmpty { imported.setups = plannedMicrophoneSetups() }
+        let compilation = RoadmapEngine.compileSpecification(
+            components: profile.components,
+            recipe: imported.recipe,
+            setupIDs: imported.setups.map(\.id),
+            relationships: profile.componentRelationships,
+            physicalPipeMappings: profile.physicalPipeMappings
+        )
+        guard !compilation.roadmap.isEmpty else {
+            throw OrgRecError.invalidNavigatorResponse("This organ has no recordable specification. Choose another result to build a recording roadmap.")
+        }
+        imported.snapshot = profile.snapshot
+        imported.navigatorPayloadRelativePath = "Manifests/modavis-navigator-payload.json"
+        imported.organComponents = profile.components
+        imported.organCharacteristics = profile.characteristics
+        imported.documentedPitchStandard = profile.documentedPitchStandard
+        imported.componentRelationships = profile.componentRelationships
+        imported.physicalPipeMappings = profile.physicalPipeMappings
+        imported.registrations = compilation.registrations
+        imported.roadmap = compilation.roadmap
+        imported.roadmapCompilation = compilation.report
+        imported.physicalSoundTargets = compilation.physicalSoundTargets
+        imported.physicalOverlapCandidates = compilation.overlapCandidates
+        imported.captureStates = compilation.captureStates
+        return imported
     }
 
     func importNavigatorOrgan(_ organ: NavigatorOrganSummary) async {
+        guard let search = catalogueSearch, hasCompletedCatalogueSearch, navigatorResults.contains(organ) else {
+            errorMessage = "Search the current catalogue again before selecting this organ."
+            return
+        }
+        if let reason = projectSwitchBlockReason(allowingCurrentOperation: false) {
+            errorMessage = reason
+            return
+        }
+        let startingProjectID = project?.id
         isWorking = true
         defer { isWorking = false }
         do {
             let profile: NavigatorRoadmapProfile
-            if let databaseURL = podDatabaseCacheURL {
-                profile = try PODDatabaseReader.roadmapProfile(
-                    databaseURL: databaseURL,
-                    organID: organ.mdvsID,
-                    databaseSHA256: podDatabaseInspection?.sha256
-                )
-            } else {
-                guard let baseURL = validatedNavigatorBaseURL() else {
-                    throw NSError(
-                        domain: "OrgRec.Navigator",
-                        code: 10,
-                        userInfo: [NSLocalizedDescriptionKey: "Import the local POD 1.6.0 database or enter a complete Navigator base URL."]
-                    )
-                }
+            switch search.catalogue {
+            case .localPOD(let databaseURL, let sha256):
+                profile = try await Task.detached(priority: .userInitiated) {
+                    try PODDatabaseReader.roadmapProfile(databaseURL: databaseURL, organID: organ.mdvsID, databaseSHA256: sha256)
+                }.value
+            case .navigator(let baseURL):
                 guard let fetched = try await navigator.fetchRoadmap(baseURL: baseURL, organID: organ.mdvsID) else {
-                    notice = "Navigator snapshot is unchanged."
-                    return
+                    throw OrgRecError.invalidNavigatorResponse("The catalogue did not return the requested organ specification.")
                 }
                 profile = fetched
             }
-            guard let project else { return }
-            let compilation = RoadmapEngine.compileSpecification(
-                components: profile.components,
-                recipe: project.recipe,
-                setupIDs: project.setups.map(\.id),
-                relationships: profile.componentRelationships,
-                physicalPipeMappings: profile.physicalPipeMappings
-            )
-            guard compilation.roadmap.isEmpty == false else {
-                throw NSError(
-                    domain: "OrgRec.Navigator",
-                    code: 20,
-                    userInfo: [NSLocalizedDescriptionKey: "Navigator returned the organ, but its specification contained no recordable stops or pipe positions. OrgRec did not replace the existing roadmap."]
-                )
+            guard search == catalogueSearch, project?.id == startingProjectID else { return }
+            if let reason = projectSwitchBlockReason(allowingCurrentOperation: true) {
+                errorMessage = reason
+                return
             }
-            let attachInPlace = canAttachNavigatorOrganToActiveProject
-            var imported = OrgRecProject(
-                id: attachInPlace ? project.id : UUID(),
-                title: attachInPlace ? project.title : "\(organ.title) · OrgRec field project",
-                organMDVSID: organ.mdvsID,
-                organName: organ.title,
-                venueName: project.venueName.isEmpty ? (organ.location ?? "") : project.venueName,
-                createdAt: attachInPlace ? project.createdAt : Date(),
-                snapshot: profile.snapshot,
-                recipe: project.recipe,
-                devices: project.devices,
-                setups: project.setups,
-                registrations: compilation.registrations,
-                roadmap: compilation.roadmap,
-                spectrogramConfiguration: project.spectrogramConfiguration,
-                organComponents: profile.components,
-                roadmapCompilation: compilation.report,
-                navigatorPayloadRelativePath: "Manifests/modavis-navigator-payload.json",
-                organCharacteristics: profile.characteristics,
-                recordingSessions: attachInPlace ? project.recordingSessions : nil,
-                documentedPitchStandard: profile.documentedPitchStandard,
-                tuningCalibrations: attachInPlace ? project.tuningCalibrations : nil,
-                componentRelationships: profile.componentRelationships,
-                physicalPipeMappings: profile.physicalPipeMappings,
-                physicalSoundTargets: compilation.physicalSoundTargets,
-                physicalOverlapCandidates: compilation.overlapCandidates,
-                controlBindings: attachInPlace ? project.controlBindings : nil,
-                captureStates: compilation.captureStates
-            )
+            let attachInPlace = canAttachNavigatorOrganToActiveProject && projectURL != nil
+            var imported = try Self.catalogueProject(profile: profile, selection: organ, attachingTo: attachInPlace ? project : nil)
             ensureActiveSession(in: &imported)
             let destination: URL
             if attachInPlace, let projectURL {
                 destination = projectURL
+                try await store.storeNavigatorPayload(
+                    profile.rawPayload, expectedSHA256: profile.snapshot.payloadSHA256,
+                    relativePath: "Manifests/modavis-navigator-payload.json", at: destination
+                )
                 try await store.save(imported, at: destination)
             } else {
-                destination = uniqueManagedProjectURL(stem: organ.title.isEmpty ? organ.mdvsID : organ.title)
-                try await store.createPackage(at: destination, project: imported)
+                destination = uniqueManagedProjectURL(stem: imported.organName.isEmpty ? organ.mdvsID : imported.organName)
+                try await store.createPackage(at: destination, project: imported, navigatorPayload: profile.rawPayload)
             }
-            try await store.storeNavigatorPayload(
-                profile.rawPayload,
-                expectedSHA256: profile.snapshot.payloadSHA256,
-                relativePath: imported.navigatorPayloadRelativePath!,
-                at: destination
-            )
-            self.project = imported
-            projectURL = destination
-            UserDefaults.standard.set(destination.path, forKey: lastProjectKey)
-            selectedRoadmapID = imported.roadmap.first?.id
-            selectedTakeID = nil
-            waveform = nil
-            spectrogram = nil
-            playback.stop()
-            page = .initialize
-            await refreshProjectLibrary()
+            guard await openProject(at: destination, destinationPage: .initialize, allowingCurrentOperation: true) else { return }
             let action = attachInPlace ? "Attached the MODAVIS specification and compiled" : "Created the organ project and compiled"
             let pitchNotice = profile.documentedPitchStandard.map {
                 " MODAVIS \($0.modavisRelease) A4 = \($0.frequencyHz.formatted(.number.precision(.fractionLength(2)))) Hz was inserted automatically as documented evidence."
             } ?? " No documented A4 was found; field calibration is still required."
-            notice = "\(action) \(compilation.report.logicalSoundAddressCount ?? compilation.report.generatedAtomicSoundCount) logical addresses into \(compilation.report.physicalSoundTargetCount ?? compilation.report.generatedAtomicSoundCount) physical sound targets and \(compilation.roadmap.count) roadmap captures.\(pitchNotice)"
+            notice = "\(action) \(imported.roadmap.count) roadmap captures.\(pitchNotice)"
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -4721,7 +4781,9 @@ final class AppModel: ObservableObject {
     }
 
     private func validatedNavigatorBaseURL() -> URL? {
-        guard let components = URLComponents(string: navigatorURL),
+        guard let components = URLComponents(string: navigatorURL.trimmingCharacters(in: .whitespacesAndNewlines)),
+              components.user == nil, components.password == nil,
+              components.query == nil, components.fragment == nil,
               let scheme = components.scheme?.lowercased(),
               ["http", "https"].contains(scheme),
               components.host?.isEmpty == false else { return nil }

@@ -173,14 +173,17 @@ private struct SidebarView: View {
                 HStack {
                     Text("MODAVIS").font(.caption.bold())
                     Spacer()
-                    Text(model.project.map { "Release \($0.snapshot.release.requestedRelease)" } ?? "No source selected").font(.caption2)
+                    let linked = model.project.flatMap { $0.snapshot.endpoint == "manual://orgrec-project" ? nil : $0 }
+                    Text(linked.map { "Release \($0.snapshot.release.requestedRelease)" } ?? "No source selected").font(.caption2)
                         .padding(.horizontal, 7).padding(.vertical, 3)
                         .background(OrgRecTheme.ai.opacity(0.12), in: Capsule())
                         .foregroundStyle(OrgRecTheme.ai)
                 }
-                Text(model.project?.organMDVSID == "MDVS:ORGN:DEMO" ? "Demonstration project" : "Frozen source snapshot")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                if let project = model.project, project.snapshot.endpoint != "manual://orgrec-project" {
+                    Text(project.organMDVSID == "MDVS:ORGN:DEMO" ? "Demonstration project" : "Frozen source snapshot")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(14)
         }
@@ -287,7 +290,7 @@ private struct ProjectHeader: View {
         case .podDatabase: return "Download once · verify · search offline"
         case .projects: return "Organ-grouped library · create, plan, import, and export"
         case .datasetImport: return "Inspect · verify identities and mappings · preserve · validate"
-        case .organSearch: return "Search MODAVIS Navigator and compile a recording roadmap"
+        case .organSearch: return model.usingLocalCatalogue ? "Search the offline POD catalogue" : "Search MODAVIS Navigator"
         case .initialize: return "MODAVIS evidence · field A4 · session readiness"
         default:
             guard let project = model.project else { return "Choose a project from the library" }
@@ -960,23 +963,32 @@ private struct OrganSearchView: View {
                             .onSubmit { Task { await model.searchNavigator() } }
                         Button("Search") { Task { await model.searchNavigator() } }
                             .buttonStyle(.borderedProminent).controlSize(.large)
-                            .disabled(
-                                (model.podDatabaseCacheURL == nil && model.navigatorURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                                    || model.navigatorQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            )
+                            .disabled(!model.canSearchCatalogue)
                     }
                     .padding(18)
                     .background(OrgRecTheme.surface, in: RoundedRectangle(cornerRadius: OrgRecTheme.cornerRadius, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: OrgRecTheme.cornerRadius, style: .continuous).stroke(OrgRecTheme.shu.opacity(0.48)))
                     HStack {
-                        if let inspection = model.podDatabaseInspection, model.podDatabaseCacheURL != nil {
-                            Label("Local POD \(inspection.releaseVersion ?? "1.6.0") SQLite catalogue", systemImage: "internaldrive.fill")
-                            Text("\(inspection.organCount.formatted()) organs · read-only")
+                        if let inspection = model.cachedPODInspection {
+                            Picker("Catalogue", selection: $model.useOnlineCatalogue) {
+                                Text("Offline POD \(inspection.releaseVersion ?? "")").tag(false)
+                                Text("Online Navigator").tag(true)
+                            }
+                            .fixedSize()
+                            .disabled(model.isWorking)
+                        }
+                        if model.usingLocalCatalogue {
+                            Label("Read-only local database", systemImage: "internaldrive")
                         } else {
-                            Text("Navigator")
-                            TextField("Base URL", text: $model.navigatorURL)
-                                .textFieldStyle(.roundedBorder).frame(width: 310)
-                            Button("Install POD 1.6.0…") { model.page = .podDatabase }
+                            if model.needsNavigatorAddress {
+                                Text("Enter a valid Navigator base URL in Settings.")
+                                SettingsLink { Text("Settings…") }
+                            } else {
+                                Label(model.navigatorURL, systemImage: "network").lineLimit(1)
+                            }
+                            if model.podDatabaseCacheURL == nil {
+                                Button("Install offline catalogue…") { model.page = .podDatabase }
+                            }
                         }
                         Spacer()
                         Button("Back to projects") { model.page = .projects }
@@ -984,15 +996,23 @@ private struct OrganSearchView: View {
                     .font(.caption).foregroundStyle(.secondary)
                 }
 
-                if model.navigatorResults.isEmpty {
+                if model.isSearchingCatalogue {
+                    ProgressView("Searching the catalogue…")
+                        .frame(maxWidth: .infinity, minHeight: 220)
+                } else if let error = model.catalogueSearchError {
+                    ContentUnavailableView("Catalogue search failed", systemImage: "exclamationmark.circle",
+                                           description: Text(error))
+                } else if model.navigatorResults.isEmpty {
                     ContentUnavailableView(
-                        model.navigatorQuery.isEmpty ? "Search the organ database" : "No results loaded",
+                        model.hasCompletedCatalogueSearch ? "No matching organs" : "Search the organ catalogue",
                         systemImage: "building.columns",
-                        description: Text("OrgRec reads the local POD database or Navigator, freezes the selected structured projection, and compiles a field roadmap.")
+                        description: Text(model.hasCompletedCatalogueSearch
+                            ? "Try a venue, city, builder or a different spelling."
+                            : "Enter a name or MDVS ID and choose Search.")
                     )
-                    .frame(maxWidth: .infinity, minHeight: 300)
+                    .frame(maxWidth: .infinity, minHeight: 220)
                 } else {
-                    Text("\(model.navigatorResults.count) organs").font(.headline)
+                    Text("\(model.navigatorResults.count) matching organs shown").font(.headline)
                     LazyVStack(spacing: 10) {
                         ForEach(model.navigatorResults) { organ in
                             HStack(spacing: 15) {
@@ -1005,9 +1025,13 @@ private struct OrganSearchView: View {
                                     Text(organ.mdvsID).font(.caption2.monospaced()).foregroundStyle(.secondary)
                                 }
                                 Spacer()
+                                if let page = model.navigatorPage(for: organ) {
+                                    Link("View in Navigator", destination: page)
+                                }
                                 Button(model.canAttachNavigatorOrganToActiveProject ? "Attach & build roadmap" : "Create recording project") {
                                     Task { await model.importNavigatorOrgan(organ) }
                                 }
+                                .disabled(model.isWorking)
                                 .buttonStyle(.borderedProminent)
                             }
                             .padding(16)
@@ -6788,6 +6812,10 @@ private struct SetupView: View {
                     HStack(alignment: .top, spacing: 18) {
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Peripheral devices", systemImage: "cable.connector").font(.headline)
+                            if project.devices.isEmpty {
+                                Text("Choose Configure microphones on a planned setup to document its input channels.")
+                                    .foregroundStyle(.secondary)
+                            }
                             ForEach(project.devices) { device in
                                 HStack {
                                     Image(systemName: device.kind == .microphone ? "mic.fill" : "hifispeaker.2.fill")
@@ -6829,12 +6857,12 @@ private struct SetupView: View {
                             HStack {
                                 VStack(alignment: .leading) {
                                     Text(setup.name).font(.headline)
-                                    Text("Revision \(setup.revision) · \(setup.arrayGeometry)")
+                                    Text(setup.revision == 0 ? "Planned setup" : "Revision \(setup.revision) · \(setup.arrayGeometry)")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer()
                                 Text(setup.coordinateOrigin).font(.caption).foregroundStyle(.secondary)
-                                Button("Revise…") { editingSetup = setup }
+                                Button(setup.placements.isEmpty ? "Configure microphones…" : "Revise…") { editingSetup = setup }
                                     .controlSize(.small)
                             }
                             Divider()
@@ -6869,15 +6897,23 @@ private struct SetupView: View {
             .padding(24)
         }
         .sheet(item: $editingSetup) { setup in
+            let firstConfiguration = model.project?.isUnusedPlannedSetup(setup) == true
             SetupEditorSheet(
                 setup: setup,
+                firstConfiguration: firstConfiguration,
                 microphones: model.project?.devices.filter { $0.kind == .microphone } ?? []
-            ) { revised in
+            ) { revised, addedMicrophones in
                 Task {
                     await model.updateProject { project in
+                        guard let slot = project.setups.firstIndex(where: { $0 == setup }) else { return }
+                        project.devices.append(contentsOf: addedMicrophones)
                         var newRevision = revised
-                        newRevision.id = UUID()
                         newRevision.revision = setup.revision + 1
+                        if project.isUnusedPlannedSetup(setup) {
+                            project.setups[slot] = newRevision
+                            return
+                        }
+                        newRevision.id = UUID()
                         project.setups.append(newRevision)
                         for index in project.roadmap.indices
                         where project.roadmap[index].setupID == setup.id
@@ -6885,7 +6921,9 @@ private struct SetupView: View {
                             project.roadmap[index].setupID = newRevision.id
                         }
                     }
-                    model.notice = "Setup revision \(setup.revision + 1) created; existing takes remain bound to their original revision."
+                    if !model.persistenceState.requiresResolution {
+                        model.notice = "Saved \(revised.name), revision \(setup.revision + 1)."
+                    }
                 }
             }
         }
@@ -6896,15 +6934,20 @@ private struct SetupEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft: MicrophoneSetup
     let microphones: [DeviceInstance]
-    let onSave: (MicrophoneSetup) -> Void
+    let firstConfiguration: Bool
+    @State private var addedMicrophones: [DeviceInstance] = []
+    @State private var microphoneName = ""
+    let onSave: (MicrophoneSetup, [DeviceInstance]) -> Void
 
     init(
         setup: MicrophoneSetup,
+        firstConfiguration: Bool,
         microphones: [DeviceInstance],
-        onSave: @escaping (MicrophoneSetup) -> Void
+        onSave: @escaping (MicrophoneSetup, [DeviceInstance]) -> Void
     ) {
         _draft = State(initialValue: setup)
         self.microphones = microphones
+        self.firstConfiguration = firstConfiguration
         self.onSave = onSave
     }
 
@@ -6912,16 +6955,20 @@ private struct SetupEditorSheet: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading) {
-                    Text("Revise microphone setup").font(.system(.title2, design: .serif, weight: .semibold))
-                    Text("Saving creates revision \(draft.revision + 1); recorded takes retain the old revision.")
+                    Text(firstConfiguration ? "Configure microphones" : "Revise microphone setup").font(.system(.title2, design: .serif, weight: .semibold))
+                    Text(firstConfiguration ? "Add the microphones, channel assignments and geometry used for this setup." : "Saving creates revision \(draft.revision + 1); recorded takes retain the old revision.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Button("Cancel") { dismiss() }
                 Button("Save revision") {
-                    onSave(draft)
+                    if firstConfiguration && draft.referenceChannelNumber == nil {
+                        draft.referenceChannelNumber = 1
+                    }
+                    onSave(draft, addedMicrophones)
                     dismiss()
                 }
+                .disabled(firstConfiguration && !draft.placements.contains { $0.channelNumber == (draft.referenceChannelNumber ?? 1) })
                 .buttonStyle(.borderedProminent)
             }
             .padding(20)
@@ -6952,11 +6999,20 @@ private struct SetupEditorSheet: View {
                 }
 
                 Section("Microphone placements") {
+                    HStack {
+                        TextField("Microphone model or identifier", text: $microphoneName)
+                        Button("Add microphone to project") {
+                            let name = microphoneName.trimmingCharacters(in: .whitespacesAndNewlines)
+                            addedMicrophones.append(DeviceInstance(kind: .microphone, manufacturer: "", model: name))
+                            microphoneName = ""
+                        }
+                        .disabled(microphoneName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
                     ForEach($draft.placements) { $placement in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Picker("Microphone", selection: $placement.microphoneID) {
-                                    ForEach(microphones) { microphone in
+                                    ForEach(microphones + addedMicrophones) { microphone in
                                         Text(microphone.displayName).tag(microphone.id)
                                     }
                                 }
@@ -6987,7 +7043,7 @@ private struct SetupEditorSheet: View {
                         .padding(.vertical, 5)
                     }
                     Button("Add microphone placement") {
-                        guard let microphone = microphones.first else { return }
+                        guard let microphone = (microphones + addedMicrophones).first else { return }
                         draft.placements.append(MicrophonePlacement(
                             microphoneID: microphone.id,
                             channelNumber: (draft.placements.map(\.channelNumber).max() ?? 0) + 1,
@@ -6997,7 +7053,7 @@ private struct SetupEditorSheet: View {
                             zMeters: 0
                         ))
                     }
-                    .disabled(microphones.isEmpty)
+                    .disabled(microphones.isEmpty && addedMicrophones.isEmpty)
                 }
             }
             .formStyle(.grouped)
@@ -7005,9 +7061,9 @@ private struct SetupEditorSheet: View {
         .frame(minWidth: 850, minHeight: 720)
     }
 
-    private func optional(_ keyPath: WritableKeyPath<EnvironmentReading, Double?>) -> Binding<Double> {
+    private func optional(_ keyPath: WritableKeyPath<EnvironmentReading, Double?>) -> Binding<Double?> {
         Binding(
-            get: { draft.environment[keyPath: keyPath] ?? 0 },
+            get: { draft.environment[keyPath: keyPath] },
             set: { draft.environment[keyPath: keyPath] = $0 }
         )
     }
@@ -7036,7 +7092,7 @@ private struct SyncView: View {
 
                     VStack(alignment: .leading, spacing: 8) {
                         Label("Protected database fingerprint", systemImage: "lock.shield.fill").font(.headline)
-                        Text(release.protectedFingerprintSHA256)
+                        Text(release.protectedFingerprintSHA256 ?? "Not supplied by the catalogue")
                             .font(.system(.caption, design: .monospaced))
                             .textSelection(.enabled)
                         Text("Every component locator and export also carries the retrieved Navigator payload checksum.")

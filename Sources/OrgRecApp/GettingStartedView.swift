@@ -34,17 +34,14 @@ struct GettingStartedView: View {
 
                 GroupBox("1 · Choose your starting point") {
                     VStack(alignment: .leading, spacing: 12) {
-                        if let inspection = model.podDatabaseInspection, model.podDatabaseCacheURL != nil {
-                            Label("POD \(inspection.releaseVersion ?? "") is installed and verified", systemImage: "checkmark.circle.fill")
-                            Button("Find an organ") { model.page = .organSearch }
-                                .buttonStyle(.borderedProminent)
+                        Button("Find a pipe organ") { model.page = .organSearch }
+                            .buttonStyle(.borderedProminent)
+                        if let inspection = model.cachedPODInspection {
+                            Label("Offline POD \(inspection.releaseVersion ?? "") is installed and verified.", systemImage: "internaldrive")
                         } else {
-                            Text("For catalogue-based planning, install the POD 1.6.0 organ database from Zenodo. No account or API key is required. The 1.8 GB download expands to 5.8 GB; allow at least 15 GB free for installation. After installation, catalogue search works offline.")
-                            Button("Set up POD 1.6.0…") { model.page = .podDatabase }
-                                .buttonStyle(.borderedProminent)
+                            Text("Search MODAVIS Navigator online by organ, venue or builder. You can create a recording plan from a catalogue entry.")
+                            Button("Install the optional offline catalogue…") { model.page = .podDatabase }
                         }
-                        Text("POD is optional. Work offline with a local project, import an existing project or recordings, or explore the demonstration first.")
-                            .foregroundStyle(.secondary)
                         HStack {
                             Button("Create a local project…") { model.requestNewProject() }
                             Button("Open or import…") { model.page = .projects }
@@ -58,7 +55,7 @@ struct GettingStartedView: View {
 
                 GroupBox("2 · Create and review your recording plan") {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("In Find Organ, search by organ, venue or builder, inspect the source, then create a project from the selected organ. Review its ranks, keys and microphone setups in Initialize and Roadmap. Historical catalogue entries must be checked against the instrument you will record.")
+                        Text("In Find Organ, search by organ, venue or builder, then choose a matching entry to create a project. Review its ranks, keys and microphone setups in Initialize and Roadmap. Historical catalogue entries must be checked against the instrument you will record.")
                         if hasOwnProject {
                             Label("Your project is open. Review its configuration before recording.", systemImage: "folder.fill")
                             Button("Review project initialization") { model.page = .initialize }

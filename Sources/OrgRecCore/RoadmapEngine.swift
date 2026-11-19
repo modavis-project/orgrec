@@ -233,6 +233,16 @@ public enum RoadmapEngine {
 
         let switchCount = stops.count + couplers.count + accessories.count
         var warnings: [String] = []
+        let shortOctaveDivisions = Set((divisions + keyboards).compactMap { component -> String? in
+            guard let field = component.sourceDetails?["short_octave"],
+                  let octave = try? JSONSerialization.jsonObject(with: Data(field.utf8)) as? [String: Any],
+                  let mapping = octave["mapping"] as? [String: Any], !mapping.isEmpty else { return nil }
+            return component.label
+        })
+        if !shortOctaveDivisions.isEmpty {
+            let names = shortOctaveDivisions.sorted().joined(separator: ", ")
+            warnings.append("The source documents a short octave for \(names). The roadmap spans the chromatic compass. Confirm the bass keys and their sounding pitches at the console before capture.")
+        }
         if assumedCompassCount > 0 {
             warnings.append("\(assumedCompassCount) stop compasses were absent; OrgRec assumed C2–C7 for manuals and C2–G4 for pedal stops. Confirm these ranges before fieldwork.")
         }

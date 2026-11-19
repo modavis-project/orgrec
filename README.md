@@ -18,6 +18,8 @@ For first use, open [Getting Started](Docs/GETTING_STARTED.md). To inspect an
 existing recording, drop an audio file onto OrgRec or choose **Analyze Audio**.
 This workflow requires no project, catalogue, account or microphone access.
 
+For catalogue work, open **Getting Started → Find a pipe organ**. Search the public MODAVIS Navigator by name, place, builder or MDVS ID, then select an organ to create a recording plan. A verified local POD catalogue is an option for offline field work. [Getting started](Docs/GETTING_STARTED.md) · [Live connection check](Docs/NAVIGATOR_API.md) · [Field-use review](Docs/APPLICATION_QUALITY_AUDIT.md#field-use-review-19-november-2026)
+
 ## Capabilities
 
 - standalone audio analysis with PDF, JSON, CSV, PNG and SVG exports;

@@ -366,6 +366,9 @@ public enum IADPackageValidator {
         if manifest.contractVersion != IADContract.version {
             errors.append("Unsupported IAD contract \(manifest.contractVersion).")
         }
+        if !manifest.releaseBinding.hasProtectedFingerprint {
+            errors.append("IAD 1.0 requires a SHA-256 protected database fingerprint.")
+        }
         if manifest.projectionMode != IADContract.projectionMode {
             errors.append("The package does not declare candidate-only MODAVIS projection semantics.")
         }

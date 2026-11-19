@@ -269,6 +269,32 @@ public struct ProjectConsistencyReport: Codable, Hashable, Sendable {
     public var isExportReady: Bool { blockerCount == 0 }
 }
 
+public extension MicrophoneSetup {
+    /// Revision zero reserves a roadmap technique before the operator documents any equipment.
+    static func planned(for technique: CaptureTechnique) -> MicrophoneSetup {
+        MicrophoneSetup(revision: 0, name: technique.rawValue, coordinateOrigin: "", referenceChannelNumber: nil)
+    }
+}
+
+public extension OrgRecProject {
+    func isUnusedPlannedSetup(_ setup: MicrophoneSetup) -> Bool {
+        guard setup.revision == 0, let technique = CaptureTechnique(rawValue: setup.name) else { return false }
+        var empty = MicrophoneSetup.planned(for: technique)
+        empty.id = setup.id
+        guard setup == empty else { return false }
+
+        if takes.contains(where: { $0.provenance?.microphoneSetup?.id == setup.id })
+            || recordingSessions?.contains(where: {
+                $0.capturePreflightReports?.contains(where: { $0.setupID == setup.id }) == true
+            }) == true { return false }
+
+        let recordedItems = Set(takes.map(\.roadmapItemID))
+        return !roadmap.contains {
+            $0.setupID == setup.id && (!$0.takeIDs.isEmpty || recordedItems.contains($0.id))
+        }
+    }
+}
+
 public enum ProjectConsistencyAuditor {
     public static func captureReadiness(project: OrgRecProject, item: RoadmapItem?) -> [ConsistencyIssue] {
         var issues: [ConsistencyIssue] = []
@@ -520,6 +546,7 @@ public enum ProjectConsistencyAuditor {
             }
         }
         for setup in project.setups {
+            if project.isUnusedPlannedSetup(setup) { continue }
             checks += 4
             if let interfaceID = setup.interfaceDeviceID, deviceIDs.contains(interfaceID) == false {
                 issues.append(issue("setup.\(setup.id).interface", .blocker, .setup, "Setup references a missing interface", setup.name, "Select an inventoried audio interface."))

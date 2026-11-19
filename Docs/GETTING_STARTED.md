@@ -1,17 +1,20 @@
 # Getting started with OrgRec
 
-On the first launch, OrgRec opens **Getting Started**. The guide remains accessible in the sidebar on later launches. The St. Nikolai example can be opened through Explore demonstration / current project. It is identified as a demonstration; use a separate project for research recordings.
+On first launch, OrgRec opens **Getting Started**. You can return to it from the sidebar. **Explore demonstration / current project** opens the St. Nikolai example when you have no previous project.
 
-## Catalogue-based recording
+## Find an organ and plan a session
 
-1. Choose **Set up POD 1.6.0…** in Getting Started, or **Install POD 1.6.0…** in Find Organ.
-2. Choose **Download, verify & install** with the prefilled Zenodo URL. No account or API key is required. The download is approximately 1.8 GB, expanding to a 5.8 GB database. Allow at least 15 GB free on the startup disk for temporary and installed copies.
-3. Keep OrgRec open during download, verification and installation. The progress indicator shows activity, not a percentage. A failure leaves a retry explanation; the database becomes available only after verification succeeds.
-4. Choose **Continue to Find Organ**. Search for an organ, inspect its source information, and create a project. Review the proposed ranks, keys and microphone setups against the actual instrument.
-5. In **Setup**, select the audio interface and check channels and microphone geometry. Allow microphone access when requested. If previously denied, enable OrgRec in macOS System Settings → Privacy & Security → Microphone.
-6. Complete the relevant **Field QA** checks and make a short test recording from a Roadmap target. Listen back and review analysis before continuing with the session.
+1. Choose **Find a pipe organ**. Enter an organ, venue, builder, city or MDVS ID and select **Search**. The online catalogue uses the public MODAVIS Navigator and needs no account or database download.
+2. Check the title, location and identifier. **View in Navigator** opens the source record when a result includes a record link. Choose **Create recording project**, or **Attach & build roadmap** if you prepared an empty local project. OrgRec retrieves the selected specification and saves its evidence with your project.
+3. In **Initialize** and **Roadmap**, compare the proposed stops, compasses and tuning with the instrument. Historical records may describe a different configuration. Check short octaves and shared pipework before recording.
+4. In **Setup**, configure the planned microphone positions, select the input device and check channel routing. Allow microphone access when requested. Previously denied access can be enabled under macOS System Settings → Privacy & Security → Microphone.
+5. Complete the relevant **Field QA** checks. Record a short test from a Roadmap target, then listen back before starting the session.
 
-If the unpacked OrgRec SQLite projection is already available, select it under **Local source**, wait for verification, then choose **Cache verified database**. A downloaded and installed database does not need to be cached again.
+## Prepare for offline catalogue work
+
+Choose **Install the optional offline catalogue…** in Getting Started, or **Install offline catalogue…** in Find Organ. Choose **Download, verify & install** with the prefilled Zenodo URL. POD 1.6.0 downloads about 1.8 GB and expands to a 5.8 GB database. Allow at least 15 GB of free space for temporary and installed copies. Keep OrgRec open through verification. Downloads can be retried after failure.
+
+If you already have the unpacked OrgRec SQLite projection, select it under **Local source**, wait for verification and choose **Cache verified database**. Find Organ defaults to the verified local catalogue. Choose **Online Navigator** there when you need the live service. You can reopen a recording plan you already saved while offline.
 
 ## Work without POD
 

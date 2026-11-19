@@ -7,13 +7,15 @@ public struct NavigatorOrganSummary: Codable, Hashable, Identifiable, Sendable {
     public var location: String?
     public var builder: String?
     public var dateLabel: String?
+    public var pagePath: String?
 
-    public init(mdvsID: String, title: String, location: String? = nil, builder: String? = nil, dateLabel: String? = nil) {
+    public init(mdvsID: String, title: String, location: String? = nil, builder: String? = nil, dateLabel: String? = nil, pagePath: String? = nil) {
         self.mdvsID = mdvsID
         self.title = title
         self.location = location
         self.builder = builder
         self.dateLabel = dateLabel
+        self.pagePath = pagePath
     }
 }
 
@@ -40,6 +42,7 @@ public struct NavigatorRoadmapProfile: Sendable {
 }
 
 public actor NavigatorClient {
+    public static let publicBaseURL = URL(string: "https://navigator.modavis.org")!
     private let session: URLSession
 
     public init(session: URLSession = .shared) {
@@ -47,57 +50,105 @@ public actor NavigatorClient {
     }
 
     public func search(baseURL: URL, query: String, limit: Int = 30) async throws -> [NavigatorOrganSummary] {
+        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return [] }
+        let limit = min(max(limit, 1), 100)
         var components = URLComponents(url: baseURL.appendingPathComponent("api/organs"), resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "q", value: query),
-            URLQueryItem(name: "limit", value: String(min(max(limit, 1), 100))),
+            URLQueryItem(name: "limit", value: String(limit)),
             URLQueryItem(name: "include_facets", value: "0"),
         ]
-        let (data, response) = try await session.data(from: components.url!)
-        try validate(response: response, data: data)
+        if Self.isPublicInstance(baseURL) {
+            components.queryItems?.append(URLQueryItem(name: "sort", value: "label"))
+        }
+        let (data, _) = try await getJSONData(from: components.url!)
         let object = try JSONSerialization.jsonObject(with: data)
-        return Self.findOrganSummaries(in: object)
+        guard let rows = Self.searchRows(in: object) else {
+            throw OrgRecError.invalidNavigatorResponse("Navigator returned an unrecognized organ search response.")
+        }
+        var seen = Set<String>()
+        return Array(rows.compactMap(Self.organSummary).filter { seen.insert($0.mdvsID).inserted }.prefix(limit))
     }
 
     public func fetchRoadmap(baseURL: URL, organID: String, previousETag: String? = nil) async throws -> NavigatorRoadmapProfile? {
-        let encodedID = organID.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? organID
-        let profileURL = baseURL.appendingPathComponent("api/orgrec/v1/roadmaps/\(encodedID)")
-        var profileRequest = URLRequest(url: profileURL)
-        if let previousETag { profileRequest.setValue(previousETag, forHTTPHeaderField: "If-None-Match") }
-        do {
-            let (data, response) = try await session.data(for: profileRequest)
-            if let http = response as? HTTPURLResponse, http.statusCode == 304 { return nil }
-            if let http = response as? HTTPURLResponse, http.statusCode == 404 {
-                return try await fetchCompatibilityRoadmap(baseURL: baseURL, organID: organID, previousETag: previousETag)
-            }
-            try validate(response: response, data: data)
-            return try Self.decodeProfile(data: data, response: response, baseURL: baseURL, endpoint: profileURL.path)
-        } catch let error as URLError where error.code == .fileDoesNotExist {
+        if Self.isPublicInstance(baseURL) {
             return try await fetchCompatibilityRoadmap(baseURL: baseURL, organID: organID, previousETag: previousETag)
         }
+        let profileURL = try Self.organURL(at: baseURL.appendingPathComponent("api/orgrec/v1/roadmaps"), id: organID)
+        var profileRequest = URLRequest(url: profileURL)
+        profileRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+        if let previousETag { profileRequest.setValue(previousETag, forHTTPHeaderField: "If-None-Match") }
+        let (data, response) = try await session.data(for: profileRequest)
+        if let http = response as? HTTPURLResponse, http.statusCode == 304 { return nil }
+        if let http = response as? HTTPURLResponse, http.statusCode == 404 {
+            return try await fetchCompatibilityRoadmap(baseURL: baseURL, organID: organID, previousETag: previousETag)
+        }
+        try validate(response: response, data: data)
+        return try Self.decodeProfile(data: data, response: response, baseURL: baseURL, endpoint: profileURL.path, organID: organID)
     }
 
     public func fetchCompatibilityRoadmap(baseURL: URL, organID: String, previousETag: String? = nil) async throws -> NavigatorRoadmapProfile? {
-        let encodedID = organID.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? organID
-        let organURL = baseURL.appendingPathComponent("api/organs/\(encodedID)")
-        let specURL = baseURL.appendingPathComponent("api/organs/\(encodedID)/specification")
-        async let organResult = session.data(from: organURL)
-        async let specResult = session.data(from: specURL)
-        let ((organData, organResponse), (specData, specResponse)) = try await (organResult, specResult)
-        try validate(response: organResponse, data: organData)
-        try validate(response: specResponse, data: specData)
-
+        let organURL = try Self.organURL(at: baseURL.appendingPathComponent("api/organs"), id: organID)
+        let specURL = organURL.appendingPathComponent("specification")
+        let (organData, organResponse) = try await getJSONData(from: organURL)
         let organJSON = try JSONSerialization.jsonObject(with: organData)
+        guard Self.primaryOrganSummary(in: organJSON)?.mdvsID == organID else {
+            throw OrgRecError.invalidNavigatorResponse("Navigator returned a different or missing organ identity for \(organID).")
+        }
+        let (specData, specResponse) = try await getJSONData(from: specURL)
         let specJSON = try JSONSerialization.jsonObject(with: specData)
-        let envelope: [String: Any] = [
+        if Self.isPublicInstance(baseURL),
+           (specJSON as? [String: Any])?["componentHierarchy"] as? [Any] == nil {
+            throw OrgRecError.invalidNavigatorResponse("Navigator returned an unrecognized public organ specification.")
+        }
+        if let specification = specJSON as? [String: Any],
+           let suppliedID = Self.firstString(in: specification, keys: ["organMdvsId", "organ_mdvs_id"]),
+           suppliedID != organID {
+            throw OrgRecError.invalidNavigatorResponse("Navigator returned a specification for a different organ.")
+        }
+        var envelope: [String: Any] = [
             "contractVersion": "modavis.navigator.compatibility-profile/v1",
             "organ": organJSON,
             "specification": specJSON,
         ]
+        var releaseHeaders: [String: String] = [:]
+        for field in ["X-MODAVIS-Release", "X-MODAVIS-Snapshot-SHA256", "X-MODAVIS-Publication-State", "X-MODAVIS-Data-Profile"] {
+            let detail = (organResponse as? HTTPURLResponse)?.value(forHTTPHeaderField: field)
+            let spec = (specResponse as? HTTPURLResponse)?.value(forHTTPHeaderField: field)
+            if let detail, let spec, detail != spec {
+                throw OrgRecError.invalidNavigatorResponse("The organ and its specification have different Navigator release metadata.")
+            }
+            releaseHeaders[field] = spec ?? detail
+        }
+        if !releaseHeaders.isEmpty { envelope["navigatorResponseHeaders"] = releaseHeaders }
         let canonical = try JSONSerialization.data(withJSONObject: envelope, options: [.sortedKeys])
-        let etag = (specResponse as? HTTPURLResponse)?.value(forHTTPHeaderField: "ETag")
-        if previousETag != nil, previousETag == etag { return nil }
-        return try Self.decodeProfile(data: canonical, response: specResponse, baseURL: baseURL, endpoint: specURL.path)
+        // A validator from either endpoint alone cannot establish that both representations are unchanged.
+        let combinedTag = "\"orgrec-compat-\(canonical.sha256Hex)\""
+        if previousETag == combinedTag { return nil }
+        var profile = try Self.decodeProfile(data: canonical, response: specResponse, baseURL: baseURL, endpoint: specURL.path, organID: organID)
+        profile.snapshot.eTag = combinedTag
+        return profile
+    }
+
+    private static func isPublicInstance(_ url: URL) -> Bool {
+        url.scheme?.lowercased() == "https" && url.host?.lowercased() == publicBaseURL.host
+            && (url.port == nil || url.port == 443) && url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")).isEmpty
+    }
+
+    private static func organURL(at collection: URL, id: String) throws -> URL {
+        guard !id.isEmpty, id != ".", id != "..", id.rangeOfCharacter(from: CharacterSet(charactersIn: "/\\?#%").union(.controlCharacters)) == nil else {
+            throw OrgRecError.invalidNavigatorResponse("The organ identifier is invalid.")
+        }
+        return collection.appendingPathComponent(id)
+    }
+
+    private func getJSONData(from url: URL) async throws -> (Data, URLResponse) {
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let result = try await session.data(for: request)
+        try validate(response: result.1, data: result.0)
+        return result
     }
 
     public func fetchTemperamentCatalog(baseURL: URL) async throws -> TemperamentCatalogSnapshot {
@@ -169,15 +220,19 @@ public actor NavigatorClient {
     private func validate(response: URLResponse, data: Data) throws {
         guard let http = response as? HTTPURLResponse else { return }
         guard (200...299).contains(http.statusCode) else {
-            let detail = String(data: data.prefix(1024), encoding: .utf8) ?? ""
-            throw OrgRecError.invalidNavigatorResponse("Navigator returned HTTP \(http.statusCode). \(detail)")
+            if http.statusCode == 429 || http.statusCode == 503 {
+                throw OrgRecError.invalidNavigatorResponse("Navigator is busy or temporarily unavailable (HTTP \(http.statusCode)). Try again later.")
+            }
+            let body = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+            let description = body?["message"] as? String ?? HTTPURLResponse.localizedString(forStatusCode: http.statusCode)
+            throw OrgRecError.invalidNavigatorResponse("Navigator returned HTTP \(http.statusCode). \(description.prefix(250))")
         }
     }
 
-    private static func decodeProfile(data: Data, response: URLResponse, baseURL: URL, endpoint: String) throws -> NavigatorRoadmapProfile {
+    private static func decodeProfile(data: Data, response: URLResponse, baseURL: URL, endpoint: String, organID: String) throws -> NavigatorRoadmapProfile {
         let object = try JSONSerialization.jsonObject(with: data)
-        guard let organ = primaryOrganSummary(in: object) else {
-            throw OrgRecError.invalidNavigatorResponse("The Navigator profile did not contain an organ identity.")
+        guard let organ = primaryOrganSummary(in: object), organ.mdvsID == organID else {
+            throw OrgRecError.invalidNavigatorResponse("The Navigator profile does not identify the requested organ.")
         }
         let hash = data.sha256Hex
         let http = response as? HTTPURLResponse
@@ -190,22 +245,28 @@ public actor NavigatorClient {
             release: release
         )
         let documentedPitch = documentedPitchStandard(in: object, release: release.requestedRelease)
-        var characteristics = specificationCharacteristics(in: object)
+        // The public bundle lists independent, sometimes historical, source configurations
+        // alongside the preferred hierarchy. Compile exactly the configuration Navigator selected.
+        let bundle = publicSpecification(in: object)
+        let structure: Any
+        if let bundle {
+            structure = bundle.filter { ["componentHierarchy", "componentRelationships", "relationships", "physicalPipeMappings"].contains($0.key) }
+        } else {
+            structure = object
+        }
+        var characteristics = bundle.map { publicCharacteristics(bundle: $0, organRecord: organRecord(in: object) ?? [:]) }
+            ?? specificationCharacteristics(in: object)
         characteristics.referencePitchHz = documentedPitch?.frequencyHz ?? characteristics.referencePitchHz
         let components = extractComponents(
-            from: object,
+            from: structure,
             organ: organ,
             snapshotSHA256: hash,
             referencePitchHz: characteristics.referencePitchHz,
-            temperament: characteristics.temperament
+            temperament: characteristics.temperament,
+            inferCompassFromCount: bundle == nil
         )
-        characteristics = enrichedCharacteristics(
-            characteristics,
-            components: components,
-            object: object,
-            organ: organ
-        )
-        let physicalStructure = extractPhysicalStructure(from: object, components: components)
+        characteristics = enrichedCharacteristics(characteristics, components: components, object: object, organ: organ)
+        let physicalStructure = extractPhysicalStructure(from: structure, components: components)
         return NavigatorRoadmapProfile(
             organ: organ,
             snapshot: snapshot,
@@ -219,71 +280,136 @@ public actor NavigatorClient {
     }
 
     private static func releaseBinding(from object: Any, response: HTTPURLResponse?) -> ReleaseBinding {
-        let dictionaries = allDictionaries(in: object)
-        func string(_ keys: [String]) -> String? {
-            for dictionary in dictionaries {
-                for key in keys {
-                    if let value = dictionary[key] as? String, !value.isEmpty { return value }
-                }
-            }
-            return nil
-        }
+        let root = object as? [String: Any] ?? [:]
+        let citation = organRecord(in: object)?["citation"] as? [String: Any]
+        let dataset = citation?["dataset"] as? [String: Any]
+        let context = citation?["provenanceContext"] as? [String: Any]
+        let headers = root["navigatorResponseHeaders"] as? [String: String] ?? [:]
+        // Only documented release fields can attest to a protected database fingerprint.
+        // The citation's rowSetSha256 identifies the source rows for this organ.
+        let specification = root["specification"] as? [String: Any] ?? [:]
+        let detail = root["organ"] as? [String: Any] ?? [:]
+        let locations = [root, specification, detail]
+        let binding = locations.compactMap {
+            ($0["releaseBinding"] ?? $0["release"]) as? [String: Any]
+        }.first ?? root
+        let release = response?.value(forHTTPHeaderField: "X-MODAVIS-Release")
+            ?? headers["X-MODAVIS-Release"]
+            ?? firstString(in: binding, keys: ["requestedRelease", "releaseVersion", "release"])
+            ?? dataset?["version"] as? String
+        let fingerprint = response?.value(forHTTPHeaderField: "X-MODAVIS-Snapshot-SHA256")
+            ?? headers["X-MODAVIS-Snapshot-SHA256"]
+            ?? firstString(in: binding, keys: ["protectedFingerprintSha256", "protectedFingerprintSHA256"])
         return ReleaseBinding(
-            requestedRelease: response?.value(forHTTPHeaderField: "X-MODAVIS-Release") ?? string(["requestedRelease", "release", "releaseVersion"]) ?? "1.1",
-            releaseState: string(["releaseState", "status"]) ?? "release_1_1_enrichment_not_justified",
-            canonicalSourceRelease: string(["canonicalSourceRelease", "sourceRelease"]) ?? "1.0",
-            protectedFingerprintSHA256: response?.value(forHTTPHeaderField: "X-MODAVIS-Snapshot-SHA256") ?? string(["protectedFingerprintSha256", "protectedFingerprintSHA256"]) ?? ReleaseBinding().protectedFingerprintSHA256,
-            navigatorContractVersion: string(["contractVersion"]) ?? "modavis.navigator.compatibility-profile/v1"
+            requestedRelease: release ?? "unknown",
+            releaseState: response?.value(forHTTPHeaderField: "X-MODAVIS-Publication-State")
+                ?? headers["X-MODAVIS-Publication-State"]
+                ?? firstString(in: binding, keys: ["releaseState"]) ?? "unknown",
+            canonicalSourceRelease: firstString(in: binding, keys: ["canonicalSourceRelease", "sourceDatabaseRelease", "sourceRelease"])
+                ?? context?["release"] as? String ?? dataset?["version"] as? String ?? "unknown",
+            protectedFingerprintSHA256: fingerprint.flatMap { $0.range(of: "^[A-Fa-f0-9]{64}$", options: .regularExpression) == nil ? nil : $0.lowercased() },
+            navigatorContractVersion: firstString(in: root, keys: ["contractVersion"])
+                ?? firstString(in: binding, keys: ["navigatorContractVersion"]) ?? "unknown"
         )
     }
 
-    private static func findOrganSummaries(in object: Any) -> [NavigatorOrganSummary] {
-        var result: [NavigatorOrganSummary] = []
-        for dictionary in allDictionaries(in: object) {
-            let id = firstString(in: dictionary, keys: ["mdvsId", "mdvs_id", "organMdvsId", "id"])
-            let title = firstString(in: dictionary, keys: ["title", "canonicalLabel", "canonical_label", "name", "label"])
-            guard let id, id.hasPrefix("MDVS:"), let title else { continue }
-            let summary = NavigatorOrganSummary(
-                mdvsID: id,
-                title: title,
-                location: firstString(in: dictionary, keys: ["location", "venue", "place"]),
-                builder: firstString(in: dictionary, keys: ["builder"]),
-                dateLabel: firstString(in: dictionary, keys: ["dateLabel", "date"])
-            )
-            if !result.contains(where: { $0.mdvsID == id }) { result.append(summary) }
+    private static func searchRows(in object: Any) -> [[String: Any]]? {
+        if let rows = object as? [[String: Any]] { return rows }
+        guard let root = object as? [String: Any] else { return nil }
+        for key in ["items", "organs", "results", "data"] {
+            if let rows = root[key] as? [[String: Any]] { return rows }
         }
-        return result
+        if let page = root["data"] as? [String: Any] { return searchRows(in: page) }
+        return nil
+    }
+
+    private static func organSummary(_ dictionary: [String: Any]) -> NavigatorOrganSummary? {
+        guard let id = firstString(in: dictionary, keys: ["mdvsId", "mdvs_id", "organMdvsId", "organ_mdvs_id", "id"]),
+              id.hasPrefix("MDVS:"),
+              let title = firstString(in: dictionary, keys: ["title", "canonicalLabel", "canonical_label", "name", "label"]) else { return nil }
+        return NavigatorOrganSummary(
+            mdvsID: id,
+            title: title,
+            location: firstString(in: dictionary, keys: ["location", "venue", "place"]),
+            builder: firstString(in: dictionary, keys: ["builder", "organBuilder", "organ_builder", "maker"]),
+            dateLabel: firstString(in: dictionary, keys: ["dateLabel", "buildDate", "build_date", "date", "year"]),
+            pagePath: (dictionary["pageUrl"] as? String).flatMap(organPagePath)
+        )
+    }
+
+    private static func organPagePath(_ path: String) -> String? {
+        let prefix = "/organs/"
+        guard path.hasPrefix(prefix),
+              let slug = String(path.dropFirst(prefix.count)).removingPercentEncoding,
+              !slug.isEmpty, slug != ".", slug != "..",
+              slug.unicodeScalars.allSatisfy(CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~:")).contains)
+        else { return nil }
+        return path
+    }
+
+    private static func organRecord(in object: Any) -> [String: Any]? {
+        guard let root = object as? [String: Any] else { return nil }
+        for key in ["organ", "entity", "record", "item", "data"] {
+            if let wrapped = root[key] as? [String: Any], let record = organRecord(in: wrapped) { return record }
+        }
+        return organSummary(root) == nil ? nil : root
     }
 
     private static func primaryOrganSummary(in object: Any) -> NavigatorOrganSummary? {
-        let dictionaries = allDictionaries(in: object)
-        func summary(_ dictionary: [String: Any]) -> NavigatorOrganSummary? {
-            let id = firstString(in: dictionary, keys: ["organMdvsId", "organ_mdvs_id", "mdvsId", "mdvs_id", "id"])
-            let title = firstString(in: dictionary, keys: ["title", "canonicalLabel", "canonical_label", "name", "label"])
-            guard let id, id.hasPrefix("MDVS:"), let title else { return nil }
-            return NavigatorOrganSummary(
-                mdvsID: id,
-                title: title,
-                location: firstString(in: dictionary, keys: ["location", "venue", "place"]),
-                builder: firstString(in: dictionary, keys: ["builder"]),
-                dateLabel: firstString(in: dictionary, keys: ["dateLabel", "date"])
-            )
+        organRecord(in: object).flatMap(organSummary)
+    }
+
+    private static func publicSpecification(in object: Any) -> [String: Any]? {
+        guard let root = object as? [String: Any] else { return nil }
+        // A custom roadmap can also use the public bundle as its specification.
+        if let bundle = root["specification"] as? [String: Any], bundle["componentHierarchy"] != nil {
+            return bundle
         }
-        if let root = object as? [String: Any] {
-            for key in ["organ", "entity", "record", "item"] {
-                if let dictionary = root[key] as? [String: Any], let result = summary(dictionary) { return result }
-            }
-            if let result = summary(root),
-               result.mdvsID.contains(":ORGN:") || result.mdvsID.contains(":ORGA:") { return result }
+        if root["componentHierarchy"] != nil && root["sourceSpecifications"] != nil { return root }
+        return nil
+    }
+
+    private static func publicCharacteristics(bundle: [String: Any], organRecord: [String: Any]) -> OrganSpecificationCharacteristics {
+        let preferred = (bundle["sourceSpecifications"] as? [[String: Any]])?.first { $0["preferred"] as? Bool == true }
+        let evidence = bundle["technicalEvidence"] as? [String: Any] ?? [:]
+        let sourceID = preferred?["id"] as? String
+        let facts = (evidence["facts"] as? [[String: Any]] ?? []).filter {
+            sourceID == nil || $0["sourceRecordId"] as? String == sourceID
         }
-        for dictionary in dictionaries {
-            let type = firstString(in: dictionary, keys: ["entityType", "entity_type", "instrumentType", "instrument_type", "type", "kind"])?.lowercased() ?? ""
-            if type.contains("organ"), let result = summary(dictionary) { return result }
+        func soleFact(_ family: String, field: String) -> String? {
+            let values = Set(facts.filter { $0["family"] as? String == family }.compactMap { firstString(in: $0, keys: [field]) })
+            return values.count == 1 ? values.first : nil
         }
-        if let result = dictionaries.compactMap(summary).first(where: {
-            $0.mdvsID.contains(":ORGN:") || $0.mdvsID.contains(":ORGA:")
-        }) { return result }
-        return findOrganSummaries(in: object).first
+        let summary = (bundle["specification"] as? [String: Any])?["summary"] as? [String: Any]
+        let parser = preferred?["parser"] as? [String: Any]
+        let temperament = preferredTechnicalEvidence("temperament", in: bundle)
+        let sources = organRecord["sources"] as? [[String: Any]] ?? []
+        let urls = Set(sources.compactMap { firstString(in: $0, keys: ["url", "sourceUrl"]) })
+        let sourceSummary = organRecord["sourceSummary"] as? [String: Any]
+        return OrganSpecificationCharacteristics(
+            temperament: firstString(in: temperament ?? [:], keys: ["preferredValue"]),
+            manualCount: intValue(summary?["manuals"]),
+            documentedStopCount: intValue(parser?["sourceStopCount"]) ?? soleFact("stop_total", field: "normalizedNumber").flatMap(Int.init),
+            actionType: soleFact("key_action", field: "displayValue"),
+            windPressure: soleFact("wind_pressure", field: "displayValue"),
+            sourceCount: intValue(sourceSummary?["sourceRecords"]) ?? (sources.isEmpty ? nil : sources.count),
+            sourceURLs: urls.isEmpty ? nil : urls.sorted()
+        )
+    }
+
+    private static func preferredTechnicalEvidence(_ field: String, in bundle: [String: Any]) -> [String: Any]? {
+        guard let technical = bundle["technicalEvidence"] as? [String: Any],
+              var evidence = technical[field] as? [String: Any],
+              evidence["status"] as? String != "sources_differ" else { return nil }
+        let preferred = (bundle["sourceSpecifications"] as? [[String: Any]])?.first { $0["preferred"] as? Bool == true }
+        if let sourceID = preferred?["id"] as? String,
+           let assertions = evidence["assertions"] as? [[String: Any]],
+           assertions.contains(where: { $0["sourceRecordId"] is String }) {
+            let matching = assertions.filter { $0["sourceRecordId"] as? String == sourceID }
+            guard !matching.isEmpty else { return nil }
+            evidence["assertions"] = matching
+        }
+        return evidence
     }
 
     static func extractComponents(
@@ -291,7 +417,8 @@ public actor NavigatorClient {
         organ: NavigatorOrganSummary,
         snapshotSHA256: String,
         referencePitchHz: Double? = nil,
-        temperament: String? = nil
+        temperament: String? = nil,
+        inferCompassFromCount: Bool = true
     ) -> [OrganComponent] {
         var result: [OrganComponent] = []
         var seen = Set<String>()
@@ -326,7 +453,7 @@ public actor NavigatorClient {
             let midi = intValue(merged["midiNote"] ?? merged["midi_note"] ?? merged["midi"] ?? merged["keyNumber"])
             let frequency = doubleValue(merged["expectedFrequencyHz"] ?? merged["frequency"])
             let footHeight = componentFootHeight(in: merged)
-            let playable = playableRange(in: merged, division: division)
+            let playable = playableRange(in: merged, inferFromCount: inferCompassFromCount)
             let parentID = firstString(in: merged, keys: ["parentComponentId", "parent_component_id", "stopId", "stop_id", "rankId", "rank_id"])
             let locator = ComponentLocator(
                 id: identity,
@@ -638,6 +765,12 @@ public actor NavigatorClient {
             return nil
         }
 
+        if let bundle = publicSpecification(in: object) {
+            // The aggregate assertion deliberately withholds a preferred A4 when sources differ.
+            // Stop pitches and values from alternative configurations cannot resolve the conflict.
+            guard let pitch = preferredTechnicalEvidence("pitch", in: bundle) else { return nil }
+            return technicalEvidence(["technicalEvidence": ["pitch": pitch]], path: "specification")
+        }
         if let result = technicalEvidence(object, path: "root") { return result }
         let pitchKeys = ["referencePitchHz", "reference_pitch_hz", "pitch", "pitch_standard", "tuning_pitch"]
         for dictionary in allDictionaries(in: object) {
@@ -664,7 +797,9 @@ public actor NavigatorClient {
         let kinds = Dictionary(grouping: components, by: \.kind)
         let namedDivisions = Set(components.filter { $0.kind == "stop" }.map(\.division).filter { $0 != "Unassigned" })
         var result = base
-        result.documentedStopCount = result.documentedStopCount ?? kinds["stop"]?.count
+        if publicSpecification(in: object) == nil {
+            result.documentedStopCount = result.documentedStopCount ?? kinds["stop"]?.count
+        }
         result.divisionCount = kinds["division"]?.count ?? (namedDivisions.isEmpty ? nil : namedDivisions.count)
         result.keyboardCount = kinds["keyboard"]?.count
         result.manualCount = result.manualCount ?? kinds["keyboard"]?.filter {
@@ -676,12 +811,6 @@ public actor NavigatorClient {
         result.accessoryCount = kinds["accessory"]?.count
         result.builder = organ.builder
         result.buildDateLabel = organ.dateLabel
-        if result.builder == nil || result.buildDateLabel == nil {
-            for dictionary in allDictionaries(in: object) {
-                result.builder = result.builder ?? firstString(in: dictionary, keys: ["builder", "organBuilder", "organ_builder", "maker"])
-                result.buildDateLabel = result.buildDateLabel ?? firstString(in: dictionary, keys: ["dateLabel", "buildDate", "build_date", "year", "date"])
-            }
-        }
         return result
     }
 
@@ -700,32 +829,34 @@ public actor NavigatorClient {
         return normalized
     }
 
-    private static func playableRange(in dictionary: [String: Any], division: String) -> ClosedRange<Int>? {
+    private static func playableRange(in dictionary: [String: Any], inferFromCount: Bool) -> ClosedRange<Int>? {
         if let quantity = dictionary["pipeQuantity"] as? [String: Any] {
             if let values = quantity["actuationRange"] as? [Any], values.count >= 2,
-               let low = intValue(values[0]), let high = intValue(values[1]), low <= high {
-                return max(0, low)...min(127, high)
+               let low = intValue(values[0]), let high = intValue(values[1]), (0...127).contains(low), (low...127).contains(high) {
+                return low...high
             }
             if let compass = quantity["documentedCompass"] as? String, let parsed = parseCompass(compass) {
                 return parsed
             }
-            if let count = intValue(quantity["noteCount"]), count > 0 { return 36...min(127, 35 + count) }
+            if inferFromCount, let count = intValue(quantity["noteCount"]), count > 0 {
+                return 36...(35 + min(92, count))
+            }
         }
         let low = intValue(dictionary["lowestMidi"] ?? dictionary["lowest_midi"] ?? dictionary["midiLow"] ?? dictionary["midi_low"])
         let high = intValue(dictionary["highestMidi"] ?? dictionary["highest_midi"] ?? dictionary["midiHigh"] ?? dictionary["midi_high"])
         if let low, let high, (0...127).contains(low), low <= high { return low...min(127, high) }
         for key in ["midiRange", "midi_range", "range"] {
             if let values = dictionary[key] as? [Any], values.count >= 2,
-               let low = intValue(values[0]), let high = intValue(values[1]), low <= high {
-                return max(0, low)...min(127, high)
+               let low = intValue(values[0]), let high = intValue(values[1]), (0...127).contains(low), (low...127).contains(high) {
+                return low...high
             }
         }
         for key in ["compass", "observed_compass", "keyboard_compass", "range"] {
             if let text = dictionary[key] as? String, let parsed = parseCompass(text) { return parsed }
         }
-        if let count = intValue(dictionary["observed_note_count"] ?? dictionary["note_count"] ?? dictionary["notes"]), count > 0 {
-            let start = 36
-            return start...min(127, start + count - 1)
+        if inferFromCount,
+           let count = intValue(dictionary["observed_note_count"] ?? dictionary["note_count"] ?? dictionary["notes"]), count > 0 {
+            return 36...(35 + min(92, count))
         }
         return nil
     }

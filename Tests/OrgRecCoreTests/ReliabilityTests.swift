@@ -69,6 +69,31 @@ final class ReliabilityTests: XCTestCase {
         })
     }
 
+    func testUnusedPlannedSetupRemainsBlockedForCaptureAndCannotHideAUsedSetup() throws {
+        var project = DemoProjectFactory.make()
+        let plan = MicrophoneSetup.planned(for: .closePair)
+        var item = try XCTUnwrap(project.roadmap.first)
+        item.setupID = plan.id
+        project.roadmap = [item]
+        project.setups = [plan]
+        project.recordingSessions = [RecordingSession(sessionCode: "FIELD", operatorName: "Operator")]
+        let missingChannel = "setup.\(plan.id).reference-channel"
+
+        XCTAssertTrue(project.isUnusedPlannedSetup(plan))
+        XCTAssertFalse(ProjectConsistencyAuditor.audit(project: project).issues.contains { $0.id == missingChannel })
+        XCTAssertTrue(ProjectConsistencyAuditor.captureReadiness(project: project, item: item).contains {
+            $0.id == "readiness.placements" && $0.severity == .blocker
+        })
+
+        // A take's forward link is sufficient even if the roadmap's take ID list is incomplete.
+        project.takes = [TakeRecord(roadmapItemID: item.id, takeNumber: 1, relativeAudioPath: "take.wav",
+                                    sampleRate: 48000, channelCount: 1)]
+        XCTAssertFalse(project.isUnusedPlannedSetup(plan))
+        XCTAssertTrue(ProjectConsistencyAuditor.audit(project: project).issues.contains {
+            $0.id == missingChannel && $0.severity == .blocker
+        })
+    }
+
     func testMissingLegacyReferenceChannelUsesChannelOneWhenItIsDocumented() throws {
         var project = DemoProjectFactory.make()
         let setupIndex = try XCTUnwrap(project.setups.firstIndex { setup in

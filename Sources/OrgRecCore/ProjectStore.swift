@@ -31,6 +31,22 @@ public actor ProjectStore {
         try save(project, at: packageURL)
     }
 
+    /// Publish a new catalogue project only after its manifest and verified source evidence are written.
+    public func createPackage(at packageURL: URL, project: OrgRecProject, navigatorPayload: Data) throws {
+        guard let path = project.navigatorPayloadRelativePath, path.hasPrefix("Manifests/") else {
+            throw OrgRecError.invalidProject("The catalogue project needs a source payload path under Manifests.")
+        }
+        let manager = FileManager.default
+        let parent = packageURL.deletingLastPathComponent()
+        try manager.createDirectory(at: parent, withIntermediateDirectories: true)
+        let staging = parent.appendingPathComponent(".orgrec-import-\(UUID().uuidString)", isDirectory: true)
+        try manager.createDirectory(at: staging, withIntermediateDirectories: false)
+        defer { try? manager.removeItem(at: staging) }
+        try createPackage(at: staging, project: project)
+        try storeNavigatorPayload(navigatorPayload, expectedSHA256: project.snapshot.payloadSHA256, relativePath: path, at: staging)
+        try manager.moveItem(at: staging, to: packageURL)
+    }
+
     public func load(from packageURL: URL) throws -> OrgRecProject {
         let projectFileURL = try validatedPackageRelativeURL(Self.projectFilename, in: packageURL)
         let data = try Data(contentsOf: projectFileURL)

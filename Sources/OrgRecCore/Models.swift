@@ -41,14 +41,18 @@ public struct ReleaseBinding: Codable, Hashable, Sendable {
     public var requestedRelease: String
     public var releaseState: String
     public var canonicalSourceRelease: String
-    public var protectedFingerprintSHA256: String
+    public var protectedFingerprintSHA256: String?
     public var navigatorContractVersion: String
+
+    var hasProtectedFingerprint: Bool {
+        protectedFingerprintSHA256?.range(of: "^[0-9a-f]{64}$", options: .regularExpression) != nil
+    }
 
     public init(
         requestedRelease: String = "1.1",
         releaseState: String = "release_1_1_enrichment_not_justified",
         canonicalSourceRelease: String = "1.0",
-        protectedFingerprintSHA256: String = "70a3ff6dd2f629e6da9fb713acfe9e9358cd7db85612a9789931ded5663031c7",
+        protectedFingerprintSHA256: String? = "70a3ff6dd2f629e6da9fb713acfe9e9358cd7db85612a9789931ded5663031c7",
         navigatorContractVersion: String = "modavis.navigator.orgrec-roadmap/v1"
     ) {
         self.requestedRelease = requestedRelease

@@ -82,8 +82,8 @@ records the executed acceptance case.
 
 ## Navigator synchronization boundary
 
-Release 1.1 remains the data contract. OrgRec reads through Navigator and keeps
-the retrieved response frozen with the project; it does not write directly to
-the MODAVIS database. A future authenticated Navigator API can use the project
-ID, MODAVIS organ ID, snapshot hash, capture manifest, and sync receipts for
-idempotent synchronization without changing the project-library model.
+The online project records its source release from Navigator and retains the
+retrieved specification with a checksum. The local POD workflow identifies its
+verified SQLite release. The public Navigator exposes read-only lookup for this
+workflow. See [Navigator integration](NAVIGATOR_API.md) for the public routes,
+provenance fields and IAD export requirements.

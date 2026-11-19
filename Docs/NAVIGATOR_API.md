@@ -1,44 +1,31 @@
 # Navigator integration contract
 
-OrgRec treats Navigator as the only MODAVIS network boundary. It never connects
-to the database directly and never edits the checked-in release workspaces.
+OrgRec uses the public HTTPS service at [navigator.modavis.org](https://navigator.modavis.org) for online organ lookup. A verified local POD catalogue takes precedence when installed. Find Organ shows the selected source and lets the user switch between the two.
 
-## Implemented retrieval flow
+## Organ lookup
 
-1. Search GET /api/organs?q={query}&limit=30&include_facets=0.
-2. Prefer GET /api/orgrec/v1/roadmaps/{mdvs-id}.
-3. On a 404, compose a compatibility profile from GET /api/organs/{mdvs-id}
-   and GET /api/organs/{mdvs-id}/specification.
-4. Freeze the response, ETag, retrieval timestamp, SHA-256, release state, and
-   protected database fingerprint in the local project. The exact response bytes
-   are stored under `Manifests/modavis-navigator-payload.json` and hash-checked
-   again during capture-package export.
-5. Bind every roadmap component with one of three locator strengths:
-   canonical MDVS identifier, functional pipe-position reference, or
-   source-record plus source-path locator.
+1. Submitting a search calls `GET /api/organs` with the entered text, `limit=30`, `include_facets=0` and `sort=label` on the public instance. Search results come from the returned organ list. Typing and opening the search page do not query the service.
+2. Selecting **Create recording project** or **Attach & build roadmap** fetches `GET /api/organs/{id}`. OrgRec checks the returned identity before requesting `GET /api/organs/{id}/specification`. On the public instance, these are the only two reads for an import. Search uses a single page. Media, source histories and individual pipe-position pages are outside the import.
+3. On a custom deployment, OrgRec first tries `GET /api/orgrec/v1/roadmaps/{id}`. A missing roadmap route triggers the two-read compatibility path. HTTP throttling and server errors surface to the user.
+4. OrgRec freezes both JSON objects and any reported release headers in a sorted-key compatibility envelope, with its own SHA-256 and retrieval time. For a dedicated roadmap it freezes the response bytes. The evidence lives at `Manifests/modavis-navigator-payload.json`. New packages become visible after the project and evidence have both been written.
+5. In the public specification, the top-level component hierarchy supplies the default disposition. Alternative source descriptions stay in the frozen evidence. A component can refer to a canonical MDVS identifier, a functional pipe position or a location in the source record. The roadmap compiler uses explicit physical relationships when available. Users should check historical compasses and short octaves at the console. See [Roadmap compiler](ROADMAP_COMPILER.md).
 
-The profile decoder tolerates the current Navigator envelope variants while
-preserving the raw payload checksum. The dedicated future endpoint should return
-contractVersion modavis.navigator.orgrec-roadmap/v1 and explicit component
-locators.
+The public organ citation supplies the POD version. Its row-set digest identifies source records for that organ. A protected database fingerprint has a different scope. When Navigator omits that fingerprint, OrgRec shows it as unavailable and retains the checksum of the retrieved payload. Use VAO for preservation in that case. Earlier OrgRec versions require the fingerprint field when opening the embedded editable project. IAD 1.0 and capture-package 2.0 require a protected fingerprint in their published schemas.
 
-The compatibility compiler consumes Navigator's `componentHierarchy`, including
-divisions, keyboards, stops, ranks, ordinary pipes, couplers, and accessories.
-It reads nested component detail, `pipeQuantity.actuationRange`, documented
-stop-to-rank and shared/borrowed/extension relationships, and per-key physical
-pipe mappings. OrgRec treats only those explicit structures as automatic
-physical identity; compatible stop names and footages produce review candidates
-rather than deduplication.
-compasses, source paths, and functional position references. See
-`ROADMAP_COMPILER.md` for coverage semantics. Choosing an organ creates a new
-project package; it never erases an existing organ's takes.
+## Public instance check, 19 November 2026
 
-OrgRec also derives a specification profile from fields already exposed by
-Navigator: documented versus parsed stop counts, manuals/keyboards, divisions,
-ranks, pipe positions, couplers, accessories, builder/date, action type, wind
-pressure, tuning pitch, temperament, source records, and source URLs. Sparse
-fields remain optional and are never invented. Count disagreements and missing
-compasses become visible audit findings instead of being silently normalized.
+A search for `Cuntz` with one result and facets disabled returned the Regensburg Positiv, `MDVS:ENTY:TX63-4D9W-W`. The first three readings cover one organ-selection workflow using the server’s default search ordering. The fourth came from a separate single-result lookup by exact MDVS ID, using the compiled Swift client with alphabetical ordering. Transfer sizes are compressed body bytes, and elapsed times include the client round trip. [Navigator organ record](https://navigator.modavis.org/organs/TX63-4D9W-W)
+
+| Read | HTTP | Bytes transferred | Elapsed | Server-Timing |
+| --- | --- | ---: | ---: | ---: |
+| Search, one result | 200 | 1,329 | 0.75 s | 530 ms |
+| Selected organ | 200 | 6,790 | 0.37 s | 200 ms |
+| Selected specification | 200 | 6,561 | 0.28 s | 106 ms |
+| Swift client ID lookup | 200 | 1,339 | 2.01 s | 1,824 ms |
+
+The search, detail and specification advertised a five-minute HTTP cache lifetime and totalled 14,680 compressed bytes. The fourth read returned the same identifier and the expected relative organ-page path. All four API reads totalled 16,019 compressed bytes. The citation identified POD 1.6.0. The default specification documented one manual, six stops, A4 at 449 Hz and “Meantone”. Offline replay through the Swift client and compiler recovered the six stops, generated 318 proposed key/stop addresses, and reopened the project with the same frozen bytes. The source also describes a short octave. The compiler flags its mapping for a console check before field use.
+
+This supports occasional, user-initiated lookup. For repeated work across many organs or field work without connectivity, use the local POD projection. Server capacity under concurrent use remains unmeasured. Routine regression tests use local HTTP fixtures.
 
 ## Planned submission flow
 

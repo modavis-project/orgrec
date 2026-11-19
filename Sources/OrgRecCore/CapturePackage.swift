@@ -118,6 +118,9 @@ public actor CapturePackageBuilder {
             throw OrgRecError.exportValidation("Export already exists: \(destinationURL.lastPathComponent)")
         }
 
+        guard project.snapshot.release.hasProtectedFingerprint else {
+            throw OrgRecError.exportValidation("IAD 1.0 requires a protected database fingerprint. This catalogue snapshot has none. Choose VAO export to preserve the project and its source evidence.")
+        }
         let consistency = ProjectConsistencyAuditor.audit(project: project, packageURL: packageURL)
         guard consistency.isExportReady else {
             let titles = consistency.issues.filter { $0.severity == .blocker }.prefix(3).map(\.title).joined(separator: "; ")

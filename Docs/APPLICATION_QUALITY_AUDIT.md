@@ -5,6 +5,20 @@ Scope: the native macOS application, recording and persistence paths, field-capt
 
 This audit treats preservation of irreplaceable field evidence as the primary product requirement. A visually polished workflow is not considered release-ready when a quit, disk, route, concurrency, or metadata failure can silently invalidate a take.
 
+## Field-use review, 19 November 2026
+
+OrgRec already offers an approachable first task in **Analyze Audio** and a strong foundation for professional capture in its BWF writer, signal-path rehearsal and frozen project evidence. The catalogue changes in this checkout let a new user look up an organ, inspect the record and create a plan. The public server answered a bounded search, both reads for the selected organ and a single-result ID lookup from the compiled Swift client. The app then imported and reopened the saved record in a local replay. [Navigator check and measurements](NAVIGATOR_API.md)
+
+| Priority | Audience and finding | Next improvement and acceptance check |
+| --- | --- | --- |
+| 1 | New users must build the published 0.4.0 source or use the earlier ad-hoc-signed binary. | Ship a Developer ID–signed, notarized app with a stapled ticket and a checksum. On a clean macOS account, open the downloaded app through Gatekeeper, find an organ and analyze a local file without installing Xcode. |
+| 2 | Enthusiasts can identify an instrument by name and place, but different sources can associate the same organ with different builders or configurations. In the Regensburg example the search card names Stephan Cuntz and the detail names Eule Orgelbau. | Add a compact in-app disposition preview showing the source, date or undated status, builder roles where known, and available stop evidence. Let someone compare two candidate records and decide which to record before creating a project. |
+| 3 | Recording teams need a plan that matches the physical console. The Regensburg source documents a short octave, while the current compiler generates targets across a continuous MIDI range. | Show the documented keyboard mapping in the plan and flag affected keys for console review. Validate short-octave and shared-pipe cases with an organist, then run an offline session on a real multichannel interface. Exercise unplug, sleep, recovery and VAO reimport and verify the retained BWF and source hashes. |
+| 4 | The optional offline database is valuable in churches without connectivity. Restoring it currently hashes and inspects the 5.8 GB SQLite file, including table and FTS checks, during project bootstrap. | Measure time to first local search on a field laptop. Keep full verification on installation and replacement. Investigate reuse of verified results with explicit cache invalidation and a user-initiated recheck. |
+| 5 | The app has native commands and accessibility labels, but operators need confidence that the whole workflow works at a console or without a mouse. | Run keyboard-only and VoiceOver tasks from search through record, stop, review and export. Verify focus order, announcements for lookup failures and recording state, and access to the recovery action. |
+
+Recommended release acceptance is one reproducible first-use run and one field run, each tied to the exact distributing binary. This review exercised retrieval, decoding and project persistence. Hardware recovery, VoiceOver and concurrent server capacity still require separate evidence. [Published 0.4.0 release](https://github.com/modavis-project/orgrec/releases/tag/v0.4.0) · [Field pilot protocol](FIELD_PILOT_CAPTURE.md)
+
 ## Evaluated and implemented points
 
 | Area | Risk found | Implemented release requirement |
