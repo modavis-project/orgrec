@@ -18,8 +18,8 @@ public struct OrgRecSoftwareMetadata: Codable, Hashable, Sendable {
 
 public enum OrgRecSoftware {
     public static let name = "OrgRec"
-    public static let version = "0.4.0"
-    public static let build = "14"
+    public static let version = "0.4.1"
+    public static let build = "15"
     public static let identifier = "org.modavis.OrgRec"
     public static let current = OrgRecSoftwareMetadata(
         name: name,

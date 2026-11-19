@@ -12,8 +12,9 @@ import subprocess
 ROOT = Path(__file__).resolve().parent.parent
 GIT_WARNING_BYTES = 50 * 1024 * 1024
 PRIVATE_PATH = re.compile(r"/(?:Users|Volumes)/[^\s\"']+")
-TARGET_VERSION = "0.4.0"
-TARGET_BUILD = "14"
+TARGET_VERSION = "0.4.1"
+RELEASE_VERSION = "0.4.1-beta.1"
+TARGET_BUILD = "15"
 
 
 def git(*arguments: str) -> subprocess.CompletedProcess[str]:
@@ -125,7 +126,7 @@ def main() -> int:
         and f'public static let build = "{TARGET_BUILD}"' in software
         and f"<string>{TARGET_VERSION}</string>" in plist
         and f"<string>{TARGET_BUILD}</string>" in plist
-        and f'version: "{TARGET_VERSION}"' in citation
+        and f'version: "{RELEASE_VERSION}"' in citation
         and "license: Apache-2.0" in citation
     )
     if not version_ok:
@@ -171,9 +172,9 @@ def main() -> int:
             "detail": "The release commit reaches excluded material. Prepare the release from a clean public history.",
         })
 
-    tag = git("rev-parse", "-q", "--verify", f"refs/tags/v{TARGET_VERSION}")
+    tag = git("rev-parse", "-q", "--verify", f"refs/tags/v{RELEASE_VERSION}")
     if tag.returncode:
-        external.append({"code": "release-tag", "detail": f"Create the reviewed signed tag v{TARGET_VERSION}."})
+        external.append({"code": "release-tag", "detail": f"Create the reviewed signed tag v{RELEASE_VERSION}."})
 
     status = git("status", "--porcelain")
     if status.stdout.strip():

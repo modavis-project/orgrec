@@ -5,14 +5,13 @@ turns an instrument specification into a field-work roadmap, records
 multichannel Broadcast Wave audio, retains capture and review provenance, and
 exports research packages for preservation and exchange.
 
-[OrgRec 0.4.0, build 14](https://github.com/modavis-project/orgrec/releases/tag/v0.4.0)
-is a source release with a command-line export to VAO 0.6.0. Build it on
-macOS 14 or later with Xcode 16 or newer.
+**Mac testers** can download OrgRec 0.4.1 beta 1, build 15, as a universal app
+for macOS 14 or later. The beta is ad-hoc signed and has no Apple notarization
+ticket. The release page includes installation instructions and checksums.
+[Download the Mac beta](https://github.com/modavis-project/orgrec/releases/tag/v0.4.1-beta.1)
 
-The previous universal macOS app is available from the
-[0.3.2 release](https://github.com/modavis-project/orgrec/releases/tag/v0.3.2)
-and its [Zenodo archive](https://doi.org/10.5281/zenodo.22698744). That bundle
-is ad-hoc signed.
+OrgRec 0.4.0 is the stable source release. Its command-line tools support VAO
+0.6.0 export. [Stable release](https://github.com/modavis-project/orgrec/releases/tag/v0.4.0)
 
 For first use, open [Getting Started](Docs/GETTING_STARTED.md). To inspect an
 existing recording, drop an audio file onto OrgRec or choose **Analyze Audio**.

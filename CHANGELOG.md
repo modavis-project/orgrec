@@ -4,6 +4,13 @@ This file records changes to the OrgRec application and its command-line tools.
 The separate [VAO standard changelog](Docs/VAO_CHANGELOG.md) records changes to
 the exchange-format contract.
 
+## 0.4.1 beta 1 — 2026-11-19
+
+- Provide a universal Mac test build with online MODAVIS organ search and a link to the source record. A verified local POD catalogue remains available for offline work.
+- Compile the selected organ’s documented disposition, keep the source payload with the project, and flag short octaves for console review.
+- Start new catalogue projects with their own venue and unconfigured microphone setups. Preserve an existing manual project's preparations when attaching a catalogue record.
+- Represent an unavailable protected database fingerprint explicitly. VAO preserves these projects, while IAD 1.0 requires that fingerprint.
+
 ## 0.4.0 — 2026-11-19
 
 - Export an editable OrgRec project or migrate a complete VAO 0.5.0 carrier to VAO 0.6.0 from the command line.
