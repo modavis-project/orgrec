@@ -23,27 +23,29 @@ if [[ "$PLIST_VERSION" != "$SOURCE_VERSION" || "$PLIST_BUILD" != "$SOURCE_BUILD"
     exit 1
 fi
 
+mkdir -p "$STAGED_APP/Contents/MacOS" "$STAGED_APP/Contents/Resources"
 RELEASE_BINARIES=()
-RESOURCE_BUNDLE=""
+STAGED_RESOURCES="$STAGED_APP/Contents/Resources/OrgRec_OrgRecCore.bundle"
 for ARCHITECTURE in "${ARCHITECTURES[@]}"; do
     TARGET_TRIPLE="${ARCHITECTURE}-apple-macosx${MINIMUM_MACOS}"
-    swift build -c release --triple "$TARGET_TRIPLE"
+    swift build -c release --product OrgRec --triple "$TARGET_TRIPLE"
     BUILD_ROOT="$(swift build -c release --triple "$TARGET_TRIPLE" --show-bin-path)"
-    RELEASE_BINARIES+=("$BUILD_ROOT/OrgRec")
-    if [[ -z "$RESOURCE_BUNDLE" ]]; then
-        RESOURCE_BUNDLE="$BUILD_ROOT/OrgRec_OrgRecCore.bundle"
+    # SwiftPM can reuse one product path across triples. Keep the verified slice before the next build.
+    SLICE="$STAGE_ROOT/OrgRec-$ARCHITECTURE"
+    cp "$BUILD_ROOT/OrgRec" "$SLICE"
+    if [[ "$(lipo -archs "$SLICE")" != "$ARCHITECTURE" ]]; then
+        echo "Expected a $ARCHITECTURE executable for $TARGET_TRIPLE" >&2
+        exit 1
+    fi
+    RELEASE_BINARIES+=("$SLICE")
+    if [[ ! -d "$STAGED_RESOURCES" ]]; then
+        ditto "$BUILD_ROOT/OrgRec_OrgRecCore.bundle" "$STAGED_RESOURCES"
     fi
 done
 
-mkdir -p "$STAGED_APP/Contents/MacOS" "$STAGED_APP/Contents/Resources"
 lipo -create "${RELEASE_BINARIES[@]}" -output "$STAGED_APP/Contents/MacOS/OrgRec"
 cp "$PROJECT_ROOT/Packaging/Info.plist" "$STAGED_APP/Contents/Info.plist"
 cp "$PROJECT_ROOT/Packaging/OrgRec.icns" "$STAGED_APP/Contents/Resources/OrgRec.icns"
-if [[ ! -d "$RESOURCE_BUNDLE" ]]; then
-    echo "Missing SwiftPM resource bundle: $RESOURCE_BUNDLE" >&2
-    exit 1
-fi
-ditto "$RESOURCE_BUNDLE" "$STAGED_APP/Contents/Resources/OrgRec_OrgRecCore.bundle"
 cp "$PROJECT_ROOT/THIRD_PARTY_NOTICES.md" "$STAGED_APP/Contents/Resources/"
 ditto "$PROJECT_ROOT/LICENSES" "$STAGED_APP/Contents/Resources/LICENSES"
 
